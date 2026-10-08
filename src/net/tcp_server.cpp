@@ -1,7 +1,6 @@
 #include "net/tcp_server.hpp"
 
-#include <stdexcept>
-#include <system_error>
+#include <thread>
 
 namespace net {
 
@@ -9,78 +8,64 @@ TcpServer::TcpServer(
     std::uint16_t port,
     ConnectionHandler handler
 )
-    : port_(port),
+    : endpoint_(Endpoint::ipv4_loopback(port)),
       handler_(std::move(handler)) {}
 
-void TcpServer::run() {
+TcpServer::TcpServer(
+    Endpoint endpoint,
+    ConnectionHandler handler
+)
+    : endpoint_(std::move(endpoint)),
+      handler_(std::move(handler)) {}
 
-    std::error_code ec;
+core::Result<void> TcpServer::run() {
+    auto sock_res = create_tcp_socket(endpoint_.family());
+    if (!sock_res) {
+        return sock_res.error();
+    }
+    server_socket_ = std::move(sock_res.value());
 
-    server_socket_ = Socket(
-        static_cast<std::intptr_t>(
-#ifdef _WIN32
-            ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-#else
-            ::socket(AF_INET, SOCK_STREAM, 0)
-#endif
-        )
-    );
-
-    if (!server_socket_.valid()) {
-        throw std::runtime_error(
-            "Failed to create TCP socket"
-        );
+    auto reuse_res = server_socket_.set_reuse_address(true);
+    if (!reuse_res) {
+        return reuse_res.error();
     }
 
-    server_socket_.set_reuse_address(true, ec);
-
-    if (ec) {
-        throw std::system_error(ec);
+    auto bind_res = server_socket_.bind(endpoint_);
+    if (!bind_res) {
+        return bind_res.error();
     }
 
-    server_socket_.bind(port_, ec);
-
-    if (ec) {
-        throw std::system_error(ec);
-    }
-
-    server_socket_.listen(128, ec);
-
-    if (ec) {
-        throw std::system_error(ec);
+    auto listen_res = server_socket_.listen(128);
+    if (!listen_res) {
+        return listen_res.error();
     }
 
     running_ = true;
 
     while (running_) {
-
-        Socket client =
-            server_socket_.accept(ec);
-
-        if (ec) {
-            if (running_) {
-                continue;
+        auto client_res = server_socket_.accept();
+        if (!client_res) {
+            if (!running_) {
+                break;
             }
-
-            break;
+            continue;
         }
 
+        Socket client = std::move(client_res.value());
         std::thread(
             [handler = handler_](Socket socket) {
-
                 handler(std::move(socket));
-
             },
             std::move(client)
         ).detach();
     }
+
+    return core::Result<void>::success();
 }
 
 void TcpServer::stop() noexcept {
-
     running_ = false;
-
     server_socket_.close();
 }
 
-}
+} // namespace net
