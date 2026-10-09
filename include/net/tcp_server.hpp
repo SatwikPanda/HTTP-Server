@@ -1,38 +1,37 @@
 #pragma once
 
+#include "net/endpoint.hpp"
 #include "net/socket.hpp"
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
-#include <thread>
-#include <vector>
 
 namespace net {
 
 class TcpServer {
 public:
-
-    using ConnectionHandler =
-        std::function<void(Socket)>;
+    using ConnectionHandler = std::function<void(Socket)>;
 
     TcpServer(
         std::uint16_t port,
         ConnectionHandler handler
     );
 
-    void run();
+    TcpServer(
+        Endpoint endpoint,
+        ConnectionHandler handler
+    );
+
+    core::Result<void> run();
 
     void stop() noexcept;
 
 private:
-
-    std::uint16_t port_;
-
+    Endpoint endpoint_;
     ConnectionHandler handler_;
-
     Socket server_socket_;
-
-    bool running_{false};
+    std::atomic<bool> running_{false};
 };
 
-}
+} // namespace net
