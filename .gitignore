@@ -1,3 +1,5 @@
 .cache
 /build
 *.md
+!tests/README.md
+!IMPLEMENTATION_ROADMAP.md

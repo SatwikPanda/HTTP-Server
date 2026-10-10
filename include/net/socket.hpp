@@ -9,6 +9,9 @@
 #include <span>
 
 namespace net {
+namespace detail { struct SocketAccess; }
+
+enum class ConnectState { connected, in_progress };
 
 class Socket {
 public:
@@ -32,6 +35,8 @@ public:
     [[nodiscard]] core::Result<void> listen(int backlog = 128);
     [[nodiscard]] core::Result<Socket> accept();
     [[nodiscard]] core::Result<void> connect(const Endpoint& remote);
+    [[nodiscard]] core::Result<ConnectState> begin_connect(const Endpoint& remote);
+    [[nodiscard]] core::Result<void> finish_connect();
     [[nodiscard]] core::Result<void> set_nonblocking(bool enabled);
     [[nodiscard]] core::Result<void> set_reuse_address(bool enabled);
     [[nodiscard]] core::Result<void> shutdown_write();
@@ -46,6 +51,7 @@ public:
     [[nodiscard]] const Impl* get_impl() const noexcept { return impl_.get(); }
 
 private:
+    friend struct detail::SocketAccess;
     std::unique_ptr<Impl> impl_;
 };
 
@@ -55,6 +61,8 @@ private:
 [[nodiscard]] core::Result<void> listen(Socket& socket, int backlog = 128);
 [[nodiscard]] core::Result<Socket> accept(Socket& listener);
 [[nodiscard]] core::Result<void> connect(Socket& socket, const Endpoint& remote);
+[[nodiscard]] core::Result<ConnectState> begin_connect(Socket& socket, const Endpoint& remote);
+[[nodiscard]] core::Result<void> finish_connect(Socket& socket);
 [[nodiscard]] core::Result<void> set_nonblocking(Socket& socket, bool enabled);
 [[nodiscard]] core::Result<void> set_reuse_address(Socket& socket, bool enabled);
 [[nodiscard]] core::Result<void> shutdown_write(Socket& socket);

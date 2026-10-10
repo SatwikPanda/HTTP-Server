@@ -1,4 +1,5 @@
 #include "net/endpoint.hpp"
+#include "detail/native.hpp"
 
 #include <sstream>
 
@@ -36,7 +37,14 @@ core::Result<Endpoint> Endpoint::from_string(std::string_view ip_str, std::uint1
         family = AddressFamily::ipv6;
     }
 
-    return Endpoint(family, std::string(ip_str), port);
+    const std::string address(ip_str);
+    unsigned char binary[16]{};
+    if (address.find('\0') != std::string::npos ||
+        ::inet_pton(family == AddressFamily::ipv6 ? AF_INET6 : AF_INET, address.c_str(), binary) != 1) {
+        return core::make_error(core::ErrorCategory::invalid_argument, "Endpoint::from_string", 0,
+                                "Expected a numeric IPv4 or IPv6 address");
+    }
+    return Endpoint(family, address, port);
 }
 
 std::string Endpoint::to_string() const {
@@ -61,7 +69,8 @@ bool Endpoint::operator!=(const Endpoint& other) const noexcept {
 
 std::string HostPort::to_string() const {
     std::ostringstream oss;
-    oss << host << ":" << port;
+    if (host.find(':') != std::string::npos) oss << '[' << host << "]:" << port;
+    else oss << host << ":" << port;
     return oss.str();
 }
 

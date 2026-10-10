@@ -1,6 +1,7 @@
 #ifndef _WIN32
 
 #include "net/socket.hpp"
+#include "../detail/socket_access.hpp"
 
 #include <arpa/inet.h>
 #include <cerrno>
@@ -96,14 +97,18 @@ bool endpoint_to_sockaddr(
     core::Error& out_error
 ) {
     std::memset(&out_addr, 0, sizeof(out_addr));
+    if ((ep.family() != AddressFamily::ipv4 && ep.family() != AddressFamily::ipv6) ||
+        ep.address().find('\0') != std::string::npos) {
+        out_error = core::make_error(core::ErrorCategory::invalid_argument, "endpoint", 0, "Invalid address family or embedded NUL");
+        return false;
+    }
 
     if (ep.family() == AddressFamily::ipv6) {
         auto* addr6 = reinterpret_cast<sockaddr_in6*>(&out_addr);
         addr6->sin6_family = AF_INET6;
         addr6->sin6_port = htons(ep.port());
         if (::inet_pton(AF_INET6, ep.address().c_str(), &addr6->sin6_addr) != 1) {
-            int err = errno;
-            out_error = make_posix_error("inet_pton(IPv6)", err);
+            out_error = core::make_error(core::ErrorCategory::invalid_argument, "inet_pton(IPv6)", 0, "Invalid numeric IPv6 address");
             return false;
         }
         out_len = sizeof(sockaddr_in6);
@@ -114,8 +119,7 @@ bool endpoint_to_sockaddr(
     addr4->sin_family = AF_INET;
     addr4->sin_port = htons(ep.port());
     if (::inet_pton(AF_INET, ep.address().c_str(), &addr4->sin_addr) != 1) {
-        int err = errno;
-        out_error = make_posix_error("inet_pton(IPv4)", err);
+        out_error = core::make_error(core::ErrorCategory::invalid_argument, "inet_pton(IPv4)", 0, "Invalid numeric IPv4 address");
         return false;
     }
     out_len = sizeof(sockaddr_in);
@@ -158,6 +162,10 @@ constexpr std::size_t kMaxChunkSize = 1024 * 1024; // Cap native buffer length t
 class Socket::Impl {
 public:
     int handle_{-1};
+    std::shared_ptr<detail::SocketLifetime> lifetime_{std::make_shared<detail::SocketLifetime>()};
+    enum class Attempt { none, pending, connected, failed };
+    Attempt attempt_{Attempt::none};
+    int connect_error_{};
 
     Impl() = default;
     explicit Impl(int h) noexcept : handle_(h) {}
@@ -171,6 +179,7 @@ public:
     }
 
     void close() noexcept {
+        lifetime_.reset();
         if (handle_ >= 0) {
             int h = handle_;
             handle_ = -1;
@@ -178,6 +187,13 @@ public:
         }
     }
 };
+
+std::uintptr_t detail::SocketAccess::handle(const Socket& socket) noexcept {
+    return socket.impl_ ? static_cast<std::uintptr_t>(socket.impl_->handle_) : static_cast<std::uintptr_t>(-1);
+}
+std::weak_ptr<detail::SocketLifetime> detail::SocketAccess::lifetime(const Socket& socket) noexcept {
+    return socket.impl_ ? socket.impl_->lifetime_ : std::weak_ptr<SocketLifetime>{};
+}
 
 Socket::Socket() noexcept = default;
 
@@ -249,23 +265,31 @@ core::Result<Socket> Socket::accept() {
     sockaddr_storage client_addr{};
     socklen_t addr_len = sizeof(client_addr);
 
-    int client_handle = ::accept(
-        impl_->handle_,
-        reinterpret_cast<sockaddr*>(&client_addr),
-        &addr_len
-    );
-
-    if (client_handle < 0) {
-        int err = errno;
+    int client_handle;
+    for (;;) {
+        addr_len = sizeof(client_addr);
+        client_handle = ::accept(impl_->handle_, reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
+        if (client_handle >= 0) break;
+        const int err = errno;
+        if (err == EINTR) continue;
         return make_posix_error("accept", err);
     }
 
 #if defined(SO_NOSIGPIPE)
     int opt = 1;
-    ::setsockopt(client_handle, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+    if (::setsockopt(client_handle, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0) {
+        const int err = errno;
+        ::close(client_handle);
+        return make_posix_error("setsockopt(SO_NOSIGPIPE)", err);
+    }
 #endif
 
-    return Socket(std::make_unique<Impl>(client_handle));
+    try {
+        return Socket(std::make_unique<Impl>(client_handle));
+    } catch (...) {
+        ::close(client_handle);
+        throw;
+    }
 }
 
 core::Result<void> Socket::connect(const Endpoint& remote) {
@@ -285,6 +309,56 @@ core::Result<void> Socket::connect(const Endpoint& remote) {
         return make_posix_error("connect", err);
     }
     return core::Result<void>::success();
+}
+
+core::Result<ConnectState> Socket::begin_connect(const Endpoint& remote) {
+    if (!is_valid()) return make_posix_error("begin_connect", EBADF);
+    if (impl_->attempt_ != Impl::Attempt::none) {
+        return core::make_error(core::ErrorCategory::invalid_argument, "begin_connect", 0, "Use a fresh socket for each attempt");
+    }
+    auto configured = set_nonblocking(true);
+    if (!configured) return configured.error();
+    sockaddr_storage address{};
+    socklen_t length = 0;
+    core::Error conversion;
+    if (!endpoint_to_sockaddr(remote, address, length, conversion)) return conversion;
+    if (::connect(impl_->handle_, reinterpret_cast<const sockaddr*>(&address), length) == 0) {
+        impl_->attempt_ = Impl::Attempt::connected;
+        return ConnectState::connected;
+    }
+    const int code = errno;
+    if (code == EINPROGRESS || code == EALREADY || code == EINTR || code == EAGAIN) {
+        impl_->attempt_ = Impl::Attempt::pending;
+        return ConnectState::in_progress;
+    }
+    impl_->attempt_ = Impl::Attempt::failed;
+    impl_->connect_error_ = code;
+    return make_posix_error("connect", code);
+}
+
+core::Result<void> Socket::finish_connect() {
+    if (!is_valid()) return make_posix_error("finish_connect", EBADF);
+    if (impl_->attempt_ == Impl::Attempt::failed) return make_posix_error("finish_connect", impl_->connect_error_);
+    int pending_error = 0;
+    socklen_t length = sizeof(pending_error);
+    if (::getsockopt(impl_->handle_, SOL_SOCKET, SO_ERROR, &pending_error, &length) < 0) {
+        const int code = errno;
+        return make_posix_error("getsockopt(SO_ERROR)", code);
+    }
+    if (pending_error != 0) {
+        impl_->attempt_ = Impl::Attempt::failed;
+        impl_->connect_error_ = pending_error;
+        return make_posix_error("finish_connect", pending_error);
+    }
+    auto peer = remote_endpoint();
+    if (!peer) {
+        if (peer.error().category == core::ErrorCategory::not_connected && impl_->attempt_ == Impl::Attempt::pending) {
+            return core::make_error(core::ErrorCategory::would_block, "finish_connect");
+        }
+        return peer.error();
+    }
+    impl_->attempt_ = Impl::Attempt::connected;
+    return {};
 }
 
 core::Result<void> Socket::set_nonblocking(bool enabled) {
@@ -444,6 +518,9 @@ core::Result<Endpoint> Socket::remote_endpoint() const {
 
 // Free functions
 core::Result<Socket> create_tcp_socket(AddressFamily family) {
+    if (family != AddressFamily::ipv4 && family != AddressFamily::ipv6) {
+        return core::make_error(core::ErrorCategory::invalid_argument, "socket", 0, "Unsupported address family");
+    }
     int af = (family == AddressFamily::ipv6) ? AF_INET6 : AF_INET;
     int h = ::socket(af, SOCK_STREAM, 0);
     if (h < 0) {
@@ -453,10 +530,19 @@ core::Result<Socket> create_tcp_socket(AddressFamily family) {
 
 #if defined(SO_NOSIGPIPE)
     int opt = 1;
-    ::setsockopt(h, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+    if (::setsockopt(h, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0) {
+        const int err = errno;
+        ::close(h);
+        return make_posix_error("setsockopt(SO_NOSIGPIPE)", err);
+    }
 #endif
 
-    return Socket(std::make_unique<Socket::Impl>(h));
+    try {
+        return Socket(std::make_unique<Socket::Impl>(h));
+    } catch (...) {
+        ::close(h);
+        throw;
+    }
 }
 
 core::Result<void> bind(Socket& socket, const Endpoint& local) {
@@ -474,6 +560,9 @@ core::Result<Socket> accept(Socket& listener) {
 core::Result<void> connect(Socket& socket, const Endpoint& remote) {
     return socket.connect(remote);
 }
+
+core::Result<ConnectState> begin_connect(Socket& socket, const Endpoint& remote) { return socket.begin_connect(remote); }
+core::Result<void> finish_connect(Socket& socket) { return socket.finish_connect(); }
 
 core::Result<void> set_nonblocking(Socket& socket, bool enabled) {
     return socket.set_nonblocking(enabled);
