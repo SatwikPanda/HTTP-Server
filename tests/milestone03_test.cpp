@@ -146,9 +146,15 @@ void outbound(net::AddressFamily family) {
 }
 
 void refused_and_fallback() {
-    auto reservation = test::take(net::create_tcp_socket());
-    CHECK(reservation.bind(net::Endpoint::ipv4_loopback(0))); // bound, never listening
+    auto reservation = test::listener();
     auto refused_endpoint = test::take(reservation.local_endpoint());
+    auto listener = test::listener();
+    auto live_endpoint = test::take(listener.local_endpoint());
+    CHECK(refused_endpoint != live_endpoint);
+    // A bound, non-listening TCP socket is not a portable refusal fixture:
+    // Darwin silently drops SYNs that match a socket in TCPS_CLOSED. Release a
+    // temporary listener so the target really is a closed port on every OS.
+    reservation.close();
     auto client = test::take(net::create_tcp_socket());
     auto state = net::begin_connect(client, refused_endpoint);
     if (state) {
@@ -161,8 +167,11 @@ void refused_and_fallback() {
         CHECK(!net::finish_connect(client)); // a consumed SO_ERROR cannot become success
         CHECK(poller.unwatch(token));
     } else CHECK(state.error().category == core::ErrorCategory::connection_refused);
-    auto listener = test::listener();
-    std::array candidates{refused_endpoint, test::take(listener.local_endpoint())};
+    auto all_refused = net::connect_candidates(
+        std::array{refused_endpoint}, test::Clock::now() + 4s);
+    CHECK(!all_refused);
+    CHECK(all_refused.error().category == core::ErrorCategory::connection_refused);
+    std::array candidates{refused_endpoint, live_endpoint};
     auto connected = test::take(net::connect_candidates(candidates, test::Clock::now() + 4s));
     CHECK(connected.remote_endpoint().value() == candidates[1]);
     CHECK(!net::connect_candidates({}, test::Clock::now() + 1s));

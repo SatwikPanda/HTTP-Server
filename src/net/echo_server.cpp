@@ -24,7 +24,12 @@ EchoSessionStats echo(StreamChannel& channel, const EchoConfig& config,
             stats.error = core::make_error(core::ErrorCategory::timed_out, "echo progress");
             return false;
         }
-        if (!wait(interest, deadline)) return false;
+        if (!wait(interest, deadline)) {
+            if (std::chrono::steady_clock::now() >= deadline) {
+                stats.error = core::make_error(core::ErrorCategory::timed_out, "echo progress");
+            }
+            return false;
+        }
         return !stopped();
     };
     while (channel.is_valid() && !stopped()) {
@@ -122,9 +127,16 @@ EchoSessionStats run_echo_session(StreamChannel& channel, const EchoConfig& conf
     return echo(channel, config, [&](Interest, Deadline deadline) {
         const auto now = std::chrono::steady_clock::now();
         if (now >= deadline) return false;
-        std::this_thread::sleep_for(std::min(config.wait_retry_delay,
-            std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now)));
-        return true;
+        const auto retry_at = std::min(deadline, now + config.wait_retry_delay);
+        auto remaining = retry_at - now;
+        while (remaining > std::chrono::steady_clock::duration::zero()) {
+            // Round up instead of dropping the final fraction of a millisecond.
+            // Some native sleep backends truncate fractional milliseconds too;
+            // recheck the clock before permitting another I/O attempt.
+            std::this_thread::sleep_for(std::chrono::ceil<std::chrono::milliseconds>(remaining));
+            remaining = retry_at - std::chrono::steady_clock::now();
+        }
+        return std::chrono::steady_clock::now() < deadline;
     }, [] { return false; });
 }
 

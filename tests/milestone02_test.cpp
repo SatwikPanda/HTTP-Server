@@ -90,5 +90,28 @@ int main() {
         CHECK(!result.completed_cleanly);
         CHECK(test::Clock::now() - start < 1s);
         CHECK(failing.calls < 1000); // zero progress must not reset the timeout
+        if (mode == AdversarialChannel::Mode::blocked_read ||
+            mode == AdversarialChannel::Mode::blocked_write) {
+            CHECK(result.error.category == core::ErrorCategory::timed_out);
+        } else {
+            CHECK(failing.calls <= 2); // invalid progress and errors stop immediately
+        }
+    }
+    // A delay longer than the remaining deadline requires just one wait, even
+    // when the entire remaining duration is less than one millisecond. This
+    // detects duration truncation without relying on CPU speed or timer ticks.
+    config.retry_timeout = 1ms;
+    config.wait_retry_delay = 2ms;
+    for (auto mode : {AdversarialChannel::Mode::blocked_read,
+                     AdversarialChannel::Mode::blocked_write}) {
+        AdversarialChannel failing;
+        failing.mode = mode;
+        failing.input = {std::byte{1}};
+        auto start = test::Clock::now();
+        auto result = net::run_echo_session(failing, config);
+        CHECK(!result.completed_cleanly);
+        CHECK(result.error.category == core::ErrorCategory::timed_out);
+        CHECK(failing.calls <= 2); // no I/O retry after the deadline expires
+        CHECK(test::Clock::now() - start >= config.retry_timeout);
     }
 }

@@ -76,6 +76,23 @@ three future assertion bodies also compile against declaration-only contracts.
 The strict milestone 04–06 gate was checked separately and correctly failed
 with NOT IMPLEMENTED for each pending milestone.
 
+The first Linux CI run exposed a retry spin caused by truncating the last
+fraction of a millisecond to zero. The retry adapter now rounds sleeps up,
+rechecks early wakeups, and reports timeout before issuing another I/O attempt
+after the deadline. Milestone 02 checks blocked reads and writes with a 1 ms
+deadline and a longer retry delay, as well as immediate error/zero-progress exits.
+
+The first macOS CI run exposed an invalid refusal fixture: a bound socket that
+never listened can silently drop connection attempts on Darwin (see the
+`TCPS_CLOSED` branch in [Apple's TCP input source](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/netinet/tcp_input.c)).
+The fixture now closes a temporary listener before connecting to its port, and
+allocates the fallback listener first to keep the two candidates distinct. It
+also verifies that an all-refused candidate list reports connection refusal.
+
+After these corrections, both Windows builds again passed the seven-test strict
+gate. The deadline regression passed 20 consecutive runs per build. Linux and
+macOS results after the corrections remain pending a CI rerun.
+
 The Windows test sandbox prevents loopback connections, so networking tests
 were executed with approved loopback access. Linux and macOS have not run
 locally; the CI matrix now checks all three operating systems. These local
