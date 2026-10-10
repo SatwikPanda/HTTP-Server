@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <optional>
 #include <string>
 
 namespace http {
@@ -19,6 +20,7 @@ struct HttpSessionConfig {
     std::string response_body{"Hello, World!\r\n"};
     std::string content_type{"text/plain; charset=utf-8"};
     StatusCode response_status{StatusCode::OK};
+    std::optional<std::chrono::system_clock::time_point> fixed_wall_time{std::nullopt};
 };
 
 struct HttpSessionStats {

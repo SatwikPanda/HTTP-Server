@@ -94,9 +94,11 @@ HttpSessionStats run_http_session(
             resp.set_body(config.response_body, config.content_type);
         }
 
-        resp.headers.set("Date", format_http_date());
+        std::string date_val = config.fixed_wall_time.has_value()
+            ? format_http_date(config.fixed_wall_time.value())
+            : format_http_date();
+        resp.headers.set("Date", std::move(date_val));
         resp.headers.set("Connection", "close");
-        resp.headers.set("Server", "httpserver/1.0");
 
         auto serialized_res = serialize_response(resp);
         if (!serialized_res) {

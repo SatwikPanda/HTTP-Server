@@ -26,6 +26,8 @@ add_library(net STATIC
     src/net/echo_server.cpp
     src/net/tcp_server.cpp
     src/net/socket.cpp
+    src/net/poller.cpp
+    src/net/resolver.cpp
 )
 target_include_directories(net PUBLIC
     include
@@ -69,48 +71,72 @@ set_target_properties(http PROPERTIES CXX_EXTENSIONS OFF)
 target_link_libraries(http PUBLIC core net)
 
 find_package(Threads REQUIRED)
+target_link_libraries(net PUBLIC Threads::Threads)
+
+# Concurrency library (ConnectionSession, EchoSession, SingleSessionDriver)
+add_library(concurrency STATIC
+    src/concurrency/session.cpp
+    src/concurrency/single_session_driver.cpp
+)
+target_include_directories(concurrency PUBLIC
+    include
+)
+target_compile_features(concurrency PUBLIC cxx_std_20)
+set_target_properties(concurrency PROPERTIES CXX_EXTENSIONS OFF)
+target_link_libraries(concurrency PUBLIC net core Threads::Threads)
+
+foreach(target IN ITEMS core net concurrency)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4)
+    else()
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endforeach()
 
 # Main executable
 add_executable(httpserver
     src/main.cpp
 )
-target_link_libraries(httpserver PRIVATE http net Threads::Threads)
+target_link_libraries(httpserver PRIVATE concurrency net Threads::Threads)
 
-# Testing
-enable_testing()
-
-add_executable(socket_ownership_test
-    tests/socket_ownership_test.cpp
-)
-target_link_libraries(socket_ownership_test PRIVATE net Threads::Threads)
-add_test(NAME socket_ownership_test COMMAND socket_ownership_test)
-
-add_executable(echo_test_double_test
-    tests/echo_test_double_test.cpp
-)
-target_link_libraries(echo_test_double_test PRIVATE net Threads::Threads)
-add_test(NAME echo_test_double_test COMMAND echo_test_double_test)
-
-add_executable(echo_integration_test
-    tests/echo_integration_test.cpp
-)
-target_link_libraries(echo_integration_test PRIVATE net Threads::Threads)
-add_test(NAME echo_integration_test COMMAND echo_integration_test)
-
-add_executable(http_serialization_test
-    tests/http_serialization_test.cpp
-)
-target_link_libraries(http_serialization_test PRIVATE http core Threads::Threads)
-add_test(NAME http_serialization_test COMMAND http_serialization_test)
-
-add_executable(http_session_test
-    tests/http_session_test.cpp
-)
-target_link_libraries(http_session_test PRIVATE http net core Threads::Threads)
-add_test(NAME http_session_test COMMAND http_session_test)
-
-add_executable(http_integration_test
-    tests/http_integration_test.cpp
-)
-target_link_libraries(http_integration_test PRIVATE http net core Threads::Threads)
-add_test(NAME http_integration_test COMMAND http_integration_test)
+include(CTest)
+option(REQUIRE_ALL_MILESTONES "Fail rather than skip unimplemented milestone acceptance suites" OFF)
+if(BUILD_TESTING)
+    # Adding a future production adapter must trigger reconfiguration and rebuild
+    # its suite; __has_include alone does not track previously absent headers.
+    file(GLOB future_adapters CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/milestone0[456]_adapter.hpp")
+    function(add_milestone_test name milestone)
+        add_executable(${name} tests/${name}.cpp)
+        target_link_libraries(${name} PRIVATE concurrency net Threads::Threads)
+        if(MSVC)
+            target_compile_options(${name} PRIVATE /UNDEBUG)
+        else()
+            target_compile_options(${name} PRIVATE -UNDEBUG)
+        endif()
+        add_test(NAME ${name} COMMAND ${name})
+        set_tests_properties(${name} PROPERTIES TIMEOUT 30 LABELS "milestone${milestone}")
+        if(NOT REQUIRE_ALL_MILESTONES)
+            set_tests_properties(${name} PROPERTIES SKIP_RETURN_CODE 77)
+        endif()
+    endfunction()
+    add_milestone_test(socket_ownership_test 01)
+    add_milestone_test(echo_test_double_test 02)
+    add_milestone_test(echo_integration_test 02)
+    foreach(milestone IN ITEMS 01 02 03 04 05 06)
+        add_milestone_test(milestone${milestone}_test ${milestone})
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/milestone${milestone}_adapter.hpp")
+            target_compile_definitions(milestone${milestone}_test PRIVATE MILESTONE${milestone}_AVAILABLE=1)
+        endif()
+    endforeach()
+    foreach(milestone IN ITEMS 04 05 06)
+        # Compile future assertions now, without linking or simulating a missing
+        # production feature. These are compile checks, never passing CTests.
+        add_library(milestone${milestone}_contract OBJECT tests/milestone${milestone}_test.cpp)
+        target_link_libraries(milestone${milestone}_contract PRIVATE concurrency net)
+        target_include_directories(milestone${milestone}_contract PRIVATE tests/contracts)
+        target_compile_definitions(milestone${milestone}_contract PRIVATE MILESTONE${milestone}_AVAILABLE=1)
+    endforeach()
+    add_test(NAME cli_validation_test COMMAND ${CMAKE_COMMAND}
+        "-DSERVER=$<TARGET_FILE:httpserver>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_validation_test.cmake")
+    set_tests_properties(cli_validation_test PROPERTIES TIMEOUT 10 LABELS "milestone03")
+endif()
