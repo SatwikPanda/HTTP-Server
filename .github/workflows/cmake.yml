@@ -25,4 +25,4 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Verify completed milestones (pending suites cannot pass)
-        run: ctest --test-dir build -C Release -L "milestone0[123]" --output-on-failure
+        run: ctest --test-dir build -C Release -L "milestone0[1234]" --output-on-failure

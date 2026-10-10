@@ -5,9 +5,42 @@ using namespace std::chrono_literals;
 // and a fake steady clock. Its contract is documented in tests/README.md.
 #if defined(MILESTONE04_AVAILABLE)
 #include "milestone04_adapter.hpp"
+#include "core/clock.hpp"
 #include <array>
+#include <chrono>
 #include <vector>
+
+namespace {
+template <typename ManualClock, typename TimePoint>
+void check_manual_clock() {
+    ManualClock clock;
+    CHECK(clock.now() == TimePoint{});
+    const auto start = TimePoint{10s};
+    clock.set(start);
+    CHECK(clock.now() == start);
+    clock.advance(1500ms);
+    CHECK(clock.now() == start + 1500ms);
+    clock.advance(-250ms);
+    CHECK(clock.now() == start + 1250ms);
+    clock.advance(0ns);
+    CHECK(clock.now() == start + 1250ms);
+
+    ManualClock precise(start);
+    // Wall-clock ticks differ across platforms. Conversion may lose less than
+    // one native tick, but must never round a positive increment upward.
+    constexpr auto increment = 123456789ns;
+    precise.advance(increment);
+    const auto elapsed = precise.now() - start;
+    CHECK(elapsed <= increment);
+    CHECK(increment - elapsed < typename TimePoint::duration{1});
+    precise.advance(-increment);
+    CHECK(precise.now() == start);
+}
+} // namespace
+
 int main() {
+    check_manual_clock<core::ManualSteadyClock, core::SteadyTimePoint>();
+    check_manual_clock<core::ManualSystemClock, core::SystemTimePoint>();
     using tests::SessionHarness;
     std::vector<std::byte> payload(8193);
     for (std::size_t i = 0; i < payload.size(); ++i) payload[i] = std::byte(i % 256);

@@ -43,7 +43,8 @@ public:
     }
 
     void advance(std::chrono::nanoseconds duration) noexcept {
-        current_ += duration;
+        // Convert to native ticks, truncating sub-tick increments toward zero.
+        current_ += std::chrono::duration_cast<SteadyTimePoint::duration>(duration);
     }
 
     void set(SteadyTimePoint tp) noexcept {
@@ -64,7 +65,8 @@ public:
     }
 
     void advance(std::chrono::nanoseconds duration) noexcept {
-        current_ += duration;
+        // Convert to native ticks, truncating sub-tick increments toward zero.
+        current_ += std::chrono::duration_cast<SystemTimePoint::duration>(duration);
     }
 
     void set(SystemTimePoint tp) noexcept {

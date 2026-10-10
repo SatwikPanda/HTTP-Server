@@ -11,27 +11,29 @@ ctest --test-dir build/milestones -L 'milestone0[12]' --output-on-failure
 ctest --test-dir build/milestones -L milestone03 --output-on-failure
 ctest --test-dir build/milestones --output-on-failure
 cmake -S . -B build/milestones -DREQUIRE_ALL_MILESTONES=ON
-ctest --test-dir build/milestones -L 'milestone0[123]' --output-on-failure
+ctest --test-dir build/milestones -L 'milestone0[1234]' --output-on-failure
 ```
 
-Milestones 04–06 are **pending**, never complete or passing. They return CTest's
+Milestone 04 now has a production-backed adapter and runs its acceptance checks.
+Milestones 05–06 are **pending**, never complete or passing. They return CTest's
 skip code 77 until a production-backed adapter exists. To enforce completion
 (turn a pending suite into a failure), configure with
-`-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing milestones 04–06.
+`-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each milestone.
 Do not add a mock implementation solely to make acceptance assertions pass.
 
-The future milestones have no stable production interfaces yet. Their acceptance
-test bodies are fully specified against small adapters, to avoid prematurely
-implementing those milestones. Add `tests/milestone04_adapter.hpp`,
-`tests/milestone05_adapter.hpp`, or `tests/milestone06_adapter.hpp` with the
-following contracts when implementing the corresponding feature; the test body
+The remaining future milestones have no stable production interfaces yet. Their
+acceptance test bodies are fully specified against small adapters, to avoid
+prematurely implementing those milestones. Add `tests/milestone05_adapter.hpp`
+or `tests/milestone06_adapter.hpp` with the following contracts when implementing
+the corresponding feature; the test body
 automatically becomes active at the next build. Link any new production targets
 to the corresponding CMake test executable. Each adapter must call production
 code; only clocks and I/O may be faked.
 
-Every build compiles the future assertion bodies as object targets against the
-declaration-only headers in `tests/contracts/`. These objects are never linked
-or counted as passing CTests. The future adapters provide production-backed
+Every build compiles the milestone 04–06 assertion bodies as object targets.
+Milestone 04 uses its production adapter; the remaining suites use the
+declaration-only headers in `tests/contracts/`. These objects are never counted
+as passing CTests. The future adapters provide production-backed
 definitions for those contracts (or equivalent wrappers) when available.
 
 - **01:** independent accepted socket lifetime, runtime moves, occupied ports,
@@ -50,6 +52,8 @@ definitions for those contracts (or equivalent wrappers) when available.
   `peak_output_bytes()`, and `open_resources()`. Also provide
   `echo_session_real_socket_roundtrip(bytes)` and
   `driver_accepts_two_sequential_clients()` returning bool.
+  The suite also checks manual steady and system clocks: initialization, setting,
+  positive/negative advancement, zero increments, and native-tick truncation.
 - **05 adapter:** `fixed_response()` returns a response under a fixed wall clock;
   `serialize(response)` returns `Result<string>`; `content_length`, `header`,
   `headers`, and `add_header` expose production message fields.
@@ -67,6 +71,17 @@ Only local loopback networking is used. IPv6 is exercised when supported. DNS
 tests use numeric literals and localhost; no external origin is required.
 
 ## Verified status (2026-10-10)
+
+After milestone 04 implementation, the manual clocks needed explicit
+`duration_cast` conversion from nanoseconds to each native clock duration.
+Implicit conversion fails for the coarser system-clock ticks on MSVC and macOS.
+Sub-tick increments truncate toward zero on each call; they are not accumulated.
+Windows GCC 16.2 Release passed all eight tests for milestones 01–04 in strict
+mode. MSVC 19.29 Release built `httpserver` and `milestone04_test`, and passed
+the milestone 04 suite. Its full build encountered a separate older-STL
+`std::future<Result<...>>` default-construction error in `milestone03_test`.
+The updated Windows/Linux/macOS CI gate includes milestone 04; remote results
+for this fix remain pending.
 
 The milestone 01–02 gate passed before milestone 03 implementation. It found and
 prevented an infinite loop on a successful zero-byte write. Following milestone
