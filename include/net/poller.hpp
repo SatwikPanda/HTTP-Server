@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/id.hpp"
 #include "core/result.hpp"
 #include "net/socket.hpp"
 
@@ -10,12 +11,7 @@
 
 namespace net {
 using Deadline = std::chrono::steady_clock::time_point;
-
-struct ConnectionId {
-    std::uint64_t value{};
-    std::uint64_t generation{};
-    bool operator==(const ConnectionId&) const = default;
-};
+using ConnectionId = core::ConnectionId;
 
 struct RegistrationToken {
     std::uint64_t poller{};

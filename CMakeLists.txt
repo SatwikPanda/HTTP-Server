@@ -55,7 +55,19 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries(net PUBLIC Threads::Threads)
 
-foreach(target IN ITEMS core net)
+# Concurrency library (ConnectionSession, EchoSession, SingleSessionDriver)
+add_library(concurrency STATIC
+    src/concurrency/session.cpp
+    src/concurrency/single_session_driver.cpp
+)
+target_include_directories(concurrency PUBLIC
+    include
+)
+target_compile_features(concurrency PUBLIC cxx_std_20)
+set_target_properties(concurrency PROPERTIES CXX_EXTENSIONS OFF)
+target_link_libraries(concurrency PUBLIC net core Threads::Threads)
+
+foreach(target IN ITEMS core net concurrency)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4)
     else()
@@ -67,7 +79,7 @@ endforeach()
 add_executable(httpserver
     src/main.cpp
 )
-target_link_libraries(httpserver PRIVATE net Threads::Threads)
+target_link_libraries(httpserver PRIVATE concurrency net Threads::Threads)
 
 include(CTest)
 option(REQUIRE_ALL_MILESTONES "Fail rather than skip unimplemented milestone acceptance suites" OFF)
@@ -77,7 +89,7 @@ if(BUILD_TESTING)
     file(GLOB future_adapters CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/milestone0[456]_adapter.hpp")
     function(add_milestone_test name milestone)
         add_executable(${name} tests/${name}.cpp)
-        target_link_libraries(${name} PRIVATE net Threads::Threads)
+        target_link_libraries(${name} PRIVATE concurrency net Threads::Threads)
         if(MSVC)
             target_compile_options(${name} PRIVATE /UNDEBUG)
         else()
@@ -102,7 +114,7 @@ if(BUILD_TESTING)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.
         add_library(milestone${milestone}_contract OBJECT tests/milestone${milestone}_test.cpp)
-        target_link_libraries(milestone${milestone}_contract PRIVATE net)
+        target_link_libraries(milestone${milestone}_contract PRIVATE concurrency net)
         target_include_directories(milestone${milestone}_contract PRIVATE tests/contracts)
         target_compile_definitions(milestone${milestone}_contract PRIVATE MILESTONE${milestone}_AVAILABLE=1)
     endforeach()

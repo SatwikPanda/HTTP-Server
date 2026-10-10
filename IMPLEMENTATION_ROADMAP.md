@@ -20,7 +20,8 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 ## Verification record — 2026-10-10
 
-- Acceptance suites for milestones 01–06 were written before implementing milestone 03. Milestones 04–06 have declaration-only adapter contracts: their full assertion bodies compile, but their runnable tests remain pending until production-backed adapters exist. They are not complete.
+- Acceptance suites for milestones 01–06 were written before implementing milestone 03. Milestones 05–06 have declaration-only adapter contracts: their full assertion bodies compile, but their runnable tests remain pending until production-backed adapters exist.
+- Milestone 04 is fully implemented: `ConnectionSession`, `EchoSession`, `SingleSessionDriver`, `core::Clock`, and `tests/milestone04_adapter.hpp` backed by production code. Milestones 01–04 pass all eight registered tests with zero failures.
 - The milestone 01–02 gate passed all five test executables before milestone 03 implementation began. A zero-progress echo write regression was found and fixed first. Existing assertions now remain active in Release builds.
 - Milestones 01–03 pass the strict completion gate on Windows with GCC 16.2 (Release) and Clang 22.1 (Debug). Each build passes seven registered tests, with zero failures and zero skips: ownership, controlled echo I/O, real echo integration, milestone 01, milestone 02, milestone 03, and CLI validation.
 - Milestone 03 covers level-triggered readiness, read/write interest changes, generation/lifetime checks, concurrent coalesced wakeups, deadlines, IPv4 and IPv6 loopback, resolution, refused-connect completion, fresh-socket candidate fallback, idle readiness, and shutdown/restart races. Real echo I/O uses readiness waits instead of retry sleeps.
@@ -98,11 +99,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Create `ConnectionSession::on_event()` with explicit state and actions for reading, writing, waiting, and closing; extend the action vocabulary as later features arrive.
-- [ ] Move the temporary echo behavior into a session. The single-session driver owns sockets and executes actions.
-- [ ] Add input/output limits, steady-clock deadlines, idle/progress tracking, and a basic stop/drain path.
-- [ ] Provide deterministic fake I/O events and a fake clock for session tests. Retain a separate wall-clock interface for future HTTP dates.
-- [ ] Ensure sessions never depend on Winsock/POSIX headers or close another owner's socket.
+- [x] Create `ConnectionSession::on_event()` with explicit state and actions for reading, writing, waiting, and closing; extend the action vocabulary as later features arrive.
+- [x] Move the temporary echo behavior into a session. The single-session driver owns sockets and executes actions.
+- [x] Add input/output limits, steady-clock deadlines, idle/progress tracking, and a basic stop/drain path.
+- [x] Provide deterministic fake I/O events and a fake clock for session tests. Retain a separate wall-clock interface for future HTTP dates.
+- [x] Ensure sessions never depend on Winsock/POSIX headers or close another owner's socket.
 
 **Completion checks:** The same echo session runs under fake I/O and real sockets. Timeout, disconnect, pending output, and stop events close resources predictably. The driver can accept another client after the previous session ends.
 
