@@ -50,13 +50,31 @@ else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
+# HTTP library (Method, Status, Version, Header, Date, Serializer, Session, Server)
+add_library(http STATIC
+    src/http/method.cpp
+    src/http/status.cpp
+    src/http/version.cpp
+    src/http/header.cpp
+    src/http/date.cpp
+    src/http/serializer.cpp
+    src/http/http_session.cpp
+    src/http/http_server.cpp
+)
+target_include_directories(http PUBLIC
+    include
+)
+target_compile_features(http PUBLIC cxx_std_20)
+set_target_properties(http PROPERTIES CXX_EXTENSIONS OFF)
+target_link_libraries(http PUBLIC core net)
+
 find_package(Threads REQUIRED)
 
 # Main executable
 add_executable(httpserver
     src/main.cpp
 )
-target_link_libraries(httpserver PRIVATE net Threads::Threads)
+target_link_libraries(httpserver PRIVATE http net Threads::Threads)
 
 # Testing
 enable_testing()
@@ -78,3 +96,21 @@ add_executable(echo_integration_test
 )
 target_link_libraries(echo_integration_test PRIVATE net Threads::Threads)
 add_test(NAME echo_integration_test COMMAND echo_integration_test)
+
+add_executable(http_serialization_test
+    tests/http_serialization_test.cpp
+)
+target_link_libraries(http_serialization_test PRIVATE http core Threads::Threads)
+add_test(NAME http_serialization_test COMMAND http_serialization_test)
+
+add_executable(http_session_test
+    tests/http_session_test.cpp
+)
+target_link_libraries(http_session_test PRIVATE http net core Threads::Threads)
+add_test(NAME http_session_test COMMAND http_session_test)
+
+add_executable(http_integration_test
+    tests/http_integration_test.cpp
+)
+target_link_libraries(http_integration_test PRIVATE http net core Threads::Threads)
+add_test(NAME http_integration_test COMMAND http_integration_test)

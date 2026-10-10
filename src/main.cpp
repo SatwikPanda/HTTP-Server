@@ -1,9 +1,10 @@
-#include "net/echo_server.hpp"
+#include "http/http_server.hpp"
 #include "net/runtime.hpp"
 
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <string_view>
 
 #ifdef _WIN32
@@ -18,7 +19,7 @@
 
 namespace {
 
-net::EchoServer* g_server = nullptr;
+http::HttpServer* g_server = nullptr;
 
 #ifdef _WIN32
 BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
@@ -27,7 +28,7 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
         case CTRL_BREAK_EVENT:
         case CTRL_CLOSE_EVENT:
             if (g_server) {
-                std::cout << "\nShutdown signal received. Stopping echo server..." << std::endl;
+                std::cout << "\nShutdown signal received. Stopping HTTP server..." << std::endl;
                 g_server->stop();
                 return TRUE;
             }
@@ -40,7 +41,7 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
 #else
 void signal_handler(int sig) {
     if (g_server) {
-        std::cout << "\nShutdown signal (" << sig << ") received. Stopping echo server..." << std::endl;
+        std::cout << "\nShutdown signal (" << sig << ") received. Stopping HTTP server..." << std::endl;
         g_server->stop();
     }
 }
@@ -51,7 +52,7 @@ void print_usage(const char* prog_name) {
               << "Options:\n"
               << "  --host <ip>          Bind address (default: 127.0.0.1)\n"
               << "  --port <port>        Port to listen on (default: 8080)\n"
-              << "  --buffer-size <size> Echo buffer capacity in bytes (default: 4096)\n"
+              << "  --body <text>        Fixed response body text (default: 'Hello, World!\\r\\n')\n"
               << "  --help               Display this help message\n";
 }
 
@@ -60,7 +61,7 @@ void print_usage(const char* prog_name) {
 int main(int argc, char* argv[]) {
     std::string host = "127.0.0.1";
     std::uint16_t port = 8080;
-    std::size_t buffer_size = 4096;
+    std::string body_text = "Hello, World!\r\n";
 
     for (int i = 1; i < argc; ++i) {
         std::string_view arg = argv[i];
@@ -71,8 +72,8 @@ int main(int argc, char* argv[]) {
             host = argv[++i];
         } else if (arg == "--port" && i + 1 < argc) {
             port = static_cast<std::uint16_t>(std::atoi(argv[++i]));
-        } else if (arg == "--buffer-size" && i + 1 < argc) {
-            buffer_size = static_cast<std::size_t>(std::strtoul(argv[++i], nullptr, 10));
+        } else if (arg == "--body" && i + 1 < argc) {
+            body_text = argv[++i];
         } else {
             std::cerr << "Unknown or incomplete argument: " << arg << "\n";
             print_usage(argv[0]);
@@ -96,12 +97,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    net::EchoConfig config;
+    http::HttpServerConfig config;
     config.endpoint = ep_res.value();
-    config.buffer_capacity = buffer_size;
+    config.session_config.response_body = body_text;
 
-    // 3. Initialize EchoServer
-    net::EchoServer server(config);
+    // 3. Initialize HttpServer
+    http::HttpServer server(config);
     g_server = &server;
 
 #ifdef _WIN32
@@ -119,11 +120,12 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "========================================\n"
-              << " Reliable TCP Echo Server (Milestone 02)\n"
+              << " HTTP/1.1 Server (Milestone 05)\n"
               << "========================================\n"
               << "Listening on       : " << server.local_endpoint().to_string() << "\n"
-              << "Echo buffer limit  : " << config.buffer_capacity << " bytes\n"
-              << "Status             : Ready for connections\n"
+              << "Response status    : 200 OK\n"
+              << "Response body size : " << body_text.size() << " bytes\n"
+              << "Status             : Ready for HTTP clients\n"
               << "Press Ctrl+C to stop.\n"
               << "----------------------------------------\n" << std::endl;
 
