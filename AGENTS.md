@@ -24,8 +24,8 @@ Read any applicable directory-specific instructions before editing those files.
 - The architecture and roadmap describe intended design. Actual source files,
   CMake target membership, and executed tests establish current behavior. Treat
   proposed signatures and CLI examples as plans rather than implemented APIs.
-- The recorded baseline is milestones 01-05 implemented and verified locally on
-  Windows; milestone 06 is pending. Linux/macOS acceptance remains unverified.
+- The recorded baseline is milestones 01-05 implemented and verified on
+  Windows, Linux, and macOS; milestone 06 is pending.
   Recheck the roadmap and adapters instead of assuming this snapshot remains
   current. The executable currently runs a fixed-response HTTP demo.
 

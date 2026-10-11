@@ -110,9 +110,11 @@ tests ran with approved loopback access. MSBuild also needed execution outside
 the sandbox. Existing MSVC NDEBUG override warnings are intentional for the
 earlier assert-based tests; HTTP checks now use Release-active CHECK.
 
-Linux and macOS could not be run locally. The CI matrix now includes milestone
-05; remote results are pending. Local compiler coverage does not establish
-three-platform acceptance. The older-MSVC milestone 03 future compile error
+The Windows/Linux/macOS GitHub Actions matrix passed for commit `f7755a4` in
+[run 38137762406](https://github.com/SatwikPanda/HTTP-Server/actions/runs/38137762406).
+All three jobs successfully configured, built every target in Release, and ran
+the strict milestone 01–05 gate. Linux/macOS were verified in CI rather than
+locally. Milestone 06 remains pending. The older-MSVC milestone 03 future compile error
 described below is now resolved by checking Result in the worker before returning
 the vector; production Result semantics are preserved.
 

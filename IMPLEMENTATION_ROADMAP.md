@@ -20,7 +20,7 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 ## Verification record — 2026-10-11
 
-- Milestone 05 is implemented and its Windows acceptance checks pass. The build
+- Milestone 05 is implemented and its Windows/Linux/macOS acceptance checks pass. The build
   now links the HTTP library into the executable and milestone 05 adapters,
   registers all three HTTP regression executables, and enables HTTP warnings.
 - The executable runs the fixed-response HTTP demo. `HttpSession` implements
@@ -46,10 +46,12 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
   vector. The Result contract is unchanged. HTTP integration uses joined threads
   and a condition variable because older MSVC's future/PPL header defines a
   conflicting global `concurrency` alias.
-- The GitHub Actions matrix now enforces milestones 01–05 on Windows, Linux, and
-  macOS. Linux/macOS are not available locally, and this change has not been pushed
-  or run in remote CI; cross-platform acceptance is still pending. Milestone 06
-  remains unimplemented and skipped outside strict mode. This demo still detects
+- The GitHub Actions matrix enforces milestones 01–05 on Windows, Linux, and
+  macOS. [CI run 38137762406](https://github.com/SatwikPanda/HTTP-Server/actions/runs/38137762406)
+  for commit `f7755a4` completed successfully on all three platforms: configure,
+  full Release build, and strict milestone 01–05 acceptance. Linux/macOS were
+  verified in CI rather than locally. Milestone 06 remains unimplemented and
+  skipped outside strict mode. This demo still detects
   only CRLF header termination; request semantics/framing and persistence belong
   to milestones 06–09.
 
