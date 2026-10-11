@@ -24,9 +24,10 @@ Read any applicable directory-specific instructions before editing those files.
 - The architecture and roadmap describe intended design. Actual source files,
   CMake target membership, and executed tests establish current behavior. Treat
   proposed signatures and CLI examples as plans rather than implemented APIs.
-- The recorded baseline is milestones 01-03 implemented, with acceptance suites
-  for 04-06 pending. Recheck the roadmap and adapters instead of assuming this
-  snapshot remains current. The executable currently runs a TCP echo server.
+- The recorded baseline is milestones 01-05 implemented and verified locally on
+  Windows; milestone 06 is pending. Linux/macOS acceptance remains unverified.
+  Recheck the roadmap and adapters instead of assuming this snapshot remains
+  current. The executable currently runs a fixed-response HTTP demo.
 
 ## Working pattern
 
@@ -132,7 +133,7 @@ Enforce the recorded completed milestone gate with:
 ```powershell
 cmake -S . -B build/agents -DREQUIRE_ALL_MILESTONES=ON
 cmake --build build/agents --config Release
-ctest --test-dir build/agents -C Release -L 'milestone0[123]' --output-on-failure
+ctest --test-dir build/agents -C Release -L 'milestone0[12345]' --output-on-failure
 ```
 
 - Extend the strict label selection as additional milestones are verified. To
@@ -140,8 +141,8 @@ ctest --test-dir build/agents -C Release -L 'milestone0[123]' --output-on-failur
   suites. Running all suites in strict mode fails while future suites are pending.
 - Exit code 77 means pending/skipped, never passed. Compilation of
   `tests/contracts/` object targets is a contract check, never runtime acceptance.
-- Future `tests/milestone04_adapter.hpp`, `milestone05_adapter.hpp`, and
-  `milestone06_adapter.hpp` must invoke production code. Only clocks and I/O may
+- Milestone adapters, including the future `tests/milestone06_adapter.hpp`,
+  must invoke production code. Only clocks and I/O may
   be faked; never simulate the feature solely to satisfy acceptance assertions.
 - Use `tests/test_support.hpp` and Release-active `CHECK` assertions for new tests.
   Keep CTest timeouts and cover relevant ownership, partial I/O, deadlines, and

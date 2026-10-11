@@ -17,7 +17,7 @@ struct HttpVersion {
     [[nodiscard]] std::string to_string() const;
 
     [[nodiscard]] bool is_valid() const noexcept {
-        return major >= 1;
+        return major == 1 && minor <= 1;
     }
 
     bool operator==(const HttpVersion& other) const = default;

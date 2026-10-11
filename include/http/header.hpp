@@ -33,10 +33,11 @@ public:
     // Check if a header exists (case-insensitive lookup).
     [[nodiscard]] bool contains(std::string_view name) const noexcept;
 
-    // Get the first matching header value (case-insensitive lookup).
+    // Borrow the first matching value. Mutation or destruction invalidates views.
     [[nodiscard]] std::optional<std::string_view> get(std::string_view name) const noexcept;
 
-    // Get all matching header values in order without joining them.
+    // Borrow matching values in order without joining them; the same lifetime
+    // restriction as get() applies.
     [[nodiscard]] std::vector<std::string_view> get_all(std::string_view name) const;
 
     // Remove all header fields matching name (case-insensitively). Returns true if any were removed.

@@ -8,6 +8,7 @@
 #include "http/response.hpp"
 #include "http/serializer.hpp"
 #include "net/stream.hpp"
+#include "test_support.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -49,11 +50,9 @@ inline const core::SystemTimePoint kFixedDemoWallTime =
     std::chrono::system_clock::from_time_t(784111777); // Sun, 06 Nov 1994 08:49:37 GMT
 
 inline Response fixed_response() {
-    http::Response resp(http::StatusCode::OK);
-    resp.set_body("Hello, World!\r\n", "text/plain; charset=utf-8");
-    resp.headers.set("Date", http::format_http_date(kFixedDemoWallTime));
-    resp.headers.set("Connection", "close");
-    return Response(std::move(resp));
+    http::HttpSessionConfig config;
+    config.fixed_wall_time = kFixedDemoWallTime;
+    return Response(test::take(http::make_fixed_response(config)));
 }
 
 inline core::Result<std::string> serialize(const Response& resp) {
@@ -145,7 +144,8 @@ inline std::string fixed_http_roundtrip(std::string_view request, std::size_t ma
     config.content_type = "text/plain; charset=utf-8";
     config.fixed_wall_time = kFixedDemoWallTime;
 
-    http::run_http_session(channel, config);
+    const auto stats = http::run_http_session(channel, config);
+    CHECK(stats.completed_cleanly && stats.response_sent);
     return channel.output();
 }
 

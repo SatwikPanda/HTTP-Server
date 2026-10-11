@@ -83,12 +83,14 @@ void wake_and_deadlines() {
     CHECK(test::take(poller.wait(start + 40ms)).empty());
     CHECK(test::Clock::now() - start >= 30ms);
     auto waiting = std::async(std::launch::async, [&] {
-        return poller.wait(test::Clock::now() + 5s);
+        // Check Result in the worker and return a vector. Older MSVC futures
+        // require a default-constructible value, which Result<T> deliberately is not.
+        return test::take(poller.wait(test::Clock::now() + 5s));
     });
     std::this_thread::sleep_for(30ms);
     CHECK(poller.wake());
     CHECK(waiting.wait_for(1s) == std::future_status::ready);
-    CHECK(test::take(waiting.get()).empty());
+    CHECK(waiting.get().empty());
     std::vector<std::jthread> wakers;
     for (int i = 0; i < 4; ++i) wakers.emplace_back([&] {
         for (int j = 0; j < 5000; ++j) CHECK(poller.wake());
@@ -100,11 +102,11 @@ void wake_and_deadlines() {
     CHECK(test::Clock::now() - start >= 20ms); // wake channel fully drained
     for (int i = 0; i < 32; ++i) {
         auto waiting_again = std::async(std::launch::async, [&] {
-            return poller.wait(test::Clock::now() + 2s);
+            return test::take(poller.wait(test::Clock::now() + 2s));
         });
         CHECK(poller.wake()); // may race before or after the native wait starts
         CHECK(waiting_again.wait_for(1s) == std::future_status::ready);
-        CHECK(test::take(waiting_again.get()).empty());
+        CHECK(waiting_again.get().empty());
     }
 }
 

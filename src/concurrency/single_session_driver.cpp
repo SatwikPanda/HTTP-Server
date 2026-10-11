@@ -112,7 +112,10 @@ DriverStats SingleSessionDriver::drive(
                 for (const auto& event : events_res.value()) {
                     if (event.token == token && poller.is_current(event)) {
                         got_event = true;
-                        action = session.on_event(ReadyEvent{event.readable || event.hangup, event.writable});
+                        // Attempt I/O on error/hangup too: recv/send supplies the
+                        // concrete error and recv drains any buffered bytes.
+                        action = session.on_event(ReadyEvent{event.readable || event.hangup || event.error,
+                                                            event.writable || event.hangup || event.error});
                         break;
                     }
                 }

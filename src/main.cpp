@@ -1,4 +1,4 @@
-#include "net/echo_server.hpp"
+#include "http/http_server.hpp"
 #include "net/runtime.hpp"
 
 #include <csignal>
@@ -86,7 +86,7 @@ void print_usage(const char* prog_name) {
               << "Options:\n"
               << "  --host <ip>          Bind address (default: 127.0.0.1)\n"
               << "  --port <port>        Port to listen on (default: 8080)\n"
-              << "  --buffer-size <size> Echo buffer capacity in bytes (default: 4096)\n"
+              << "  --buffer-size <size> Request header limit in bytes (default: 4096)\n"
               << "  --help               Display this help message\n";
 }
 
@@ -111,8 +111,8 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg == "--buffer-size" && i + 1 < argc) {
             if (!parse_unsigned(std::string_view(argv[++i]), buffer_size) ||
-                buffer_size == 0 || buffer_size > 16 * 1024 * 1024) {
-                std::cerr << "Invalid buffer size: expected an integer from 1 to 16777216\n";
+                buffer_size < 4 || buffer_size > 16 * 1024 * 1024) {
+                std::cerr << "Invalid buffer size: expected an integer from 4 to 16777216\n";
                 return 1;
             }
         } else {
@@ -138,12 +138,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    net::EchoConfig config;
+    http::HttpServerConfig config;
     config.endpoint = ep_res.value();
-    config.buffer_capacity = buffer_size;
+    config.session_config.max_header_bytes = buffer_size;
 
-    // 3. Initialize EchoServer
-    net::EchoServer server(config);
+    // 3. Initialize the fixed-response HTTP demo
+    http::HttpServer server(config);
 
     // 4. Start Server
     auto start_res = server.start();
@@ -165,10 +165,10 @@ int main(int argc, char* argv[]) {
     });
 
     std::cout << "========================================\n"
-              << " Readiness TCP Echo Server (Milestone 03)\n"
+              << " Fixed Response HTTP Demo (Milestone 05)\n"
               << "========================================\n"
               << "Listening on       : " << server.local_endpoint().to_string() << "\n"
-              << "Echo buffer limit  : " << config.buffer_capacity << " bytes\n"
+              << "Header byte limit  : " << config.session_config.max_header_bytes << " bytes\n"
               << "Status             : Ready for connections\n"
               << "Press Ctrl+C to stop.\n"
               << "----------------------------------------\n" << std::endl;

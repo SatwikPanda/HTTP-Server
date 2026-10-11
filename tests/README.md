@@ -11,11 +11,11 @@ ctest --test-dir build/milestones -L 'milestone0[12]' --output-on-failure
 ctest --test-dir build/milestones -L milestone03 --output-on-failure
 ctest --test-dir build/milestones --output-on-failure
 cmake -S . -B build/milestones -DREQUIRE_ALL_MILESTONES=ON
-ctest --test-dir build/milestones -L 'milestone0[1234]' --output-on-failure
+ctest --test-dir build/milestones -L 'milestone0[12345]' --output-on-failure
 ```
 
-Milestone 04 now has a production-backed adapter and runs its acceptance checks.
-Milestones 05–06 are **pending**, never complete or passing. They return CTest's
+Milestones 04–05 have production-backed adapters and run their acceptance checks.
+Milestone 06 is **pending**, never complete or passing. It returns CTest's
 skip code 77 until a production-backed adapter exists. To enforce completion
 (turn a pending suite into a failure), configure with
 `-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each milestone.
@@ -23,15 +23,15 @@ Do not add a mock implementation solely to make acceptance assertions pass.
 
 The remaining future milestones have no stable production interfaces yet. Their
 acceptance test bodies are fully specified against small adapters, to avoid
-prematurely implementing those milestones. Add `tests/milestone05_adapter.hpp`
-or `tests/milestone06_adapter.hpp` with the following contracts when implementing
+prematurely implementing those milestones. Add `tests/milestone06_adapter.hpp`
+with the following contract when implementing
 the corresponding feature; the test body
 automatically becomes active at the next build. Link any new production targets
 to the corresponding CMake test executable. Each adapter must call production
 code; only clocks and I/O may be faked.
 
 Every build compiles the milestone 04–06 assertion bodies as object targets.
-Milestone 04 uses its production adapter; the remaining suites use the
+Milestones 04–05 use their production adapters; milestone 06 uses the
 declaration-only headers in `tests/contracts/`. These objects are never counted
 as passing CTests. The future adapters provide production-backed
 definitions for those contracts (or equivalent wrappers) when available.
@@ -70,7 +70,53 @@ definitions for those contracts (or equivalent wrappers) when available.
 Only local loopback networking is used. IPv6 is exercised when supported. DNS
 tests use numeric literals and localhost; no external origin is required.
 
-## Verified status (2026-10-10)
+## Fixed-response HTTP demo
+
+The executable now serves `Hello, World!\r\n` as a fixed HTTP/1.1 response and
+closes after one header block. Request parsing, HEAD semantics, body framing,
+and keep-alive remain future milestones. `--buffer-size` now limits the incoming
+header block (4–16777216 bytes; default 4096); the library defaults to 8192 header
+bytes and 1 MiB total response bytes. Both default I/O progress timeouts are 5 s.
+
+After building, run these commands in separate terminals:
+
+```powershell
+.\build\agents\httpserver.exe --host 127.0.0.1 --port 8080
+curl.exe --include http://127.0.0.1:8080/
+```
+
+On Linux/macOS, use `./build/agents/httpserver` and `curl`. Ctrl+C stops the
+listener and wakes active I/O; join any library driver before destroying its
+server or network runtime.
+
+The milestone 05 gate includes `milestone05_test`, `http_serialization_test`,
+`http_session_test`, and `http_integration_test`. They check production message
+creation, repeated fields, generated-field injection, request-line injection,
+fixed/binary lengths, output bounds, every read chunk size of a representative
+request, exact header bounds, premature EOF, bare-LF rejection, short writes,
+would-block, zero/oversized progress, native errors, read/write deadlines,
+manual-clock drain bounds, and wall-clock jumps. Real nonblocking loopback tests
+exercise IPv4/IPv6, half-close, sequential clients, idle clients, occupied ports,
+stop during accept/read waits, and restart. Unsupported IPv6 is reported.
+
+## Verified status (2026-10-11)
+
+Every target builds on Windows with GCC 16.2 (Release), Clang 22.1.8 (Debug), and
+MSVC 19.29 (Release). Each passes all 12 tests in the strict milestone 01–05 gate,
+with zero failures and zero skips. IPv4 and IPv6 HTTP integration ran on this host.
+The separate non-strict all-suite run passed the implemented tests and skipped
+milestone 06. The sandbox blocks loopback with native error 10013, so network
+tests ran with approved loopback access. MSBuild also needed execution outside
+the sandbox. Existing MSVC NDEBUG override warnings are intentional for the
+earlier assert-based tests; HTTP checks now use Release-active CHECK.
+
+Linux and macOS could not be run locally. The CI matrix now includes milestone
+05; remote results are pending. Local compiler coverage does not establish
+three-platform acceptance. The older-MSVC milestone 03 future compile error
+described below is now resolved by checking Result in the worker before returning
+the vector; production Result semantics are preserved.
+
+### Earlier verification (2026-10-10)
 
 After milestone 04 implementation, the manual clocks needed explicit
 `duration_cast` conversion from nanoseconds to each native clock duration.

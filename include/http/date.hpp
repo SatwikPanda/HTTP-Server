@@ -7,6 +7,7 @@ namespace http {
 
 // Formats a time_point according to RFC 9110 IMF-fixdate:
 // Example: "Sun, 06 Nov 1994 08:49:37 GMT"
+// Returns an empty string when the year cannot be represented in four digits.
 [[nodiscard]] std::string format_http_date(
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now()
 );

@@ -1,8 +1,9 @@
 #include "http/http_session.hpp"
 #include "net/stream.hpp"
+#include "http/serializer.hpp"
 
 #include <algorithm>
-#include <cassert>
+#include "test_support.hpp"
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -26,9 +27,18 @@ public:
     std::size_t total_short_writes{0};
     std::size_t total_write_calls{0};
     std::size_t total_read_calls{0};
+    bool zero_read{false};
+    bool zero_write{false};
+    bool oversized_read_count{false};
+    bool oversized_write_count{false};
+    core::Error read_error{};
+    core::Error write_error{};
 
     [[nodiscard]] net::ReadResult read_some(std::span<std::byte> destination) override {
         total_read_calls++;
+        if (zero_read) return net::ReadResult::success(0);
+        if (oversized_read_count) return net::ReadResult::success(destination.size() + 1);
+        if (read_error) return net::ReadResult::failure(read_error);
         if (is_closed) {
             return net::ReadResult::failure(
                 core::make_error(core::ErrorCategory::bad_descriptor, "read_some")
@@ -55,6 +65,9 @@ public:
 
     [[nodiscard]] net::WriteResult write_some(std::span<const std::byte> source) override {
         total_write_calls++;
+        if (zero_write) return net::WriteResult::success(0);
+        if (oversized_write_count) return net::WriteResult::success(source.size() + 1);
+        if (write_error) return net::WriteResult::failure(write_error);
         if (is_closed) {
             return net::WriteResult::failure(
                 core::make_error(core::ErrorCategory::bad_descriptor, "write_some")
@@ -111,17 +124,17 @@ void test_session_normal_request() {
 
     auto stats = http::run_http_session(channel, config);
 
-    assert(stats.completed_cleanly);
-    assert(stats.request_received);
-    assert(stats.response_sent);
+    CHECK(stats.completed_cleanly);
+    CHECK(stats.request_received);
+    CHECK(stats.response_sent);
 
     std::string out = channel.output_string();
-    assert(out.starts_with("HTTP/1.1 200 OK\r\n"));
-    assert(out.find("\r\nContent-Length: 15\r\n") != std::string::npos);
-    assert(out.find("\r\nConnection: close\r\n") != std::string::npos);
-    assert(out.find("\r\nContent-Type: text/plain; charset=utf-8\r\n") != std::string::npos);
-    assert(out.find("\r\nDate: ") != std::string::npos);
-    assert(out.ends_with("Hello, World!\r\n"));
+    CHECK(out.starts_with("HTTP/1.1 200 OK\r\n"));
+    CHECK(out.find("\r\nContent-Length: 15\r\n") != std::string::npos);
+    CHECK(out.find("\r\nConnection: close\r\n") != std::string::npos);
+    CHECK(out.find("\r\nContent-Type: text/plain; charset=utf-8\r\n") != std::string::npos);
+    CHECK(out.find("\r\nDate: ") != std::string::npos);
+    CHECK(out.ends_with("Hello, World!\r\n"));
     std::cout << "[PASS] test_session_normal_request" << std::endl;
 }
 
@@ -136,14 +149,14 @@ void test_session_fragmented_reads() {
 
     auto stats = http::run_http_session(channel, config);
 
-    assert(stats.completed_cleanly);
-    assert(stats.request_received);
-    assert(stats.response_sent);
+    CHECK(stats.completed_cleanly);
+    CHECK(stats.request_received);
+    CHECK(stats.response_sent);
 
     std::string out = channel.output_string();
-    assert(out.starts_with("HTTP/1.1 200 OK\r\n"));
-    assert(out.find("\r\nContent-Length: 10\r\n") != std::string::npos);
-    assert(out.ends_with("Fixed Body"));
+    CHECK(out.starts_with("HTTP/1.1 200 OK\r\n"));
+    CHECK(out.find("\r\nContent-Length: 10\r\n") != std::string::npos);
+    CHECK(out.ends_with("Fixed Body"));
     std::cout << "[PASS] test_session_fragmented_reads" << std::endl;
 }
 
@@ -158,13 +171,13 @@ void test_session_forced_short_writes() {
 
     auto stats = http::run_http_session(channel, config);
 
-    assert(stats.completed_cleanly);
-    assert(stats.response_sent);
-    assert(stats.short_write_count > 0);
+    CHECK(stats.completed_cleanly);
+    CHECK(stats.response_sent);
+    CHECK(stats.short_write_count > 0);
 
     std::string out = channel.output_string();
-    assert(out.starts_with("HTTP/1.1 200 OK\r\n"));
-    assert(out.ends_with("Testing forced short writes payload!"));
+    CHECK(out.starts_with("HTTP/1.1 200 OK\r\n"));
+    CHECK(out.ends_with("Testing forced short writes payload!"));
     std::cout << "[PASS] test_session_forced_short_writes" << std::endl;
 }
 
@@ -181,10 +194,10 @@ void test_session_would_block_cycles() {
 
     auto stats = http::run_http_session(channel, config);
 
-    assert(stats.completed_cleanly);
-    assert(stats.would_block_read_count == 3);
-    assert(stats.would_block_write_count == 2);
-    assert(stats.response_sent);
+    CHECK(stats.completed_cleanly);
+    CHECK(stats.would_block_read_count == 3);
+    CHECK(stats.would_block_write_count == 2);
+    CHECK(stats.response_sent);
     std::cout << "[PASS] test_session_would_block_cycles" << std::endl;
 }
 
@@ -196,9 +209,9 @@ void test_session_empty_disconnect() {
     http::HttpSessionConfig config;
     auto stats = http::run_http_session(channel, config);
 
-    assert(!stats.request_received);
-    assert(!stats.response_sent);
-    assert(channel.output_data.empty());
+    CHECK(!stats.request_received);
+    CHECK(!stats.response_sent);
+    CHECK(channel.output_data.empty());
     std::cout << "[PASS] test_session_empty_disconnect" << std::endl;
 }
 
@@ -214,13 +227,146 @@ void test_session_header_limit_exceeded() {
 
     auto stats = http::run_http_session(channel, config);
 
-    assert(stats.header_limit_exceeded);
-    assert(stats.response_sent);
+    CHECK(stats.header_limit_exceeded);
+    CHECK(stats.response_sent);
 
     std::string out = channel.output_string();
-    assert(out.starts_with("HTTP/1.1 431 Request Header Fields Too Large\r\n"));
-    assert(out.find("Connection: close\r\n") != std::string::npos);
+    CHECK(out.starts_with("HTTP/1.1 431 Request Header Fields Too Large\r\n"));
+    CHECK(out.find("Connection: close\r\n") != std::string::npos);
     std::cout << "[PASS] test_session_header_limit_exceeded" << std::endl;
+}
+
+void test_exact_limits_and_fragments() {
+    const std::string request = "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    http::HttpSessionConfig config;
+    config.fixed_wall_time = std::chrono::system_clock::from_time_t(784111777);
+    config.max_header_bytes = request.size();
+    const auto expected = test::take(http::serialize_response(test::take(http::make_fixed_response(config))));
+    for (std::size_t chunk = 1; chunk <= request.size(); ++chunk) {
+        ControlledStreamChannel channel;
+        channel.set_input(request);
+        channel.max_read_chunk = chunk;
+        channel.max_write_chunk = 7;
+        const auto stats = http::run_http_session(channel, config);
+        CHECK(stats.completed_cleanly && stats.response_sent && !stats.error);
+        CHECK(stats.peak_input_bytes <= config.max_header_bytes);
+        CHECK(stats.peak_output_bytes <= config.max_output_bytes);
+        CHECK(channel.output_string() == expected);
+    }
+    ControlledStreamChannel oversized;
+    oversized.set_input(request); // Terminator would previously bypass the bound.
+    config.max_header_bytes = request.size() - 1;
+    auto stats = http::run_http_session(oversized, config);
+    CHECK(stats.header_limit_exceeded && stats.response_sent);
+    CHECK(stats.total_bytes_read == config.max_header_bytes);
+    CHECK(stats.peak_input_bytes == config.max_header_bytes);
+    CHECK(oversized.output_string().starts_with("HTTP/1.1 431 "));
+
+    ControlledStreamChannel truncated;
+    truncated.set_input("GET / HTTP/1.1\r\nHost: localhost\r\n");
+    config.max_header_bytes = 8192;
+    stats = http::run_http_session(truncated, config);
+    CHECK(stats.error.category == core::ErrorCategory::eof);
+    CHECK(!stats.response_sent && truncated.output_data.empty());
+    ControlledStreamChannel bare_lf;
+    bare_lf.set_input("GET / HTTP/1.1\nHost: localhost\n\n");
+    CHECK(!http::run_http_session(bare_lf, config).response_sent);
+}
+
+void test_invalid_progress_and_io_errors() {
+    for (int scenario = 0; scenario < 6; ++scenario) {
+        ControlledStreamChannel channel;
+        channel.set_input("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+        channel.zero_read = scenario == 0;
+        channel.zero_write = scenario == 1;
+        channel.oversized_read_count = scenario == 2;
+        channel.oversized_write_count = scenario == 3;
+        const auto error = core::make_error(core::ErrorCategory::connection_reset, "controlled I/O", 123);
+        if (scenario == 4) channel.read_error = error;
+        if (scenario == 5) channel.write_error = error;
+        const auto stats = http::run_http_session(channel);
+        CHECK(!stats.completed_cleanly && !stats.response_sent);
+        CHECK(stats.error.category == (scenario < 4 ? core::ErrorCategory::io_error : core::ErrorCategory::connection_reset));
+        if (scenario >= 4) CHECK(stats.error.native_code == 123 && stats.error.operation == "controlled I/O");
+        CHECK(channel.total_read_calls == 1);
+        CHECK(channel.total_write_calls <= 1);
+    }
+    for (bool writing : {false, true}) {
+        ControlledStreamChannel channel;
+        channel.set_input("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+        channel.read_would_block_cycles = writing ? 0 : 100;
+        channel.write_would_block_cycles = writing ? 100 : 0;
+        http::HttpSessionConfig config;
+        config.retry_timeout = std::chrono::milliseconds(1);
+        config.wait_retry_delay = std::chrono::milliseconds(100);
+        const auto stats = http::run_http_session(channel, config);
+        CHECK(stats.error.category == core::ErrorCategory::timed_out);
+        CHECK(!stats.response_sent);
+        CHECK(channel.total_read_calls == 1);
+        CHECK(channel.total_write_calls == (writing ? 1u : 0u));
+    }
+}
+
+void test_clock_deadlines_and_configuration() {
+    using namespace std::chrono_literals;
+    using namespace concurrency;
+    core::ManualSteadyClock steady;
+    core::ManualSystemClock wall(std::chrono::system_clock::from_time_t(784111777));
+    http::HttpSessionConfig config;
+    config.retry_timeout = 500ms;
+    http::HttpSession idle(config, {1, 1}, steady, wall);
+    CHECK(idle.initial_action().is_read());
+    auto wait = idle.on_event(WouldBlockEvent{net::Interest::read});
+    CHECK(wait.is_wait() && wait.as_wait()->deadline == steady.now() + 500ms);
+    wall.advance(24h); // Wall-clock jumps do not affect I/O deadlines.
+    steady.advance(500ms);
+    CHECK(idle.on_event(ReadyEvent{true, false}).is_close());
+    CHECK(idle.error().category == core::ErrorCategory::timed_out);
+
+    http::HttpSession late(config, {1, 3}, steady, wall);
+    CHECK(late.initial_action().is_read());
+    steady.advance(500ms);
+    const std::string late_request = "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    CHECK(late.on_event(ReadDataEvent{std::as_bytes(std::span(late_request))}).is_close());
+    CHECK(late.error().category == core::ErrorCategory::timed_out);
+
+    wall.set(std::chrono::system_clock::from_time_t(784111777));
+    http::HttpSession draining(config, {1, 2}, steady, wall);
+    CHECK(draining.initial_action().is_read());
+    const std::string request = "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    auto write = draining.on_event(ReadDataEvent{std::as_bytes(std::span(request))});
+    CHECK(write.is_write());
+    const std::string wire(reinterpret_cast<const char*>(write.as_write()->data.data()), write.as_write()->data.size());
+    CHECK(wire.find("Date: Sun, 06 Nov 1994 08:49:37 GMT\r\n") != std::string::npos);
+    CHECK(draining.on_event(StopEvent{5ms}).is_write());
+    steady.advance(3ms);
+    CHECK(draining.on_event(WriteCompleteEvent{1}).is_write());
+    steady.advance(2ms);
+    CHECK(draining.on_event(WouldBlockEvent{net::Interest::write}).is_close());
+    CHECK(draining.error().category == core::ErrorCategory::timed_out);
+
+    for (int scenario = 0; scenario < 7; ++scenario) {
+        auto invalid = config;
+        if (scenario == 0) invalid.max_header_bytes = 0;
+        if (scenario == 1) invalid.max_output_bytes = 0;
+        if (scenario == 2) invalid.retry_timeout = 0ms;
+        if (scenario == 3) invalid.wait_retry_delay = 0ms;
+        if (scenario == 4) invalid.content_type = "text/plain\r\nX: injected";
+        if (scenario == 5) invalid.response_status = http::StatusCode::NoContent;
+        if (scenario == 6) invalid.response_body.assign(invalid.max_output_bytes + 1, 'x');
+        ControlledStreamChannel channel;
+        const auto stats = http::run_http_session(channel, invalid);
+        CHECK(stats.error.category == core::ErrorCategory::invalid_argument);
+        CHECK(channel.total_read_calls == 0 && channel.total_write_calls == 0);
+    }
+    ControlledStreamChannel small_output;
+    small_output.set_input(request);
+    config.max_output_bytes = 64;
+    CHECK(http::run_http_session(small_output, config).error);
+    CHECK(small_output.output_data.empty());
+    ControlledStreamChannel closed;
+    closed.close();
+    CHECK(http::run_http_session(closed).error.category == core::ErrorCategory::bad_descriptor);
 }
 
 int main() {
@@ -231,6 +377,9 @@ int main() {
     test_session_would_block_cycles();
     test_session_empty_disconnect();
     test_session_header_limit_exceeded();
+    test_exact_limits_and_fragments();
+    test_invalid_progress_and_io_errors();
+    test_clock_deadlines_and_configuration();
     std::cout << "All HTTP Session Tests PASSED!" << std::endl;
     return 0;
 }

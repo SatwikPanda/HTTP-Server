@@ -18,7 +18,42 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
-## Verification record — 2026-10-10
+## Verification record — 2026-10-11
+
+- Milestone 05 is implemented and its Windows acceptance checks pass. The build
+  now links the HTTP library into the executable and milestone 05 adapters,
+  registers all three HTTP regression executables, and enables HTTP warnings.
+- The executable runs the fixed-response HTTP demo. `HttpSession` implements
+  `ConnectionSession` and uses `SingleSessionDriver`; real sockets wait through
+  `Poller`. Header/input and response/output bytes are bounded, short-write
+  offsets survive would-block, and zero/invalid I/O counts fail without spinning.
+  Stop wakes both accept and session waits; listener/client registrations are
+  removed before sockets close. Repeated starts and explicit restarts are checked.
+- Serialization validates request/status lines, fields, versions, lengths, and
+  output limits. Complete fixed-length responses generate Content-Length when
+  absent and reject mismatches, repeated lengths, and unsupported Transfer-Encoding.
+  Header-only output supports representation metadata; full output rejects bodies
+  for informational, 204, and 304 responses. HTTP dates use portable UTC calendar
+  arithmetic and a separate injected wall clock.
+- Windows GCC 16.2 Release, Clang 22.1.8 Debug, and MSVC 19.29 Release each build
+  every target and pass all 12 tests in the strict milestone 01–05 gate, with zero
+  failures and zero skips. HTTP loopback integration exercised IPv4 and IPv6,
+  binary/fragmented requests, peer half-close, idle clients, shutdown, and restart.
+  Controlled tests cover exact limits, partial writes, invalid progress, I/O
+  failures, submillisecond deadline waits, and manual-clock drain deadlines.
+- The older-MSVC milestone 03 future build failure is fixed by checking the
+  production poll result in the worker and returning its default-constructible
+  vector. The Result contract is unchanged. HTTP integration uses joined threads
+  and a condition variable because older MSVC's future/PPL header defines a
+  conflicting global `concurrency` alias.
+- The GitHub Actions matrix now enforces milestones 01–05 on Windows, Linux, and
+  macOS. Linux/macOS are not available locally, and this change has not been pushed
+  or run in remote CI; cross-platform acceptance is still pending. Milestone 06
+  remains unimplemented and skipped outside strict mode. This demo still detects
+  only CRLF header termination; request semantics/framing and persistence belong
+  to milestones 06–09.
+
+### Earlier verification — 2026-10-10
 
 - Acceptance suites for milestones 01–06 were written before implementing milestone 03. Milestones 05–06 have declaration-only adapter contracts: their full assertion bodies compile, but their runnable tests remain pending until production-backed adapters exist.
 - Milestone 04 is implemented: `ConnectionSession`, `EchoSession`, `SingleSessionDriver`, `core::SteadyClock`/`core::SystemClock`, and `tests/milestone04_adapter.hpp` backed by production code. After fixing manual-clock duration conversion, Windows GCC 16.2 Release passes all eight tests for milestones 01–04 in strict mode, with zero failures and zero skips.
@@ -118,11 +153,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Define request/response, header-field, method, status, and HTTP-version types independent of networking.
-- [ ] Store repeated fields without indiscriminately joining them. Add case-insensitive field-name lookup.
-- [ ] Implement validated status-line/header serialization, CRLF termination, and fixed-length output.
-- [ ] As a temporary demonstration, accumulate a bounded header block and reply with a constant text body, `Date`, `Content-Type`, `Content-Length`, and `Connection: close`.
-- [ ] Reject invalid header names/values in generated output. Replace the temporary header detection with the real parser in milestone 06.
+- [x] Define request/response, header-field, method, status, and HTTP-version types independent of networking.
+- [x] Store repeated fields without indiscriminately joining them. Add case-insensitive field-name lookup.
+- [x] Implement validated status-line/header serialization, CRLF termination, and fixed-length output.
+- [x] As a temporary demonstration, accumulate a bounded header block and reply with a constant text body, `Date`, `Content-Type`, `Content-Length`, and `Connection: close`.
+- [x] Reject invalid header names/values in generated output. Replace the temporary header detection with the real parser in milestone 06.
 
 **Completion checks:** A local HTTP client displays the fixed response, its length matches the actual bytes, and forced partial writes still produce the same message. This milestone is a demonstration, not the finished request parser.
 

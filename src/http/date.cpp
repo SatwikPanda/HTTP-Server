@@ -2,57 +2,31 @@
 
 #include <array>
 #include <cstdio>
-#include <ctime>
 
 namespace http {
 
-namespace {
-
-constexpr const char* kDayNames[] = {
-    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-};
-
-constexpr const char* kMonthNames[] = {
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-} // namespace
-
 std::string format_http_date(std::chrono::system_clock::time_point tp) {
-    std::time_t time_val = std::chrono::system_clock::to_time_t(tp);
-    std::tm tm_val{};
-
-#ifdef _WIN32
-    gmtime_s(&tm_val, &time_val);
-#else
-    gmtime_r(&time_val, &tm_val);
-#endif
-
-    const char* day_name = (tm_val.tm_wday >= 0 && tm_val.tm_wday < 7)
-        ? kDayNames[tm_val.tm_wday]
-        : "Sun";
-
-    const char* month_name = (tm_val.tm_mon >= 0 && tm_val.tm_mon < 12)
-        ? kMonthNames[tm_val.tm_mon]
-        : "Jan";
-
-    // Format: "Sun, 06 Nov 1994 08:49:37 GMT" (exactly 29 chars)
-    std::array<char, 32> buffer{};
-    std::snprintf(
-        buffer.data(),
-        buffer.size(),
-        "%s, %02d %s %04d %02d:%02d:%02d GMT",
-        day_name,
-        tm_val.tm_mday,
-        month_name,
-        tm_val.tm_year + 1900,
-        tm_val.tm_hour,
-        tm_val.tm_min,
-        tm_val.tm_sec
-    );
-
-    return std::string(buffer.data());
+    using namespace std::chrono;
+    // Calendar arithmetic avoids locale, shared tm storage, and OS-specific APIs.
+    const auto day = floor<days>(tp);
+    if (day < sys_days{year{0}/January/1} || day >= sys_days{year{10000}/January/1}) return {};
+    const year_month_day date{day};
+    const int year_value = static_cast<int>(date.year());
+    if (!date.ok() || year_value < 0 || year_value > 9999) return {};
+    const hh_mm_ss time{floor<seconds>(tp).time_since_epoch() -
+                       duration_cast<seconds>(day.time_since_epoch())};
+    constexpr const char* day_names[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    constexpr const char* month_names[] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    std::array<char, 30> buffer{};
+    const int written = std::snprintf(buffer.data(), buffer.size(),
+        "%s, %02u %s %04d %02d:%02d:%02d GMT",
+        day_names[weekday{day}.c_encoding()], static_cast<unsigned>(date.day()),
+        month_names[static_cast<unsigned>(date.month()) - 1], year_value,
+        static_cast<int>(time.hours().count()), static_cast<int>(time.minutes().count()),
+        static_cast<int>(time.seconds().count()));
+    return written == 29 ? std::string(buffer.data(), 29) : std::string{};
 }
 
 } // namespace http

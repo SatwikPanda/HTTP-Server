@@ -23,7 +23,7 @@ std::string_view default_reason_phrase(int code) noexcept {
 
         case 400: return "Bad Request";
         case 403: return "Forbidden";
-        case 404: return "NotFound";
+        case 404: return "Not Found";
         case 405: return "Method Not Allowed";
         case 408: return "Request Timeout";
         case 409: return "Conflict";
@@ -44,7 +44,7 @@ std::string_view default_reason_phrase(int code) noexcept {
 }
 
 bool is_valid_status_code(int code) noexcept {
-    return code >= 100 && code <= 999;
+    return code >= 100 && code <= 599;
 }
 
 bool is_valid_reason_phrase(std::string_view phrase) noexcept {

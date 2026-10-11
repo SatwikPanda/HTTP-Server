@@ -12,7 +12,7 @@ namespace http {
 
 struct Request {
     Method method{Method::GET};
-    std::string raw_method{"GET"};
+    std::string raw_method; // Empty means use Method; parsers retain the original token here.
     std::string target{"/"};
     HttpVersion version{1, 1};
     HeaderMap headers;

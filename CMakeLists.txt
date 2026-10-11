@@ -68,8 +68,6 @@ target_include_directories(http PUBLIC
 )
 target_compile_features(http PUBLIC cxx_std_20)
 set_target_properties(http PROPERTIES CXX_EXTENSIONS OFF)
-target_link_libraries(http PUBLIC core net)
-
 find_package(Threads REQUIRED)
 target_link_libraries(net PUBLIC Threads::Threads)
 
@@ -85,7 +83,9 @@ target_compile_features(concurrency PUBLIC cxx_std_20)
 set_target_properties(concurrency PROPERTIES CXX_EXTENSIONS OFF)
 target_link_libraries(concurrency PUBLIC net core Threads::Threads)
 
-foreach(target IN ITEMS core net concurrency)
+target_link_libraries(http PUBLIC core net concurrency)
+
+foreach(target IN ITEMS core net concurrency http)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4)
     else()
@@ -97,7 +97,7 @@ endforeach()
 add_executable(httpserver
     src/main.cpp
 )
-target_link_libraries(httpserver PRIVATE concurrency net Threads::Threads)
+target_link_libraries(httpserver PRIVATE http concurrency net Threads::Threads)
 
 include(CTest)
 option(REQUIRE_ALL_MILESTONES "Fail rather than skip unimplemented milestone acceptance suites" OFF)
@@ -128,6 +128,11 @@ if(BUILD_TESTING)
             target_compile_definitions(milestone${milestone}_test PRIVATE MILESTONE${milestone}_AVAILABLE=1)
         endif()
     endforeach()
+    target_link_libraries(milestone05_test PRIVATE http)
+    foreach(name IN ITEMS http_serialization_test http_session_test http_integration_test)
+        add_milestone_test(${name} 05)
+        target_link_libraries(${name} PRIVATE http)
+    endforeach()
     foreach(milestone IN ITEMS 04 05 06)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.
@@ -136,6 +141,7 @@ if(BUILD_TESTING)
         target_include_directories(milestone${milestone}_contract PRIVATE tests/contracts)
         target_compile_definitions(milestone${milestone}_contract PRIVATE MILESTONE${milestone}_AVAILABLE=1)
     endforeach()
+    target_link_libraries(milestone05_contract PRIVATE http)
     add_test(NAME cli_validation_test COMMAND ${CMAKE_COMMAND}
         "-DSERVER=$<TARGET_FILE:httpserver>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_validation_test.cmake")
     set_tests_properties(cli_validation_test PROPERTIES TIMEOUT 10 LABELS "milestone03")

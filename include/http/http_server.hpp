@@ -3,9 +3,14 @@
 #include "core/result.hpp"
 #include "http/http_session.hpp"
 #include "net/endpoint.hpp"
+#include "net/poller.hpp"
 #include "net/socket.hpp"
 
 #include <atomic>
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <optional>
 
 namespace http {
 
@@ -14,6 +19,9 @@ struct HttpServerConfig {
     HttpSessionConfig session_config{};
 };
 
+// One driver owns socket operations. stop() and is_running() are thread-safe.
+// Stop and join that driver before destruction; NetworkRuntime must outlive this
+// server. Read local_endpoint() after start(), before another start() changes it.
 class HttpServer {
 public:
     explicit HttpServer(HttpServerConfig config = {});
@@ -37,9 +45,20 @@ public:
     }
 
 private:
+    [[nodiscard]] core::Result<void> start_locked();
+    [[nodiscard]] core::Result<void> enter_driver(bool auto_start = false);
+    [[nodiscard]] core::Result<void> accept_one();
+    void leave_driver() noexcept;
+    void close_listener() noexcept;
     HttpServerConfig config_;
     net::Socket listener_;
+    std::unique_ptr<net::Poller> poller_;
+    std::optional<net::RegistrationToken> listener_token_;
+    std::mutex lifecycle_mutex_;
+    bool driving_{false};
+    bool stop_requested_{false};
     std::atomic<bool> running_{false};
+    std::uint64_t connection_generation_{0};
     net::Endpoint actual_endpoint_;
 };
 
