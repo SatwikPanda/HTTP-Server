@@ -268,9 +268,13 @@ void test_exact_limits_and_fragments() {
     stats = http::run_http_session(truncated, config);
     CHECK(stats.error.category == core::ErrorCategory::eof);
     CHECK(!stats.response_sent && truncated.output_data.empty());
+    // Milestone 06: a bare LF is a syntax error, answered with 400 before closing.
     ControlledStreamChannel bare_lf;
     bare_lf.set_input("GET / HTTP/1.1\nHost: localhost\n\n");
-    CHECK(!http::run_http_session(bare_lf, config).response_sent);
+    stats = http::run_http_session(bare_lf, config);
+    CHECK(stats.response_sent && stats.response_status == 400);
+    CHECK(stats.parse_error == http::ParseError::bare_line_ending);
+    CHECK(bare_lf.output_string().starts_with("HTTP/1.1 400 Bad Request\r\n"));
 }
 
 void test_invalid_progress_and_io_errors() {

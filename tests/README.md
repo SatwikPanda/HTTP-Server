@@ -11,30 +11,19 @@ ctest --test-dir build/milestones -L 'milestone0[12]' --output-on-failure
 ctest --test-dir build/milestones -L milestone03 --output-on-failure
 ctest --test-dir build/milestones --output-on-failure
 cmake -S . -B build/milestones -DREQUIRE_ALL_MILESTONES=ON
-ctest --test-dir build/milestones -L 'milestone0[12345]' --output-on-failure
+ctest --test-dir build/milestones -L 'milestone0[123456]' --output-on-failure
 ```
 
-Milestones 04–05 have production-backed adapters and run their acceptance checks.
-Milestone 06 is **pending**, never complete or passing. It returns CTest's
-skip code 77 until a production-backed adapter exists. To enforce completion
-(turn a pending suite into a failure), configure with
-`-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each milestone.
-Do not add a mock implementation solely to make acceptance assertions pass.
+Milestones 04–06 have production-backed adapters and run their acceptance checks.
+A suite without its adapter returns CTest's skip code 77, which is pending,
+never passing. To enforce completion (turn a pending suite into a failure),
+configure with `-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each
+milestone. Do not add a mock implementation solely to make acceptance assertions
+pass. Each adapter must call production code; only clocks and I/O may be faked.
 
-The remaining future milestones have no stable production interfaces yet. Their
-acceptance test bodies are fully specified against small adapters, to avoid
-prematurely implementing those milestones. Add `tests/milestone06_adapter.hpp`
-with the following contract when implementing
-the corresponding feature; the test body
-automatically becomes active at the next build. Link any new production targets
-to the corresponding CMake test executable. Each adapter must call production
-code; only clocks and I/O may be faked.
-
-Every build compiles the milestone 04–06 assertion bodies as object targets.
-Milestones 04–05 use their production adapters; milestone 06 uses the
-declaration-only headers in `tests/contracts/`. These objects are never counted
-as passing CTests. The future adapters provide production-backed
-definitions for those contracts (or equivalent wrappers) when available.
+Every build also compiles the milestone 04–06 assertion bodies as object targets
+against the declaration-only headers in `tests/contracts/`. These objects check
+that the contracts still compile and are never counted as passing CTests.
 
 - **01:** independent accepted socket lifetime, runtime moves, occupied ports,
   self/move assignment, invalid operations, handle reuse, move-only results.
@@ -66,14 +55,40 @@ definitions for those contracts (or equivalent wrappers) when available.
   `rejects_header_count_limit(limit)`, `rejects_connection_input_limit(limit)`,
   and `maps_{syntax,version,header_limit}_to_status(status)`. Each helper feeds
   actual malformed/oversized input to the production parser or session.
+  `tests/milestone06_adapter.hpp` wraps `http::RequestParser` and
+  `http::HttpSession`; each limit helper also checks that input exactly at the
+  limit is accepted, so the rejection is caused by that limit.
 
 Only local loopback networking is used. IPv6 is exercised when supported. DNS
 tests use numeric literals and localhost; no external origin is required.
 
+## Request parsing (milestone 06)
+
+`http::RequestParser` consumes a request head incrementally and stops at its
+end, leaving later bytes unconsumed. It requires CRLF line endings and exactly
+one space between request-line parts, accepts HTTP/1.0 and HTTP/1.1 (other
+well-formed versions get 505), validates field names and values, keeps repeated
+fields, rejects obsolete line folding, and requires exactly one valid `Host` for
+HTTP/1.1. Host values are limited to IP literals, IPv4 addresses, and DNS-style
+names with an optional port, so `a,b` is rejected. Unknown method tokens are
+kept for the application to reject in milestone 07. Empty lines before the
+request line are ignored but count toward the header limit.
+
+Limits are checked as each byte arrives: request line (8192), target (8000,
+414 URI Too Long), whole head (8192, 431), field count (100, 431), and the
+session's connection input buffer (16 KiB: the head parsed so far plus bytes
+received after it, 431). Other rejections are 400. The session answers a
+rejected head and closes, because the stream can no longer be framed.
+
+`http_parser_test` adds every three-way split of a request, pipelined
+boundaries at every read size, each malformed case mapped to its specific
+error and status, early rejection of garbage and overlong lines, exact limit
+boundaries, and session-level preservation of bytes after the head.
+
 ## Fixed-response HTTP demo
 
-The executable now serves `Hello, World!\r\n` as a fixed HTTP/1.1 response and
-closes after one header block. Request parsing, HEAD semantics, body framing,
+The executable serves `Hello, World!\r\n` as a fixed HTTP/1.1 response to any
+request head the parser accepts, then closes. HEAD semantics, body framing,
 and keep-alive remain future milestones. `--buffer-size` now limits the incoming
 header block (4–16777216 bytes; default 4096); the library defaults to 8192 header
 bytes and 1 MiB total response bytes. Both default I/O progress timeouts are 5 s.
@@ -98,6 +113,25 @@ would-block, zero/oversized progress, native errors, read/write deadlines,
 manual-clock drain bounds, and wall-clock jumps. Real nonblocking loopback tests
 exercise IPv4/IPv6, half-close, sequential clients, idle clients, occupied ports,
 stop during accept/read waits, and restart. Unsupported IPv6 is reported.
+
+## Verified status (2026-10-12)
+
+Milestone 06 is implemented. On Linux (GCC 13.3 Release, strict mode), all 14
+tests passed in the strict milestone 01–06 gate, with zero failures and zero
+skips. The same suites passed under Clang 18 Debug and under GCC
+AddressSanitizer/UndefinedBehaviorSanitizer. A MinGW-w64 GCC 13 Windows build
+compiled every target, and its HTTP and milestone 05–06 tests passed under
+Wine, which is not real Windows. Six deliberate parser faults (Host not
+required, bytes after the head dropped, bare LF accepted, an off-by-one head
+limit, folding accepted, parsing past a complete head) each failed at least
+one test. IPv6 was unavailable on the Linux host, so the IPv6 integration
+cases did not exercise IPv6 there. Windows and macOS acceptance of milestone 06
+is pending a CI run; the CI gate now includes milestone 06.
+
+Known limitation, not new in milestone 06: when a session rejects a request
+before reading all of it, it closes with unread input, and the peer's TCP stack
+may then discard the error response on reset. A bounded lingering close belongs
+with the keep-alive and shutdown milestones.
 
 ## Verified status (2026-10-11)
 
