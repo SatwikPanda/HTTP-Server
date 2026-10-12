@@ -3,6 +3,7 @@
 #include "concurrency/session.hpp"
 #include "core/clock.hpp"
 #include "core/result.hpp"
+#include "http/request_parser.hpp"
 #include "http/response.hpp"
 #include "net/socket.hpp"
 #include "net/stream.hpp"
@@ -11,11 +12,19 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace http {
 
 struct HttpSessionConfig {
+    // Whole request head: request line, field lines, and the blank line.
     std::size_t max_header_bytes{8192};
+    std::size_t max_request_line_bytes{8192};
+    std::size_t max_target_bytes{8000};
+    std::size_t max_header_count{100};
+    // Request input held per connection at once: the head parsed so far plus any
+    // bytes received after it. A head that cannot fit is rejected with 431.
+    std::size_t max_input_bytes{16 * 1024};
     std::size_t max_output_bytes{1024 * 1024};
     std::chrono::milliseconds wait_retry_delay{1};
     std::chrono::milliseconds retry_timeout{5000};
@@ -35,20 +44,26 @@ struct HttpSessionStats {
     std::size_t peak_input_bytes{};
     std::size_t peak_output_bytes{};
     core::Error error{};
+    ParseError parse_error{ParseError::none};
+    int response_status{}; // 0 until a response is prepared
     bool request_received{};
     bool response_sent{};
     bool header_limit_exceeded{};
+    bool input_limit_exceeded{};
     bool completed_cleanly{};
 };
 
 [[nodiscard]] core::Result<void> validate_http_session_config(const HttpSessionConfig& config);
+[[nodiscard]] RequestLimits request_limits(const HttpSessionConfig& config) noexcept;
 [[nodiscard]] core::Result<Response> make_fixed_response(
     const HttpSessionConfig& config = {},
     const core::SystemClock& clock = core::real_system_clock()
 );
 
-// Temporary bounded CRLF header detection, replaced by the milestone 06 parser.
-// Serves one response then closes. Clocks are borrowed and must outlive the session.
+// Parses one request head incrementally and answers it with the fixed demo
+// response, or with 400/414/431/505 when the head is rejected. Either way it
+// closes afterwards; keep-alive belongs to milestone 09. Bytes received after
+// the head stay buffered. Clocks are borrowed and must outlive the session.
 class HttpSession final : public concurrency::ConnectionSession {
 public:
     explicit HttpSession(
@@ -62,7 +77,7 @@ public:
     [[nodiscard]] concurrency::Action on_event(const concurrency::Event& event) override;
     [[nodiscard]] concurrency::SessionState state() const noexcept override { return state_; }
     [[nodiscard]] bool is_closed() const noexcept override { return state_ == concurrency::SessionState::closed; }
-    [[nodiscard]] std::size_t input_limit() const noexcept override { return config_.max_header_bytes; }
+    [[nodiscard]] std::size_t input_limit() const noexcept override { return config_.max_input_bytes; }
     [[nodiscard]] std::size_t output_limit() const noexcept override { return config_.max_output_bytes; }
     [[nodiscard]] std::size_t peak_input_bytes() const noexcept override { return stats_.peak_input_bytes; }
     [[nodiscard]] std::size_t peak_output_bytes() const noexcept override { return stats_.peak_output_bytes; }
@@ -71,11 +86,16 @@ public:
     [[nodiscard]] core::SteadyTimePoint last_progress_time() const noexcept override { return last_progress_; }
     [[nodiscard]] const core::Error& error() const noexcept override { return stats_.error; }
     [[nodiscard]] const HttpSessionStats& stats() const noexcept { return stats_; }
+    [[nodiscard]] const RequestParser& parser() const noexcept { return parser_; }
+
+    // Bytes received after the parsed head, kept for the next request.
+    [[nodiscard]] std::string_view unconsumed_input() const noexcept { return input_; }
 
 private:
     [[nodiscard]] concurrency::Action next_action();
     [[nodiscard]] concurrency::Action close(core::Error error = {});
-    [[nodiscard]] concurrency::Action prepare_response(bool oversized);
+    [[nodiscard]] concurrency::Action prepare_response(ParseError rejected);
+    [[nodiscard]] std::size_t read_capacity() const noexcept;
 
     HttpSessionConfig config_;
     core::ConnectionId id_;
@@ -85,6 +105,7 @@ private:
     core::SteadyTimePoint drain_deadline_{};
     concurrency::SessionState state_{concurrency::SessionState::initial};
     HttpSessionStats stats_;
+    RequestParser parser_;
     std::string input_;
     std::string output_;
     std::size_t output_offset_{};

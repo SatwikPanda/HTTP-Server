@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <span>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -38,10 +39,17 @@ HttpSessionStats session_stats(const HttpSession& session, const concurrency::Dr
 
 } // namespace
 
+RequestLimits request_limits(const HttpSessionConfig& config) noexcept {
+    return {config.max_request_line_bytes, config.max_target_bytes,
+            config.max_header_bytes, config.max_header_count};
+}
+
 core::Result<void> validate_http_session_config(const HttpSessionConfig& config) {
     constexpr std::size_t hard_limit = 16 * 1024 * 1024;
     const int status = static_cast<int>(config.response_status);
     if (config.max_header_bytes < 4 || config.max_header_bytes > hard_limit ||
+        config.max_input_bytes < 4 || config.max_input_bytes > hard_limit ||
+        !validate_request_limits(request_limits(config)) ||
         config.max_output_bytes == 0 || config.max_output_bytes > hard_limit ||
         config.response_body.size() > config.max_output_bytes ||
         config.wait_retry_delay <= std::chrono::milliseconds::zero() ||
@@ -71,7 +79,8 @@ core::Result<Response> make_fixed_response(const HttpSessionConfig& config, cons
 HttpSession::HttpSession(HttpSessionConfig config, core::ConnectionId id,
                          const core::SteadyClock& steady_clock, const core::SystemClock& wall_clock)
     : config_(std::move(config)), id_(id), steady_clock_(&steady_clock),
-      wall_clock_(&wall_clock), last_progress_(steady_clock.now()) {
+      wall_clock_(&wall_clock), last_progress_(steady_clock.now()),
+      parser_(request_limits(config_)) {
     auto valid = validate_http_session_config(config_);
     if (!valid) {
         stats_.error = valid.error();
@@ -102,19 +111,34 @@ concurrency::Action HttpSession::next_action() {
                                                                output_.size() - output_offset_))};
     }
     state_ = concurrency::SessionState::reading;
-    return concurrency::ReadAction{std::min<std::size_t>(512, config_.max_header_bytes - input_.size())};
+    return concurrency::ReadAction{read_capacity()};
+}
+
+// Never read past either bound: the parser holds every head byte it consumed,
+// and input_ holds whatever arrived after the head.
+std::size_t HttpSession::read_capacity() const noexcept {
+    const std::size_t held = parser_.head_bytes() + input_.size();
+    const std::size_t header_room = config_.max_header_bytes - std::min(config_.max_header_bytes, parser_.head_bytes());
+    const std::size_t input_room = config_.max_input_bytes - std::min(config_.max_input_bytes, held);
+    return std::min({std::size_t{512}, header_room, input_room});
 }
 
 concurrency::Action HttpSession::initial_action() {
     return next_action();
 }
 
-concurrency::Action HttpSession::prepare_response(bool oversized) {
+concurrency::Action HttpSession::prepare_response(ParseError rejected) {
     auto response_config = config_;
-    if (oversized) {
-        stats_.header_limit_exceeded = true;
-        response_config.response_status = StatusCode::HeaderFieldsTooLarge;
-        response_config.response_body = "431 Request Header Fields Too Large\r\n";
+    if (rejected != ParseError::none) {
+        stats_.parse_error = rejected;
+        if ((rejected == ParseError::header_too_large || rejected == ParseError::too_many_headers) &&
+            !stats_.input_limit_exceeded) {
+            stats_.header_limit_exceeded = true;
+        }
+        const StatusCode status = status_for(rejected);
+        response_config.response_status = status;
+        response_config.response_body = std::to_string(static_cast<int>(status)) + " " +
+                                         std::string(default_reason_phrase(status)) + "\r\n";
         response_config.content_type = "text/plain; charset=utf-8";
     }
     auto response = make_fixed_response(response_config, *wall_clock_);
@@ -125,7 +149,7 @@ concurrency::Action HttpSession::prepare_response(bool oversized) {
     if (wire.value().size() > config_.max_output_bytes) return close(invalid_config());
     output_ = std::move(wire.value());
     stats_.peak_output_bytes = output_.size();
-    input_.clear();
+    stats_.response_status = response.value().status_code;
     output_offset_ = 0;
     writing_ = true;
     waiting_ = false;
@@ -141,25 +165,35 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
         if constexpr (std::is_same_v<T, ReadDataEvent>) {
             auto pending = next_action();
             if (pending.is_close()) return pending;
-            if (writing_ || value.data.empty() ||
-                value.data.size() > std::min<std::size_t>(512, config_.max_header_bytes - input_.size())) {
+            if (writing_ || value.data.empty() || value.data.size() > read_capacity()) {
                 return close(core::make_error(core::ErrorCategory::io_error, "HTTP read", 0, "Invalid read event"));
             }
             waiting_ = false;
             last_progress_ = steady_clock_->now();
-            for (std::byte byte : value.data) {
-                input_.push_back(static_cast<char>(byte));
-                stats_.peak_input_bytes = std::max(stats_.peak_input_bytes, input_.size());
-                if (input_.ends_with("\r\n\r\n")) {
-                    stats_.request_received = true;
-                    return prepare_response(false);
-                }
-                if (input_.size() == config_.max_header_bytes) return prepare_response(true);
+            input_.append(reinterpret_cast<const char*>(value.data.data()), value.data.size());
+            stats_.peak_input_bytes = std::max(stats_.peak_input_bytes, parser_.head_bytes() + input_.size());
+
+            // The parser stops at the end of the head; anything after it stays in
+            // input_ for the next request instead of being dropped.
+            const auto parsed = parser_.consume(input_);
+            input_.erase(0, parsed.consumed);
+            if (parsed.event == ParseEvent::complete) {
+                stats_.request_received = true;
+                return prepare_response(ParseError::none);
+            }
+            if (parsed.event == ParseEvent::error) {
+                // The stream can no longer be framed, so answer and close.
+                return prepare_response(parser_.error());
+            }
+            if (read_capacity() == 0) {
+                // An incomplete head has filled a bound the parser cannot see past.
+                if (parser_.head_bytes() < config_.max_header_bytes) stats_.input_limit_exceeded = true;
+                return prepare_response(ParseError::header_too_large);
             }
             return next_action();
         } else if constexpr (std::is_same_v<T, ReadEofEvent>) {
             if (writing_) return next_action();
-            if (input_.empty()) return close();
+            if (parser_.head_bytes() == 0) return close();
             return close(core::make_error(core::ErrorCategory::eof, "HTTP header", 0, "Incomplete header block"));
         } else if constexpr (std::is_same_v<T, WriteCompleteEvent>) {
             auto pending = next_action();

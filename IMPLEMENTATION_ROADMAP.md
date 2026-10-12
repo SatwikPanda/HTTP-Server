@@ -18,6 +18,18 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Verification record — 2026-10-12
+
+- Milestone 06 is implemented: `http::RequestParser` (incremental, bounded,
+  preserves bytes after the head) and shared `http::RequestLimits`, wired into
+  `HttpSession`, which answers rejected heads with 400/414/431/505 and closes.
+  `tests/milestone06_adapter.hpp` is production-backed and `http_parser_test`
+  adds split, pipeline, error-mapping, and limit-boundary checks.
+- Linux GCC 13.3 Release passes all 14 tests in the strict milestone 01–06 gate
+  with zero skips; Clang 18 Debug and ASan/UBSan runs also pass. A MinGW-w64
+  Windows build passed its HTTP and milestone 05–06 tests under Wine only.
+  Windows and macOS acceptance is pending CI, which now gates milestone 06.
+
 ## Verification record — 2026-10-11
 
 - Milestone 05 is implemented and its Windows/Linux/macOS acceptance checks pass. The build
@@ -171,11 +183,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Add `consume(bytes)`, consumed-byte counts, parsing states, completion/error events, and `reset()`.
-- [ ] Validate request-line syntax, HTTP version, field names/values, repeated fields, and the HTTP/1.1 `Host` requirement. Reject obsolete folded headers.
-- [ ] Bound request-line/target length, total header bytes, header count, and connection input buffers.
-- [ ] Preserve bytes following the parsed message rather than dropping the beginning of the next request.
-- [ ] Map malformed syntax, unsupported versions, and size limits to the appropriate errors; close when parsing is unsafe to continue.
+- [x] Add `consume(bytes)`, consumed-byte counts, parsing states, completion/error events, and `reset()`.
+- [x] Validate request-line syntax, HTTP version, field names/values, repeated fields, and the HTTP/1.1 `Host` requirement. Reject obsolete folded headers.
+- [x] Bound request-line/target length, total header bytes, header count, and connection input buffers.
+- [x] Preserve bytes following the parsed message rather than dropping the beginning of the next request.
+- [x] Map malformed syntax, unsupported versions, and size limits to the appropriate errors; close when parsing is unsafe to continue.
 
 **Completion checks:** Representative bodyless requests parse at every byte split position. Combined requests preserve their boundaries. Malformed Host fields, header syntax, overlong targets, and header limits produce deterministic failures.
 

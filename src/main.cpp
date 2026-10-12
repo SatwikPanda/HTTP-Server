@@ -2,6 +2,7 @@
 #include "net/runtime.hpp"
 
 #include <csignal>
+#include <algorithm>
 #include <atomic>
 #include <charconv>
 #include <chrono>
@@ -141,6 +142,9 @@ int main(int argc, char* argv[]) {
     http::HttpServerConfig config;
     config.endpoint = ep_res.value();
     config.session_config.max_header_bytes = buffer_size;
+    // The connection buffer holds the head being parsed, so it must not be the
+    // tighter bound when a larger header limit is requested.
+    config.session_config.max_input_bytes = std::max(config.session_config.max_input_bytes, buffer_size);
 
     // 3. Initialize the fixed-response HTTP demo
     http::HttpServer server(config);
@@ -165,7 +169,7 @@ int main(int argc, char* argv[]) {
     });
 
     std::cout << "========================================\n"
-              << " Fixed Response HTTP Demo (Milestone 05)\n"
+              << " Fixed Response HTTP Demo (Milestone 06)\n"
               << "========================================\n"
               << "Listening on       : " << server.local_endpoint().to_string() << "\n"
               << "Header byte limit  : " << config.session_config.max_header_bytes << " bytes\n"

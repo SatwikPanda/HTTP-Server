@@ -52,7 +52,7 @@ else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
-# HTTP library (Method, Status, Version, Header, Date, Serializer, Session, Server)
+# HTTP library (Method, Status, Version, Header, Date, Serializer, RequestParser, Session, Server)
 add_library(http STATIC
     src/http/method.cpp
     src/http/status.cpp
@@ -60,6 +60,8 @@ add_library(http STATIC
     src/http/header.cpp
     src/http/date.cpp
     src/http/serializer.cpp
+    src/http/limits.cpp
+    src/http/request_parser.cpp
     src/http/http_session.cpp
     src/http/http_server.cpp
 )
@@ -129,10 +131,13 @@ if(BUILD_TESTING)
         endif()
     endforeach()
     target_link_libraries(milestone05_test PRIVATE http)
+    target_link_libraries(milestone06_test PRIVATE http)
     foreach(name IN ITEMS http_serialization_test http_session_test http_integration_test)
         add_milestone_test(${name} 05)
         target_link_libraries(${name} PRIVATE http)
     endforeach()
+    add_milestone_test(http_parser_test 06)
+    target_link_libraries(http_parser_test PRIVATE http)
     foreach(milestone IN ITEMS 04 05 06)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.
