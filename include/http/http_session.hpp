@@ -28,6 +28,11 @@ struct HttpSessionConfig {
     std::size_t max_output_bytes{1024 * 1024};
     std::chrono::milliseconds wait_retry_delay{1};
     std::chrono::milliseconds retry_timeout{5000};
+    std::chrono::milliseconds idle_timeout{0};
+    std::chrono::milliseconds request_progress_timeout{0};
+    std::chrono::milliseconds output_progress_timeout{0};
+    std::size_t max_requests_per_connection{100};
+    bool keep_alive{false};
     std::string response_body{"Hello, World!\r\n"};
     std::string content_type{"text/plain; charset=utf-8"};
     StatusCode response_status{StatusCode::OK};
@@ -51,6 +56,7 @@ struct HttpSessionStats {
     bool header_limit_exceeded{};
     bool input_limit_exceeded{};
     bool completed_cleanly{};
+    std::size_t requests_served{};
 };
 
 [[nodiscard]] core::Result<void> validate_http_session_config(const HttpSessionConfig& config);
@@ -60,10 +66,10 @@ struct HttpSessionStats {
     const core::SystemClock& clock = core::real_system_clock()
 );
 
-// Parses one request and answers bodyless GET/HEAD with the fixed demo response.
+// Parses requests and answers bodyless GET/HEAD with the fixed demo response.
+// Supports keep-alive and ordered pipelined requests when keep_alive is configured.
 // Rejects malformed framing, nonempty GET/HEAD, Expect, disabled methods, and
-// Upgrade, then closes. Bytes received after the request stay buffered;
-// keep-alive belongs to milestone 09. Clocks must outlive the session.
+// Upgrade, then closes. Clocks must outlive the session.
 class HttpSession final : public concurrency::ConnectionSession {
 public:
     explicit HttpSession(
@@ -82,7 +88,7 @@ public:
     [[nodiscard]] std::size_t peak_input_bytes() const noexcept override { return stats_.peak_input_bytes; }
     [[nodiscard]] std::size_t peak_output_bytes() const noexcept override { return stats_.peak_output_bytes; }
     [[nodiscard]] core::ConnectionId connection_id() const noexcept override { return id_; }
-    [[nodiscard]] std::chrono::milliseconds idle_timeout() const noexcept override { return config_.retry_timeout; }
+    [[nodiscard]] std::chrono::milliseconds idle_timeout() const noexcept override;
     [[nodiscard]] core::SteadyTimePoint last_progress_time() const noexcept override { return last_progress_; }
     [[nodiscard]] const core::Error& error() const noexcept override { return stats_.error; }
     [[nodiscard]] const HttpSessionStats& stats() const noexcept { return stats_; }
@@ -95,7 +101,12 @@ private:
     [[nodiscard]] concurrency::Action next_action();
     [[nodiscard]] concurrency::Action close(core::Error error = {});
     [[nodiscard]] concurrency::Action prepare_response(ParseError rejected);
+    [[nodiscard]] concurrency::Action process_parsed_input();
     [[nodiscard]] std::size_t read_capacity() const noexcept;
+    [[nodiscard]] bool should_keep_alive() const noexcept;
+    [[nodiscard]] std::chrono::milliseconds effective_idle_timeout() const noexcept;
+    [[nodiscard]] std::chrono::milliseconds effective_request_timeout() const noexcept;
+    [[nodiscard]] std::chrono::milliseconds effective_output_timeout() const noexcept;
 
     HttpSessionConfig config_;
     core::ConnectionId id_;
@@ -109,9 +120,12 @@ private:
     std::string input_;
     std::string output_;
     std::size_t output_offset_{};
+    std::size_t requests_served_{};
     bool writing_{};
     bool waiting_{};
     bool stopping_{};
+    bool close_demanded_{};
+    bool peer_eof_{};
 };
 
 [[nodiscard]] HttpSessionStats run_http_session(
