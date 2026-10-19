@@ -235,7 +235,7 @@ void test_fixed_length_and_limits() {
     CHECK(!http::serialize_response(response));
     response.headers.remove("Content-Length");
     response.headers.add("Transfer-Encoding", "chunked");
-    CHECK(!http::serialize_response(response));
+    CHECK(http::serialize_response(response));
     response.headers.set("Content-Length", "6");
     CHECK(!http::serialize_response(response));
 

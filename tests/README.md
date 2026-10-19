@@ -1,6 +1,6 @@
 # Milestone acceptance tests
 
-All six suites were written before milestone 03 implementation. `CHECK` remains
+The milestone 01–06 suites were written before milestone 03 implementation. `CHECK` remains
 active in Release builds; the original regression tests are compiled with
 `NDEBUG` undefined. Every CTest executable has a timeout so a deadlock fails.
 
@@ -11,10 +11,11 @@ ctest --test-dir build/milestones -L 'milestone0[12]' --output-on-failure
 ctest --test-dir build/milestones -L milestone03 --output-on-failure
 ctest --test-dir build/milestones --output-on-failure
 cmake -S . -B build/milestones -DREQUIRE_ALL_MILESTONES=ON
-ctest --test-dir build/milestones -L 'milestone0[123456]' --output-on-failure
+ctest --test-dir build/milestones -L 'milestone0[12345678]' --output-on-failure
 ```
 
 Milestones 04–06 have production-backed adapters and run their acceptance checks.
+Milestones 07–08 call production HTTP code directly and need no adapter.
 A suite without its adapter returns CTest's skip code 77, which is pending,
 never passing. To enforce completion (turn a pending suite into a failure),
 configure with `-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each
@@ -64,20 +65,20 @@ tests use numeric literals and localhost; no external origin is required.
 
 ## Request parsing (milestone 06)
 
-`http::RequestParser` consumes a request head incrementally and stops at its
-end, leaving later bytes unconsumed. It requires CRLF line endings and exactly
+`http::RequestParser` consumes requests incrementally and leaves later bytes
+unconsumed. Its head parsing requires CRLF line endings and exactly
 one space between request-line parts, accepts HTTP/1.0 and HTTP/1.1 (other
 well-formed versions get 505), validates field names and values, keeps repeated
 fields, rejects obsolete line folding, and requires exactly one valid `Host` for
 HTTP/1.1. Host values are limited to IP literals, IPv4 addresses, and DNS-style
 names with an optional port, so `a,b` is rejected. Unknown method tokens are
-kept for the application to reject in milestone 07. Empty lines before the
+kept for the application to reject. Empty lines before the
 request line are ignored but count toward the header limit.
 
 Limits are checked as each byte arrives: request line (8192), target (8000,
 414 URI Too Long), whole head (8192, 431), field count (100, 431), and the
-session's connection input buffer (16 KiB: the head parsed so far plus bytes
-received after it, 431). Other rejections are 400. The session answers a
+session's connection input buffer (16 KiB of retained head/body/extensions/trailers
+plus unconsumed input, 431). Other head rejections are 400. The session answers a
 rejected head and closes, because the stream can no longer be framed.
 
 `http_parser_test` adds every three-way split of a request, pipelined
@@ -85,11 +86,70 @@ boundaries at every read size, each malformed case mapped to its specific
 error and status, early rejection of garbage and overlong lines, exact limit
 boundaries, and session-level preservation of bytes after the head.
 
+## Request framing (milestone 07)
+
+The parser accepts unframed, fixed-length, and chunked request bodies, stores
+decoded bytes separately from trailers, and exposes `finish_on_eof()` to reject
+truncated messages. Identical repeated/list Content-Length values are accepted;
+conflicting, empty, malformed, or overflowing values are rejected. TE plus CL,
+repeated chunked codings, unsupported transfer codings, and HTTP/1.0 TE fail.
+The shared field parser rejects folding and invalid names/values in both heads
+and trailers. Routing, framing, authentication, response-control, and
+Connection-nominated fields are prohibited in trailers.
+
+Defaults bound decoded bodies to 10 MiB, each complete chunk-size line to 8192
+bytes, extensions (including separators/whitespace) to 1024 bytes, and trailers
+to 4096 bytes/32 fields. Extensions validate token/quoted-string syntax. Chunk
+sizes and cumulative body sizes are checked without overflowing. EOF preserves
+an earlier error until reset.
+
+`HttpSession` rejects nonempty GET/HEAD bodies and closes. Unsupported Expect
+receives 417 as soon as the head is known, including when the client is waiting
+to send a body. Disabled methods receive 405 with `Allow: GET, HEAD`; unknown
+methods receive 501; CONNECT and Upgrade are rejected. `milestone07_test` covers
+fragments, boundaries, limits, early policy rejection, and bounded trailer input.
+
+## Response parsing and output (milestone 08)
+
+`http::ResponseParser(method, limits)` parses HTTP/1.0 or HTTP/1.1 origin bytes
+without opening an upstream connection. It requires a three-digit 100–599 status
+and a space after the status even for an empty reason phrase. Repeated fields
+retain their order. It accepts fixed-length, chunked, and close-delimited bodies;
+only close-delimited bodies complete at EOF. HEAD/204/304 stop at the end of the
+head, preserving later bytes. Informational responses are stored separately
+until a final response arrives; the header-byte budget covers their combined
+heads and bounds their accumulation. 101 and successful CONNECT responses fail.
+Framing validation is shared with requests. This implementation also rejects
+framing fields on 1xx/204, ambiguous HEAD/304 metadata, and unsupported transfer
+codings. Content-Encoding bytes, including compressed NUL-containing data, stay
+opaque. The shared request-line limit applies to response status lines.
+
+`serialize_response(response)` chooses fixed length or the response's explicit
+chunked TE. The overload taking `Method::HEAD` emits representation metadata
+without a body. The overload taking `BodyFraming` explicitly selects fixed,
+chunked, close-delimited, or valid bodyless output; close-delimited output sets
+`Connection: close` and requires the caller to close the transport. CL and TE
+are mutually exclusive. Bodyless statuses emit no chunks/trailers; 304 may retain
+length/TE metadata. A populated body on a bodyless status is rejected.
+
+`encode_chunk` and `encode_final_chunk` return `core::Result<string>`, bound their
+output, and validate generated trailer fields. An empty `encode_chunk` emits a
+terminator, so use it or `encode_final_chunk`, never both for the same terminator.
+`SerializationLimits::max_body_bytes` bounds emitted data; `max_head_bytes`
+separately bounds the head, chunk framing, and final chunk with trailers.
+
+`milestone08_test` and `http_response_test` cover every two-way split of valid
+and malformed fixtures, bytewise input, representative three-way splits, bytes
+after completion, interim responses, no-body boundaries, EOF at every truncated
+position, numeric overflow, exact limits, trailer injection, and serializer/parser
+round trips for all body modes. These are production-backed fake-origin checks;
+real upstream proxy transactions remain milestones 13–16.
+
 ## Fixed-response HTTP demo
 
-The executable serves `Hello, World!\r\n` as a fixed HTTP/1.1 response to any
-request head the parser accepts, then closes. HEAD semantics, body framing,
-and keep-alive remain future milestones. `--buffer-size` now limits the incoming
+The executable serves `Hello, World!\r\n` for bodyless GET, and the corresponding
+metadata without body bytes for HEAD, then closes. Request framing and method
+restrictions are enforced; keep-alive remains milestone 09. `--buffer-size` limits the incoming
 header block (4–16777216 bytes; default 4096); the library defaults to 8192 header
 bytes and 1 MiB total response bytes. Both default I/O progress timeouts are 5 s.
 
@@ -113,6 +173,17 @@ would-block, zero/oversized progress, native errors, read/write deadlines,
 manual-clock drain bounds, and wall-clock jumps. Real nonblocking loopback tests
 exercise IPv4/IPv6, half-close, sequential clients, idle clients, occupied ports,
 stop during accept/read waits, and restart. Unsupported IPv6 is reported.
+
+## Verified status (2026-10-20)
+
+All targets build on Windows with GCC 16.2 Release (`build/agents`), Clang
+22.1.8 Debug (`build/agents-clang`), and MSVC 19.29 Release (`build/agents-msvc`).
+Each passes all 17 tests in the strict milestone 01–08 gate, with zero failures
+and zero skips. IPv4 and IPv6 loopback ran. The sandbox still blocks local
+socket connections with native error 10013; full gates ran with approved local
+loopback access. Existing MSVC `/DNDEBUG` versus `/UNDEBUG` warnings are expected.
+CI now gates milestone 08; Linux/macOS acceptance of milestones 07–08 and remote
+results for these changes remain pending. No new Linux/macOS run is claimed.
 
 ## Verified status (2026-10-12)
 

@@ -22,8 +22,8 @@ struct HttpSessionConfig {
     std::size_t max_request_line_bytes{8192};
     std::size_t max_target_bytes{8000};
     std::size_t max_header_count{100};
-    // Request input held per connection at once: the head parsed so far plus any
-    // bytes received after it. A head that cannot fit is rejected with 431.
+    // Request bytes held per connection: parsed head/body/extension/trailer bytes
+    // plus unconsumed input. A request that cannot fit is rejected with 431.
     std::size_t max_input_bytes{16 * 1024};
     std::size_t max_output_bytes{1024 * 1024};
     std::chrono::milliseconds wait_retry_delay{1};
@@ -60,10 +60,10 @@ struct HttpSessionStats {
     const core::SystemClock& clock = core::real_system_clock()
 );
 
-// Parses one request head incrementally and answers it with the fixed demo
-// response, or with 400/414/431/505 when the head is rejected. Either way it
-// closes afterwards; keep-alive belongs to milestone 09. Bytes received after
-// the head stay buffered. Clocks are borrowed and must outlive the session.
+// Parses one request and answers bodyless GET/HEAD with the fixed demo response.
+// Rejects malformed framing, nonempty GET/HEAD, Expect, disabled methods, and
+// Upgrade, then closes. Bytes received after the request stay buffered;
+// keep-alive belongs to milestone 09. Clocks must outlive the session.
 class HttpSession final : public concurrency::ConnectionSession {
 public:
     explicit HttpSession(
@@ -88,7 +88,7 @@ public:
     [[nodiscard]] const HttpSessionStats& stats() const noexcept { return stats_; }
     [[nodiscard]] const RequestParser& parser() const noexcept { return parser_; }
 
-    // Bytes received after the parsed head, kept for the next request.
+    // Bytes received after the parsed request, kept for the next request.
     [[nodiscard]] std::string_view unconsumed_input() const noexcept { return input_; }
 
 private:

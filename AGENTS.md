@@ -25,8 +25,9 @@ Read any applicable directory-specific instructions before editing those files.
   CMake target membership, and executed tests establish current behavior. Treat
   proposed signatures and CLI examples as plans rather than implemented APIs.
 - The recorded baseline is milestones 01-05 implemented and verified on
-  Windows, Linux, and macOS. Milestone 06 is implemented and passes locally on
-  Linux; its Windows/macOS CI verification is pending.
+  Windows, Linux, and macOS. Milestones 06–08 are implemented and pass locally
+  on Windows; milestone 06 also has historical local Linux verification.
+  Linux/macOS acceptance of milestones 07–08 and new CI verification are pending.
   Recheck the roadmap and adapters instead of assuming this snapshot remains
   current. The executable currently runs a fixed-response HTTP demo.
 
@@ -134,7 +135,7 @@ Enforce the recorded completed milestone gate with:
 ```powershell
 cmake -S . -B build/agents -DREQUIRE_ALL_MILESTONES=ON
 cmake --build build/agents --config Release
-ctest --test-dir build/agents -C Release -L 'milestone0[123456]' --output-on-failure
+ctest --test-dir build/agents -C Release -L 'milestone0[12345678]' --output-on-failure
 ```
 
 - Extend the strict label selection as additional milestones are verified. To

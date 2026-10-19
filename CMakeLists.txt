@@ -52,7 +52,7 @@ else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
-# HTTP library (Method, Status, Version, Header, Date, Serializer, RequestParser, Session, Server)
+# HTTP library (messages, framing, request/response parsers, serialization, sessions)
 add_library(http STATIC
     src/http/method.cpp
     src/http/status.cpp
@@ -61,7 +61,9 @@ add_library(http STATIC
     src/http/date.cpp
     src/http/serializer.cpp
     src/http/limits.cpp
+    src/http/framing.cpp
     src/http/request_parser.cpp
+    src/http/response_parser.cpp
     src/http/http_session.cpp
     src/http/http_server.cpp
 )
@@ -109,7 +111,7 @@ if(BUILD_TESTING)
     file(GLOB future_adapters CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/milestone0[456]_adapter.hpp")
     function(add_milestone_test name milestone)
         add_executable(${name} tests/${name}.cpp)
-        target_link_libraries(${name} PRIVATE concurrency net Threads::Threads)
+        target_link_libraries(${name} PRIVATE concurrency net http Threads::Threads)
         if(MSVC)
             target_compile_options(${name} PRIVATE /UNDEBUG)
         else()
@@ -138,11 +140,15 @@ if(BUILD_TESTING)
     endforeach()
     add_milestone_test(http_parser_test 06)
     target_link_libraries(http_parser_test PRIVATE http)
+    add_milestone_test(milestone07_test 07)
+    target_link_libraries(milestone07_test PRIVATE http)
+    add_milestone_test(milestone08_test 08)
+    add_milestone_test(http_response_test 08)
     foreach(milestone IN ITEMS 04 05 06)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.
         add_library(milestone${milestone}_contract OBJECT tests/milestone${milestone}_test.cpp)
-        target_link_libraries(milestone${milestone}_contract PRIVATE concurrency net)
+        target_link_libraries(milestone${milestone}_contract PRIVATE concurrency net http)
         target_include_directories(milestone${milestone}_contract PRIVATE tests/contracts)
         target_compile_definitions(milestone${milestone}_contract PRIVATE MILESTONE${milestone}_AVAILABLE=1)
     endforeach()

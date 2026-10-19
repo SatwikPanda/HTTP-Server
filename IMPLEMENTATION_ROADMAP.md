@@ -18,6 +18,30 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Verification record — 2026-10-20
+
+- Resolved the overlapping milestone 06 and incoming milestone 07–08 merge
+  conflicts, retaining the incremental request parser and adding request/response
+  framing to the production HTTP target.
+- Milestones 07–08 are implemented and verified locally on Windows. The response
+  parser handles bounded informational heads, fixed/chunked/close-delimited
+  bodies, premature EOF, and HEAD/204/304 boundaries. Shared framing rejects
+  ambiguous lengths and unsupported transfer codings. Content encoding stays
+  opaque. Serialization supports fixed, chunked, close-delimited, and bodyless
+  output with validated, bounded trailers and originating-method context.
+- Every target builds with GCC 16.2 Release, Clang 22.1.8 Debug, and MSVC
+  19.29 Release. Each passes all 17 tests in the strict milestone 01–08 gate,
+  with zero failures and zero skips. IPv4 and IPv6 loopback ran on this host.
+  Networking tests required execution outside the sandbox (native error 10013
+  inside it). Existing MSVC NDEBUG override warnings are intentional.
+- Added `http_response_test` for malformed status/framing/chunk cases, exact
+  limits, split boundaries, interim metadata, EOF at every truncated position,
+  generated-trailer injection, and serializer/parser round trips. Strengthened
+  milestone 07 checks for early Expect/method rejection and retained input limits.
+- The Windows/Linux/macOS CI gate now includes milestone 08. Linux/macOS
+  acceptance of milestones 07–08 and remote results for this change are pending;
+  the earlier Linux milestone 06 results below are historical evidence only.
+
 ## Verification record — 2026-10-12
 
 - Milestone 06 is implemented: `http::RequestParser` (incremental, bounded,
@@ -199,12 +223,12 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Add no-body, fixed-length, and chunked request framing. A request without a framing header has no body.
-- [ ] Reject conflicting/ambiguous lengths, `Transfer-Encoding` plus `Content-Length`, malformed numbers, and numeric overflow before allocation.
-- [ ] Parse chunk sizes, bounded extensions, body fragments, zero chunks, and separately bounded trailers. Prevent trailers from redefining routing or framing.
-- [ ] Reject unsupported transfer codings; distinguish an invalid sequence not ending in chunked from an unsupported coding as specified in the architecture.
-- [ ] Add premature-EOF detection and decoded-body limits.
-- [ ] Enforce bodyless GET/HEAD at the application boundary: reject nonempty bodies and close. Handle unsupported `Expect` with 417 and close; reject disabled/unknown methods, CONNECT, and Upgrade explicitly.
+- [x] Add no-body, fixed-length, and chunked request framing. A request without a framing header has no body.
+- [x] Reject conflicting/ambiguous lengths, `Transfer-Encoding` plus `Content-Length`, malformed numbers, and numeric overflow before allocation.
+- [x] Parse chunk sizes, bounded extensions, body fragments, zero chunks, and separately bounded trailers. Prevent trailers from redefining routing or framing.
+- [x] Reject unsupported transfer codings; distinguish an invalid sequence not ending in chunked from an unsupported coding as specified in the architecture.
+- [x] Add premature-EOF detection and decoded-body limits.
+- [x] Enforce bodyless GET/HEAD at the application boundary: reject nonempty bodies and close. Handle unsupported `Expect` with 417 and close; reject disabled/unknown methods, CONNECT, and Upgrade explicitly.
 
 **Completion checks:** Fixed-length and chunked fixtures parse across all important boundaries. Truncated bodies, invalid chunks, prohibited trailers, oversize bodies, and ambiguous framing fail safely. Rejected body bytes never become a second request.
 
@@ -216,11 +240,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Add response status-line parsing using the shared header/framing machinery and the originating request method as context.
-- [ ] Support fixed-length, chunked, and close-delimited upstream bodies, with `finish_on_eof()` distinguishing valid completion from truncation.
-- [ ] Handle informational responses before the final response and reject protocol switching. HEAD, informational, 204, and 304 responses produce no body events.
-- [ ] Implement chunked output encoding and correct no-body serialization. Never generate both `Content-Length` and `Transfer-Encoding`.
-- [ ] Keep transfer decoding separate from content encoding: compressed representation bytes remain opaque.
+- [x] Add response status-line parsing using the shared header/framing machinery and the originating request method as context.
+- [x] Support fixed-length, chunked, and close-delimited upstream bodies, with `finish_on_eof()` distinguishing valid completion from truncation.
+- [x] Handle informational responses before the final response and reject protocol switching. HEAD, informational, 204, and 304 responses produce no body events.
+- [x] Implement chunked output encoding and correct no-body serialization. Never generate both `Content-Length` and `Transfer-Encoding`.
+- [x] Keep transfer decoding separate from content encoding: compressed representation bytes remain opaque.
 
 **Completion checks:** Fake origin byte streams cover all framing modes, interim responses, invalid status lines, premature EOF, and HEAD/204/304 boundaries. Serializer checks distinguish body length metadata from whether bytes are actually sent.
 

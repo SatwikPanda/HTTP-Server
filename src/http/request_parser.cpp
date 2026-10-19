@@ -1,8 +1,12 @@
 #include "http/request_parser.hpp"
 
+#include "detail/parsing.hpp"
+#include "http/framing.hpp"
 #include "http/header.hpp"
 #include "http/method.hpp"
 
+#include <algorithm>
+#include <limits>
 #include <string>
 #include <utility>
 
@@ -31,12 +35,6 @@ bool is_token_char(char c) noexcept {
 // Visible ASCII. A fragment ('#') is never part of a request target.
 bool is_target_char(char c) noexcept {
     return c > 0x20 && c < 0x7F && c != '#';
-}
-
-std::string_view trim_whitespace(std::string_view text) noexcept {
-    while (!text.empty() && (text.front() == ' ' || text.front() == '\t')) text.remove_prefix(1);
-    while (!text.empty() && (text.back() == ' ' || text.back() == '\t')) text.remove_suffix(1);
-    return text;
 }
 
 bool is_valid_port(std::string_view port) noexcept {
@@ -97,6 +95,8 @@ std::string_view to_string(ParseError error) noexcept {
     switch (error) {
         case ParseError::none: return "none";
         case ParseError::malformed_request_line: return "malformed request line";
+        case ParseError::malformed_status_line: return "malformed response status line";
+        case ParseError::status_line_too_long: return "response status line too long";
         case ParseError::invalid_method: return "invalid method";
         case ParseError::invalid_target: return "invalid request target";
         case ParseError::malformed_version: return "malformed HTTP version";
@@ -111,6 +111,27 @@ std::string_view to_string(ParseError error) noexcept {
         case ParseError::target_too_long: return "request target too long";
         case ParseError::header_too_large: return "header section too large";
         case ParseError::too_many_headers: return "too many header fields";
+        case ParseError::ambiguous_framing: return "ambiguous framing: both Transfer-Encoding and Content-Length";
+        case ParseError::conflicting_content_length: return "conflicting Content-Length headers";
+        case ParseError::invalid_content_length: return "invalid Content-Length header";
+        case ParseError::content_length_overflow: return "Content-Length numeric overflow";
+        case ParseError::invalid_transfer_encoding: return "invalid Transfer-Encoding header";
+        case ParseError::unsupported_transfer_coding: return "unsupported transfer coding";
+        case ParseError::invalid_chunk_size: return "invalid chunk size";
+        case ParseError::chunk_size_overflow: return "chunk size numeric overflow";
+        case ParseError::chunk_extension_too_large: return "chunk extension too large";
+        case ParseError::invalid_chunk_extension: return "invalid chunk extension";
+        case ParseError::chunk_line_too_long: return "chunk size line too long";
+        case ParseError::malformed_chunk: return "malformed chunk framing";
+        case ParseError::body_too_large: return "message body too large";
+        case ParseError::too_many_trailers: return "too many trailer fields";
+        case ParseError::trailer_too_large: return "trailer section too large";
+        case ParseError::prohibited_trailer: return "prohibited trailer field";
+        case ParseError::premature_eof: return "premature end of input stream";
+        case ParseError::nonempty_get_head_body: return "nonempty body on GET/HEAD request";
+        case ParseError::expectation_failed: return "unsupported Expect header";
+        case ParseError::method_not_allowed: return "method not allowed";
+        case ParseError::not_implemented: return "feature or method not implemented";
     }
     return "unknown";
 }
@@ -125,7 +146,20 @@ StatusCode status_for(ParseError error) noexcept {
             return StatusCode::UriTooLong;
         case ParseError::header_too_large:
         case ParseError::too_many_headers:
+        case ParseError::trailer_too_large:
+        case ParseError::too_many_trailers:
+        case ParseError::chunk_extension_too_large:
+        case ParseError::chunk_line_too_long:
             return StatusCode::HeaderFieldsTooLarge;
+        case ParseError::body_too_large:
+            return StatusCode::PayloadTooLarge;
+        case ParseError::expectation_failed:
+            return StatusCode::ExpectationFailed;
+        case ParseError::method_not_allowed:
+            return StatusCode::MethodNotAllowed;
+        case ParseError::unsupported_transfer_coding:
+        case ParseError::not_implemented:
+            return StatusCode::NotImplemented;
         default:
             return StatusCode::BadRequest;
     }
@@ -143,12 +177,50 @@ ConsumeResult RequestParser::consume(std::span<const std::byte> bytes) {
 
     std::size_t consumed = 0;
     while (consumed < bytes.size()) {
+        if (state_ == State::complete) return {consumed, ParseEvent::complete};
+        if (state_ == State::failed) return {consumed, ParseEvent::error};
+
+        if (state_ == State::body_fixed_length) {
+            const std::size_t available = bytes.size() - consumed;
+            const std::size_t take = std::min(static_cast<std::uint64_t>(available), body_bytes_remaining_);
+            const char* ptr = reinterpret_cast<const char*>(bytes.data() + consumed);
+            request_.body.append(ptr, take);
+            body_bytes_remaining_ -= take;
+            consumed += take;
+            if (body_bytes_remaining_ == 0) {
+                state_ = State::complete;
+                return {consumed, ParseEvent::complete};
+            }
+            continue;
+        }
+
+        if (state_ == State::chunk_data) {
+            const std::size_t available = bytes.size() - consumed;
+            const std::size_t take = std::min(static_cast<std::uint64_t>(available), chunk_bytes_remaining_);
+            const char* ptr = reinterpret_cast<const char*>(bytes.data() + consumed);
+            request_.body.append(ptr, take);
+            chunk_bytes_remaining_ -= take;
+            consumed += take;
+            if (chunk_bytes_remaining_ == 0) {
+                state_ = State::chunk_data_crlf;
+                chunk_crlf_phase_ = 0;
+            }
+            continue;
+        }
+
         const auto byte = static_cast<char>(bytes[consumed]);
         ++consumed;
         if (!accept_byte(byte)) return {consumed, ParseEvent::error};
         if (state_ == State::complete) return {consumed, ParseEvent::complete};
     }
-    return {consumed, ParseEvent::need_more};
+    return {consumed, state_ == State::complete ? ParseEvent::complete : ParseEvent::need_more};
+}
+
+bool RequestParser::finish_on_eof() {
+    if (state_ == State::failed) return false;
+    if (state_ == State::complete) return true;
+    fail(ParseError::premature_eof);
+    return false;
 }
 
 void RequestParser::reset() {
@@ -160,6 +232,19 @@ void RequestParser::reset() {
     request_line_segment_ = 0;
     segment_bytes_ = 0;
     saw_cr_ = false;
+    head_complete_ = false;
+
+    framing_ = ParserFraming::none;
+    body_bytes_remaining_ = 0;
+    chunk_size_ = 0;
+    chunk_bytes_remaining_ = 0;
+    chunk_ext_bytes_ = 0;
+    chunk_line_bytes_ = 0;
+    chunk_extensions_.clear();
+    trailer_bytes_ = 0;
+    trailer_line_.clear();
+    saw_hex_digit_ = false;
+    chunk_crlf_phase_ = 0;
 }
 
 core::Error RequestParser::error_detail() const {
@@ -175,24 +260,144 @@ bool RequestParser::fail(ParseError error) noexcept {
 }
 
 bool RequestParser::accept_byte(char byte) {
-    // Checked before the byte is kept, so a head of exactly the limit completes.
-    if (head_bytes_ == limits_.max_header_bytes) return fail(ParseError::header_too_large);
-    ++head_bytes_;
+    if (state_ == State::request_line || state_ == State::headers) {
+        // Checked before the byte is kept, so a head of exactly the limit completes.
+        if (head_bytes_ == limits_.max_header_bytes) return fail(ParseError::header_too_large);
+        ++head_bytes_;
 
-    if (saw_cr_) {
-        if (byte != '\n') return fail(ParseError::bare_line_ending);
-        saw_cr_ = false;
-        return finish_line();
-    }
-    if (byte == '\r') {
-        saw_cr_ = true;
+        if (saw_cr_) {
+            if (byte != '\n') return fail(ParseError::bare_line_ending);
+            saw_cr_ = false;
+            return finish_line();
+        }
+        if (byte == '\r') {
+            saw_cr_ = true;
+            return true;
+        }
+        if (byte == '\n') return fail(ParseError::bare_line_ending);
+
+        if (state_ == State::request_line) return accept_request_line_byte(byte);
+        line_.push_back(byte);
         return true;
     }
-    if (byte == '\n') return fail(ParseError::bare_line_ending);
 
-    if (state_ == State::request_line) return accept_request_line_byte(byte);
-    line_.push_back(byte);
-    return true;
+    if ((state_ == State::chunk_size || state_ == State::chunk_extension) && byte != '\r' && byte != '\n') {
+        if (chunk_line_bytes_ == limits_.max_chunk_line_bytes) return fail(ParseError::chunk_line_too_long);
+        ++chunk_line_bytes_;
+    }
+    if (state_ == State::chunk_size) {
+        if (saw_cr_) {
+            if (byte != '\n') return fail(ParseError::bare_line_ending);
+            saw_cr_ = false;
+            if (!saw_hex_digit_) return fail(ParseError::invalid_chunk_size);
+            if (chunk_size_ == 0) {
+                state_ = State::trailers;
+                trailer_line_.clear();
+                trailer_bytes_ = 0;
+            } else {
+                if (chunk_size_ > limits_.max_body_bytes - request_.body.size()) {
+                    return fail(ParseError::body_too_large);
+                }
+                chunk_bytes_remaining_ = chunk_size_;
+                state_ = State::chunk_data;
+            }
+            return true;
+        }
+        if (byte == '\r') {
+            saw_cr_ = true;
+            return true;
+        }
+        if (byte == '\n') return fail(ParseError::bare_line_ending);
+        if (byte == ';' || byte == ' ' || byte == '\t') {
+            if (!saw_hex_digit_) return fail(ParseError::invalid_chunk_size);
+            state_ = State::chunk_extension;
+            chunk_ext_bytes_ = 1;
+            if (chunk_ext_bytes_ > limits_.max_chunk_extension_bytes) return fail(ParseError::chunk_extension_too_large);
+            chunk_extensions_.assign(1, byte);
+            return true;
+        }
+        if (is_hex_digit(byte)) {
+            saw_hex_digit_ = true;
+            unsigned val = is_digit(byte) ? static_cast<unsigned>(byte - '0') :
+                (byte >= 'a' && byte <= 'f') ? static_cast<unsigned>(10 + byte - 'a') :
+                static_cast<unsigned>(10 + byte - 'A');
+            if (chunk_size_ > (std::numeric_limits<std::uint64_t>::max() - val) / 16) {
+                return fail(ParseError::chunk_size_overflow);
+            }
+            chunk_size_ = chunk_size_ * 16 + val;
+            return true;
+        }
+        return fail(ParseError::invalid_chunk_size);
+    }
+
+    if (state_ == State::chunk_extension) {
+        if (saw_cr_) {
+            if (byte != '\n') return fail(ParseError::bare_line_ending);
+            saw_cr_ = false;
+            if (!is_valid_chunk_extensions(chunk_extensions_)) return fail(ParseError::invalid_chunk_extension);
+            if (chunk_size_ == 0) {
+                state_ = State::trailers;
+                trailer_line_.clear();
+                trailer_bytes_ = 0;
+            } else {
+                if (chunk_size_ > limits_.max_body_bytes - request_.body.size()) {
+                    return fail(ParseError::body_too_large);
+                }
+                chunk_bytes_remaining_ = chunk_size_;
+                state_ = State::chunk_data;
+            }
+            return true;
+        }
+        if (byte == '\r') {
+            saw_cr_ = true;
+            return true;
+        }
+        if (byte == '\n') return fail(ParseError::bare_line_ending);
+        ++chunk_ext_bytes_;
+        if (chunk_ext_bytes_ > limits_.max_chunk_extension_bytes) {
+            return fail(ParseError::chunk_extension_too_large);
+        }
+        if (!is_valid_header_value(std::string_view(&byte, 1))) return fail(ParseError::invalid_chunk_extension);
+        chunk_extensions_.push_back(byte);
+        return true;
+    }
+
+    if (state_ == State::chunk_data_crlf) {
+        if (chunk_crlf_phase_ == 0) {
+            if (byte != '\r') return fail(ParseError::malformed_chunk);
+            chunk_crlf_phase_ = 1;
+            return true;
+        }
+        if (byte != '\n') return fail(ParseError::malformed_chunk);
+        state_ = State::chunk_size;
+        chunk_size_ = 0;
+        saw_hex_digit_ = false;
+        chunk_ext_bytes_ = 0;
+        chunk_line_bytes_ = 0;
+        chunk_extensions_.clear();
+        return true;
+    }
+
+    if (state_ == State::trailers) {
+        ++trailer_bytes_;
+        if (trailer_bytes_ > limits_.max_trailer_bytes) {
+            return fail(ParseError::trailer_too_large);
+        }
+        if (saw_cr_) {
+            if (byte != '\n') return fail(ParseError::bare_line_ending);
+            saw_cr_ = false;
+            return finish_trailer_line();
+        }
+        if (byte == '\r') {
+            saw_cr_ = true;
+            return true;
+        }
+        if (byte == '\n') return fail(ParseError::bare_line_ending);
+        trailer_line_.push_back(byte);
+        return true;
+    }
+
+    return fail(ParseError::none);
 }
 
 // Validates the request line as it streams in, so garbage and oversized targets
@@ -272,25 +477,8 @@ bool RequestParser::finish_request_line() {
 }
 
 bool RequestParser::finish_field_line() {
-    // A field line starting with whitespace continues the previous one
-    // (obs-fold). RFC 9112 section 5.2 lets a server reject it.
-    if (line_.front() == ' ' || line_.front() == '\t') {
-        return fail(ParseError::obsolete_line_folding);
-    }
-
-    const std::string_view line = line_;
-    const auto colon = line.find(':');
-    if (colon == std::string_view::npos) return fail(ParseError::malformed_header);
-
-    // No whitespace is allowed between the name and the colon.
-    const auto name = line.substr(0, colon);
-    if (!is_valid_header_name(name)) return fail(ParseError::malformed_header);
-
-    const auto value = trim_whitespace(line.substr(colon + 1));
-    if (!is_valid_header_value(value)) return fail(ParseError::malformed_header);
-
-    if (request_.headers.size() == limits_.max_header_count) return fail(ParseError::too_many_headers);
-    request_.headers.add(std::string(name), std::string(value));
+    const auto error = detail::parse_field_line(line_, request_.headers, limits_.max_header_count);
+    if (error != ParseError::none) return fail(error);
     line_.clear();
     return true;
 }
@@ -304,7 +492,60 @@ bool RequestParser::finish_head() {
     } else if (!is_valid_host(hosts.front())) {
         return fail(ParseError::invalid_host);
     }
+
+    const auto rf = select_request_framing(request_.headers);
+    if (rf.error != ParseError::none) {
+        return fail(rf.error);
+    }
+    if (request_.version == HttpVersion::http_1_0() && rf.framing == BodyFraming::chunked) {
+        return fail(ParseError::invalid_transfer_encoding);
+    }
+    head_complete_ = true;
+
+    if (rf.framing == BodyFraming::none) {
+        framing_ = ParserFraming::none;
+        state_ = State::complete;
+        return true;
+    }
+
+    if (rf.framing == BodyFraming::fixed_length) {
+        framing_ = ParserFraming::fixed_length;
+        if (rf.content_length == 0) {
+            state_ = State::complete;
+            return true;
+        }
+        if (rf.content_length > limits_.max_body_bytes) {
+            return fail(ParseError::body_too_large);
+        }
+        body_bytes_remaining_ = rf.content_length;
+        request_.body.reserve(static_cast<std::size_t>(rf.content_length));
+        state_ = State::body_fixed_length;
+        return true;
+    }
+
+    if (rf.framing == BodyFraming::chunked) {
+        framing_ = ParserFraming::chunked;
+        state_ = State::chunk_size;
+        chunk_size_ = 0;
+        chunk_bytes_remaining_ = 0;
+        chunk_ext_bytes_ = 0;
+        saw_hex_digit_ = false;
+        return true;
+    }
+
     state_ = State::complete;
+    return true;
+}
+
+bool RequestParser::finish_trailer_line() {
+    if (trailer_line_.empty()) {
+        state_ = State::complete;
+        return true;
+    }
+    const auto error = detail::parse_field_line(trailer_line_, request_.trailers,
+                                              limits_.max_trailer_count, &request_.headers);
+    if (error != ParseError::none) return fail(error);
+    trailer_line_.clear();
     return true;
 }
 
