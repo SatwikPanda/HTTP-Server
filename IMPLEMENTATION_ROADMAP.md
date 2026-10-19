@@ -18,7 +18,27 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
-## Verification record — 2026-10-20
+## Verification record — 2026-10-20 (Milestone 09)
+
+- Milestone 09 is implemented: persistent connections, keep-alive, and pipelining
+  in `http::HttpSession` with ordered response dispatch, input/output buffer
+  preservation across transactions, and transaction reset.
+- Evaluates HTTP/1.1 persistence and `Connection: close`, along with HTTP/1.0
+  persistence rules (`Connection: keep-alive`). Enforces `max_requests_per_connection`
+  with terminating `Connection: close` on the final allowed transaction.
+- Adds phase-specific timeouts: `idle_timeout` (clean close on idle persistent
+  connections), `request_progress_timeout`, and `output_progress_timeout`.
+- Error and application restrictions (framing errors, version rejections, and
+  nonempty GET/HEAD bodies) immediately demand close and send `Connection: close`,
+  ensuring rejected/unread body bytes cannot desynchronize subsequent pipelined requests.
+- Added `tests/milestone09_test.cpp` covering sequential keep-alive, pipelining,
+  fragmented reads across split boundaries, client close semantics, HTTP/1.0
+  persistence, max request caps, phase-specific deadlines, framing/rejection isolation,
+  and real socket loopback integration with `HttpServer`.
+- Strict milestone 01–09 gate passes all 18 registered tests with zero failures and
+  zero skips on Windows with GCC 16.2 Release.
+
+## Verification record — 2026-10-20 (Milestones 07–08)
 
 - Resolved the overlapping milestone 06 and incoming milestone 07–08 merge
   conflicts, retaining the incremental request parser and adding request/response
@@ -256,11 +276,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Keep per-session input and output state across requests. Reset only the completed HTTP transaction.
-- [ ] Process one request at a time, retaining later pipelined bytes within the input limit.
-- [ ] Honor HTTP/1.1 persistence and `Connection: close`; consume an accepted request fully or close before another request is processed.
-- [ ] Add an idle timeout, request-progress deadline, output-progress deadline, and maximum requests per keep-alive connection.
-- [ ] Preserve response order and close after framing errors or unsafe output failures.
+- [x] Keep per-session input and output state across requests. Reset only the completed HTTP transaction.
+- [x] Process one request at a time, retaining later pipelined bytes within the input limit.
+- [x] Honor HTTP/1.1 persistence and `Connection: close`; consume an accepted request fully or close before another request is processed.
+- [x] Add an idle timeout, request-progress deadline, output-progress deadline, and maximum requests per keep-alive connection.
+- [x] Preserve response order and close after framing errors or unsafe output failures.
 
 **Completion checks:** Sequential and pipelined requests return ordered responses. Split headers and leftover bytes are preserved. Close semantics, idle clients, and rejected bodies cannot desynchronize the next request.
 

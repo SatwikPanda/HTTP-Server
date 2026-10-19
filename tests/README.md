@@ -11,11 +11,11 @@ ctest --test-dir build/milestones -L 'milestone0[12]' --output-on-failure
 ctest --test-dir build/milestones -L milestone03 --output-on-failure
 ctest --test-dir build/milestones --output-on-failure
 cmake -S . -B build/milestones -DREQUIRE_ALL_MILESTONES=ON
-ctest --test-dir build/milestones -L 'milestone0[12345678]' --output-on-failure
+ctest --test-dir build/milestones -L 'milestone0[123456789]' --output-on-failure
 ```
 
 Milestones 04–06 have production-backed adapters and run their acceptance checks.
-Milestones 07–08 call production HTTP code directly and need no adapter.
+Milestones 07–09 call production HTTP code directly and need no adapter.
 A suite without its adapter returns CTest's skip code 77, which is pending,
 never passing. To enforce completion (turn a pending suite into a failure),
 configure with `-DREQUIRE_ALL_MILESTONES=ON`. Use that gate when completing each
@@ -145,11 +145,44 @@ position, numeric overflow, exact limits, trailer injection, and serializer/pars
 round trips for all body modes. These are production-backed fake-origin checks;
 real upstream proxy transactions remain milestones 13–16.
 
+## Keep-alive and pipelined requests (milestone 09)
+
+`http::HttpSession` supports HTTP/1.1 persistent connections and pipelining when
+keep-alive is enabled (`HttpSessionConfig::keep_alive`). The session maintains its
+connection-wide input buffer (`input_`) across requests, bounded by `max_input_bytes`.
+Only completed HTTP transactions are reset: `parser_.reset()`, response buffer
+clearing, and progress updates occur between transactions while unconsumed bytes remain
+buffered for subsequent requests.
+
+Requests are processed sequentially one at a time, preserving strict response order.
+HTTP/1.1 persistence defaults to open unless `Connection: close` is requested by client
+or server. HTTP/1.0 connections close by default unless `Connection: keep-alive` is
+present. Responses advertise `Connection: keep-alive` when continuing and
+`Connection: close` when terminating.
+
+Configurable timeouts distinguish connection phases:
+- `idle_timeout`: deadline while waiting between transactions on an idle persistent
+  connection; upon expiry, the connection closes cleanly without an error response.
+- `request_progress_timeout`: deadline during partial incoming request receipt.
+- `output_progress_timeout`: deadline during response write progress.
+- `max_requests_per_connection`: bounds the number of requests per connection; the final
+  allowed request emits `Connection: close` and closes transport afterwards.
+
+Framing errors (syntax, unsupported versions, oversized headers) and application rejections
+(nonempty GET/HEAD bodies, disabled methods, unsupported expectations) set close-demanded,
+emit the appropriate error status with `Connection: close`, and immediately close transport,
+ensuring invalid or unread body bytes cannot desynchronize subsequent pipelined requests.
+
+`milestone09_test` covers sequential requests, pipelining within single and multi-chunk
+reads, client close headers, HTTP/1.0 persistence rules, max request caps, phase-specific
+deadlines, framing/rejection isolation, and loopback TCP integration with `HttpServer`.
+
 ## Fixed-response HTTP demo
 
 The executable serves `Hello, World!\r\n` for bodyless GET, and the corresponding
 metadata without body bytes for HEAD, then closes. Request framing and method
-restrictions are enforced; keep-alive remains milestone 09. `--buffer-size` limits the incoming
+restrictions are enforced; persistent keep-alive connections are supported in
+`HttpSession`. `--buffer-size` limits the incoming
 header block (4–16777216 bytes; default 4096); the library defaults to 8192 header
 bytes and 1 MiB total response bytes. Both default I/O progress timeouts are 5 s.
 
@@ -176,13 +209,12 @@ stop during accept/read waits, and restart. Unsupported IPv6 is reported.
 
 ## Verified status (2026-10-20)
 
-All targets build on Windows with GCC 16.2 Release (`build/agents`), Clang
-22.1.8 Debug (`build/agents-clang`), and MSVC 19.29 Release (`build/agents-msvc`).
-Each passes all 17 tests in the strict milestone 01–08 gate, with zero failures
-and zero skips. IPv4 and IPv6 loopback ran. The sandbox still blocks local
+All targets build on Windows with GCC 16.2 Release (`build/agents`).
+The build passes all 18 tests in the strict milestone 01–09 gate, with zero failures
+and zero skips. IPv4 loopback ran. The sandbox still blocks local
 socket connections with native error 10013; full gates ran with approved local
 loopback access. Existing MSVC `/DNDEBUG` versus `/UNDEBUG` warnings are expected.
-CI now gates milestone 08; Linux/macOS acceptance of milestones 07–08 and remote
+CI now gates milestone 09; Linux/macOS acceptance of milestones 07–09 and remote
 results for these changes remain pending. No new Linux/macOS run is claimed.
 
 ## Verified status (2026-10-12)
