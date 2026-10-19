@@ -199,12 +199,12 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Add no-body, fixed-length, and chunked request framing. A request without a framing header has no body.
-- [ ] Reject conflicting/ambiguous lengths, `Transfer-Encoding` plus `Content-Length`, malformed numbers, and numeric overflow before allocation.
-- [ ] Parse chunk sizes, bounded extensions, body fragments, zero chunks, and separately bounded trailers. Prevent trailers from redefining routing or framing.
-- [ ] Reject unsupported transfer codings; distinguish an invalid sequence not ending in chunked from an unsupported coding as specified in the architecture.
-- [ ] Add premature-EOF detection and decoded-body limits.
-- [ ] Enforce bodyless GET/HEAD at the application boundary: reject nonempty bodies and close. Handle unsupported `Expect` with 417 and close; reject disabled/unknown methods, CONNECT, and Upgrade explicitly.
+- [x] Add no-body, fixed-length, and chunked request framing. A request without a framing header has no body.
+- [x] Reject conflicting/ambiguous lengths, `Transfer-Encoding` plus `Content-Length`, malformed numbers, and numeric overflow before allocation.
+- [x] Parse chunk sizes, bounded extensions, body fragments, zero chunks, and separately bounded trailers. Prevent trailers from redefining routing or framing.
+- [x] Reject unsupported transfer codings; distinguish an invalid sequence not ending in chunked from an unsupported coding as specified in the architecture.
+- [x] Add premature-EOF detection and decoded-body limits.
+- [x] Enforce bodyless GET/HEAD at the application boundary: reject nonempty bodies and close. Handle unsupported `Expect` with 417 and close; reject disabled/unknown methods, CONNECT, and Upgrade explicitly.
 
 **Completion checks:** Fixed-length and chunked fixtures parse across all important boundaries. Truncated bodies, invalid chunks, prohibited trailers, oversize bodies, and ambiguous framing fail safely. Rejected body bytes never become a second request.
 

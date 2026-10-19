@@ -61,6 +61,7 @@ add_library(http STATIC
     src/http/date.cpp
     src/http/serializer.cpp
     src/http/limits.cpp
+    src/http/framing.cpp
     src/http/request_parser.cpp
     src/http/http_session.cpp
     src/http/http_server.cpp
@@ -138,6 +139,8 @@ if(BUILD_TESTING)
     endforeach()
     add_milestone_test(http_parser_test 06)
     target_link_libraries(http_parser_test PRIVATE http)
+    add_milestone_test(milestone07_test 07)
+    target_link_libraries(milestone07_test PRIVATE http)
     foreach(milestone IN ITEMS 04 05 06)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.

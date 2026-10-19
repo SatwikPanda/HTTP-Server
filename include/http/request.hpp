@@ -17,6 +17,7 @@ struct Request {
     HttpVersion version{1, 1};
     HeaderMap headers;
     std::string body;
+    HeaderMap trailers;
 
     [[nodiscard]] std::optional<std::string_view> header(
         std::string_view name

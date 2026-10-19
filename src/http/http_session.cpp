@@ -2,6 +2,7 @@
 
 #include "concurrency/single_session_driver.hpp"
 #include "http/date.hpp"
+#include "http/framing.hpp"
 #include "http/header.hpp"
 #include "http/serializer.hpp"
 #include "net/poller.hpp"
@@ -40,8 +41,12 @@ HttpSessionStats session_stats(const HttpSession& session, const concurrency::Dr
 } // namespace
 
 RequestLimits request_limits(const HttpSessionConfig& config) noexcept {
-    return {config.max_request_line_bytes, config.max_target_bytes,
-            config.max_header_bytes, config.max_header_count};
+    RequestLimits limits;
+    limits.max_request_line_bytes = config.max_request_line_bytes;
+    limits.max_target_bytes = config.max_target_bytes;
+    limits.max_header_bytes = config.max_header_bytes;
+    limits.max_header_count = config.max_header_count;
+    return limits;
 }
 
 core::Result<void> validate_http_session_config(const HttpSessionConfig& config) {
@@ -73,6 +78,9 @@ core::Result<Response> make_fixed_response(const HttpSessionConfig& config, cons
     response.headers.set("Date", date);
     response.headers.set("Connection", "close");
     response.headers.set("Server", "httpserver/1.0");
+    if (config.response_status == StatusCode::MethodNotAllowed) {
+        response.headers.set("Allow", "GET, HEAD");
+    }
     return response;
 }
 
@@ -118,9 +126,12 @@ concurrency::Action HttpSession::next_action() {
 // and input_ holds whatever arrived after the head.
 std::size_t HttpSession::read_capacity() const noexcept {
     const std::size_t held = parser_.head_bytes() + input_.size();
-    const std::size_t header_room = config_.max_header_bytes - std::min(config_.max_header_bytes, parser_.head_bytes());
     const std::size_t input_room = config_.max_input_bytes - std::min(config_.max_input_bytes, held);
-    return std::min({std::size_t{512}, header_room, input_room});
+    if (parser_.framing() == ParserFraming::none && !parser_.complete()) {
+        const std::size_t header_room = config_.max_header_bytes - std::min(config_.max_header_bytes, parser_.head_bytes());
+        return std::min({std::size_t{512}, header_room, input_room});
+    }
+    return std::min({std::size_t{512}, input_room});
 }
 
 concurrency::Action HttpSession::initial_action() {
@@ -173,12 +184,24 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
             input_.append(reinterpret_cast<const char*>(value.data.data()), value.data.size());
             stats_.peak_input_bytes = std::max(stats_.peak_input_bytes, parser_.head_bytes() + input_.size());
 
-            // The parser stops at the end of the head; anything after it stays in
-            // input_ for the next request instead of being dropped.
+            // The parser consumes up to message completion; later bytes stay in
+            // input_ for the next request.
             const auto parsed = parser_.consume(input_);
             input_.erase(0, parsed.consumed);
             if (parsed.event == ParseEvent::complete) {
                 stats_.request_received = true;
+                const auto restriction = check_request_restrictions(parser_.request());
+                if (restriction != StatusCode::OK) {
+                    if (restriction == StatusCode::MethodNotAllowed) {
+                        return prepare_response(ParseError::method_not_allowed);
+                    } else if (restriction == StatusCode::ExpectationFailed) {
+                        return prepare_response(ParseError::expectation_failed);
+                    } else if (restriction == StatusCode::NotImplemented) {
+                        return prepare_response(ParseError::not_implemented);
+                    } else {
+                        return prepare_response(ParseError::nonempty_get_head_body);
+                    }
+                }
                 return prepare_response(ParseError::none);
             }
             if (parsed.event == ParseEvent::error) {
@@ -186,7 +209,7 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
                 return prepare_response(parser_.error());
             }
             if (read_capacity() == 0) {
-                // An incomplete head has filled a bound the parser cannot see past.
+                // An incomplete request has filled a bound the parser cannot see past.
                 if (parser_.head_bytes() < config_.max_header_bytes) stats_.input_limit_exceeded = true;
                 return prepare_response(ParseError::header_too_large);
             }
