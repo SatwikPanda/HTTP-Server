@@ -171,8 +171,13 @@ void upstream_actions() {
     auto make = [&](WorkRequest request) { return WorkAction{{{{9, 2}, 1}, endpoint_role(request), ++sequence}, test::Clock::now() + 5s, std::move(request), cancellation}; };
     auto resolved = executor.execute(make(ResolveWork{{"localhost", origin.target().port}}));
     CHECK(resolved.status == WorkStatus::complete && !resolved.candidates.empty());
-    auto bound = test::take(net::create_tcp_socket()); CHECK(bound.bind(net::Endpoint::ipv4_loopback(0)));
-    auto candidates = std::vector<net::Endpoint>{test::take(bound.local_endpoint()), origin.endpoint()};
+    auto reservation = test::listener();
+    const auto refused_endpoint = test::take(reservation.local_endpoint());
+    CHECK(refused_endpoint != origin.endpoint());
+    // Darwin can drop SYNs for a bound, non-listening socket. As in milestone
+    // 03, close a temporary listener so this candidate is a genuinely closed port.
+    reservation.close();
+    auto candidates = std::vector<net::Endpoint>{refused_endpoint, origin.endpoint()};
     auto connected = executor.execute(make(ConnectWork{candidates}));
     if (connected.error) std::cerr << connected.error.to_string() << '\n';
     CHECK(connected.status == WorkStatus::complete);

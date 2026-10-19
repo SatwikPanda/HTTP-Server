@@ -1,16 +1,17 @@
 # Parallel foundation handoff — 2026-10-20
 
-Implementation and local acceptance are complete. Changes are intentionally
-uncommitted; no branch, tag, commit or remote publication was created.
+Implementation and local acceptance were delivered without a commit. That
+delivery was subsequently committed as `604205d2981e8931b4b8e340b27a3b5ad48f9a10`.
+The macOS fixture correction documented below is a follow-up working-tree change.
 
 ## Base identity
 
 - `BASE_09`: `d644e68de34f36e9d4628060de8efbe2ab4026cc` (`fixing milestone9`).
   Its original strict Windows GCC gate passed 18/18 before P0 edits.
-- `PARALLEL_BASE`: the reviewed working-tree changes delivered with this handoff,
-  based on `BASE_09`, including the milestone 09 corrections below. It has no
-  commit SHA yet. Once these changes are committed, record that resulting SHA
-  here and start A–J from it. Do not branch from `BASE_09` expecting P0 APIs.
+- Initial P0 revision: `604205d2981e8931b4b8e340b27a3b5ad48f9a10`, based on
+  `BASE_09`, including the milestone 09 corrections below. Publish an updated
+  `PARALLEL_BASE` that includes the macOS fixture correction before starting A–J.
+  Do not branch from `BASE_09` expecting P0 APIs.
 - There were no unmerged Git index entries. Existing `.gitignore`, architecture,
   master parallel-roadmap and per-track guide changes were preserved.
 
@@ -110,3 +111,24 @@ async drivers, CLI/logging implementation and final composition remain in A–N.
 These are planned tracks, not missing P0 behavior. P0's fixed resource factories
 and no-op metrics are working reference implementations, not production feature
 completion claims for those tracks.
+
+## macOS connect-fallback fixture correction
+
+The [macOS job for commit 604205d](https://github.com/SatwikPanda/HTTP-Server/actions/runs/39316609510/job/118279609910)
+failed `parallel_work_test` at the `connected.status == WorkStatus::complete`
+assertion after the five-second shared connect deadline. Its first candidate was
+a bound, non-listening socket. Darwin can silently drop SYNs for that socket
+state, leaving no time to attempt the live second candidate. The Linux and Windows
+jobs for that commit succeeded.
+
+The test now uses the same refusal fixture as milestone 03: create a temporary
+listener, capture its endpoint, verify it differs from the live origin, and close
+it before connecting. The first candidate is then a closed loopback port. This
+exercises actual refusal and fresh-socket fallback under the existing shared
+deadline.
+
+After this correction, the Windows GCC Release strict 01–09/P0 gate passed all
+20 tests with zero failures/skips (11.86 seconds). `parallel_work_test` also passed
+five consecutive `--repeat until-fail:5` runs. The production connect code and
+deadline were unchanged. macOS CI verification of the correction is pending;
+the local Windows checks do not establish a macOS pass.
