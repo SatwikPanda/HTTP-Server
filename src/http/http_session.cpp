@@ -73,7 +73,7 @@ core::Result<void> validate_http_session_config(const HttpSessionConfig& config)
         config.request_progress_timeout > std::chrono::hours(24) ||
         config.output_progress_timeout < std::chrono::milliseconds::zero() ||
         config.output_progress_timeout > std::chrono::hours(24) ||
-        config.max_requests_per_connection == 0 ||
+        config.max_requests_per_connection == 0 || config.metrics == nullptr ||
         !is_valid_header_value(config.content_type) || config.content_type.empty() ||
         status < 200 || !is_valid_status_code(status) || status == 204 || status == 304) {
         return invalid_config();
@@ -101,7 +101,7 @@ HttpSession::HttpSession(HttpSessionConfig config, core::ConnectionId id,
                          const core::SteadyClock& steady_clock, const core::SystemClock& wall_clock)
     : config_(std::move(config)), id_(id), steady_clock_(&steady_clock),
       wall_clock_(&wall_clock), last_progress_(steady_clock.now()),
-      parser_(request_limits(config_)) {
+      parser_(request_limits(config_)), writer_(config_.max_output_bytes) {
     auto valid = validate_http_session_config(config_);
     if (!valid) {
         stats_.error = valid.error();
@@ -110,6 +110,11 @@ HttpSession::HttpSession(HttpSessionConfig config, core::ConnectionId id,
 }
 
 concurrency::Action HttpSession::close(core::Error error) {
+    if (error && !is_closed()) config_.metrics->record(core::Metric::request_errors);
+    if (cancellation_) cancellation_->cancel();
+    work_.reset();
+    transaction_.reset();
+    writer_.abort();
     stats_.error = std::move(error);
     state_ = concurrency::SessionState::closed;
     return concurrency::CloseAction{stats_.error};
@@ -128,7 +133,7 @@ std::chrono::milliseconds HttpSession::effective_output_timeout() const noexcept
 }
 
 std::chrono::milliseconds HttpSession::idle_timeout() const noexcept {
-    if (writing_) return effective_output_timeout();
+    if (writing_ || transaction_) return effective_output_timeout();
     if (parser_.head_bytes() > 0 || !input_.empty()) return effective_request_timeout();
     return effective_idle_timeout();
 }
@@ -139,7 +144,7 @@ bool HttpSession::should_keep_alive() const noexcept {
     if (stats_.error) return false;
     if (close_demanded_) return false;
     if (requests_served_ >= config_.max_requests_per_connection) return false;
-    if (peer_eof_) return false;
+    if (peer_eof_ && input_.empty()) return false;
     return true;
 }
 
@@ -148,7 +153,7 @@ concurrency::Action HttpSession::next_action() {
     auto deadline = deadline_after(last_progress_, idle_timeout());
     if (stopping_) deadline = std::min(deadline, drain_deadline_);
     if (steady_clock_->now() >= deadline) {
-        if (requests_served_ > 0 && parser_.head_bytes() == 0 && input_.empty()) {
+        if (!writing_ && requests_served_ > 0 && parser_.head_bytes() == 0 && input_.empty()) {
             return close();
         }
         if (writing_) {
@@ -159,17 +164,21 @@ concurrency::Action HttpSession::next_action() {
         }
         return close(core::make_error(core::ErrorCategory::timed_out, "HTTP progress"));
     }
+    if (work_) {
+        work_->deadline = std::min(work_->deadline, deadline);
+        state_ = concurrency::SessionState::waiting;
+        return *work_;
+    }
     if (waiting_) {
         state_ = concurrency::SessionState::waiting;
-        return concurrency::WaitAction{writing_ ? net::Interest::write : net::Interest::read, deadline};
+        return concurrency::WaitAction{writing_ ? net::Interest::write : net::Interest::read, deadline, downstream_id()};
     }
     if (writing_) {
         state_ = stopping_ ? concurrency::SessionState::draining : concurrency::SessionState::writing;
-        return concurrency::WriteAction{std::as_bytes(std::span(output_.data() + output_offset_,
-                                                               output_.size() - output_offset_))};
+        return concurrency::WriteAction{writer_.pending(), downstream_id()};
     }
     state_ = concurrency::SessionState::reading;
-    return concurrency::ReadAction{read_capacity()};
+    return concurrency::ReadAction{read_capacity(), downstream_id()};
 }
 
 // Include retained bodies, extensions, and trailers in the connection budget.
@@ -188,6 +197,7 @@ concurrency::Action HttpSession::initial_action() {
 }
 
 concurrency::Action HttpSession::prepare_response(ParseError rejected) {
+    config_.metrics->record(core::Metric::requests_started);
     auto response_config = config_;
     bool will_keep_alive = false;
     if (rejected != ParseError::none) {
@@ -202,7 +212,8 @@ concurrency::Action HttpSession::prepare_response(ParseError rejected) {
                                          std::string(default_reason_phrase(status)) + "\r\n";
         response_config.content_type = "text/plain; charset=utf-8";
         close_demanded_ = true;
-    } else if (config_.keep_alive && !stopping_ && !close_demanded_ && !peer_eof_) {
+    } else if (config_.keep_alive && !stopping_ && !close_demanded_ &&
+               (!peer_eof_ || !input_.empty())) {
         const auto& req = parser_.request();
         bool client_wants_close = false;
         bool client_wants_keep_alive = false;
@@ -236,24 +247,117 @@ concurrency::Action HttpSession::prepare_response(ParseError rejected) {
     response_config.keep_alive = will_keep_alive;
     auto response = make_fixed_response(response_config, *wall_clock_);
     if (!response) return close(response.error());
-
-    if (will_keep_alive) {
-        response.value().headers.set("Connection", "keep-alive");
-    } else {
-        response.value().headers.set("Connection", "close");
+    cancellation_ = std::make_shared<concurrency::Cancellation>();
+    if (rejected != ParseError::none) {
+        head_started_ = true;
+        auto wire = writer_.buffered(response.value(), parser_.request().method);
+        if (!wire) return close(wire.error());
+        stats_.response_status = response.value().status_code;
+        writing_ = true; waiting_ = false;
+        stats_.peak_output_bytes = std::max(stats_.peak_output_bytes, writer_.pending().size());
+        last_progress_ = steady_clock_->now();
+        return next_action();
     }
+    auto factory = config_.application ? config_.application : make_demo_factory(std::move(response.value()));
+    auto created = factory->create(parser_.request(), {{id_, requests_served_ + 1}, config_.max_output_bytes, *steady_clock_, *wall_clock_});
+    if (!created) return transaction_failure(created.error(), StatusCode::InternalServerError);
+    if (!created.value()) return transaction_failure(invalid_config(), StatusCode::InternalServerError);
+    transaction_ = std::move(created.value());
+    return advance_transaction(StartTransaction{});
+}
 
-    auto wire = serialize_response(response.value(), parser_.request().method,
-        {std::min<std::size_t>(8192, config_.max_output_bytes), config_.max_output_bytes});
-    if (!wire) return close(wire.error());
-    if (wire.value().size() > config_.max_output_bytes) return close(invalid_config());
-    output_ = std::move(wire.value());
-    stats_.peak_output_bytes = std::max(stats_.peak_output_bytes, output_.size());
-    stats_.response_status = response.value().status_code;
-    output_offset_ = 0;
-    writing_ = true;
-    waiting_ = false;
+core::OperationId HttpSession::downstream_id() const noexcept {
+    return {{id_, requests_served_ + 1}, core::EndpointRole::downstream, downstream_sequence_};
+}
+
+concurrency::Action HttpSession::transaction_failure(core::Error error, StatusCode status) {
+    if (writer_.committed()) return close(std::move(error));
+    config_.metrics->record(core::Metric::request_errors);
+    if (cancellation_) cancellation_->cancel();
+    work_.reset(); transaction_.reset();
+    writer_ = ResponseWriter(config_.max_output_bytes);
+    close_demanded_ = true;
+    Response response(status);
+    if (response.status_code < 400 || response.status_code > 599) response = Response(StatusCode::InternalServerError);
+    response.set_body(std::to_string(response.status_code) + " Error\r\n", "text/plain; charset=utf-8");
+    response.headers.set("Connection", "close");
+    auto encoded = writer_.buffered(response, parser_.request().method);
+    if (!encoded) return close(encoded.error());
+    stats_.response_status = response.status_code;
+    writing_ = true; waiting_ = false; head_started_ = true;
+    stats_.peak_output_bytes = std::max(stats_.peak_output_bytes, writer_.pending().size());
     last_progress_ = steady_clock_->now();
+    return next_action();
+}
+
+concurrency::Action HttpSession::advance_transaction(const TransactionEvent& event) {
+    auto step = transaction_->on_event(event);
+    return std::visit([&](auto& value) -> concurrency::Action {
+        using T = std::decay_t<decltype(value)>;
+        core::Result<void> result;
+        if constexpr (std::is_same_v<T, TransactionFailure>) {
+            return transaction_failure(value.error, value.status);
+        } else if constexpr (std::is_same_v<T, TransactionWork>) {
+            if (++operation_sequence_ == 0) return close(invalid_config());
+            work_ = concurrency::WorkAction{{{id_, requests_served_ + 1}, concurrency::endpoint_role(value.request), operation_sequence_},
+                value.deadline, std::move(value.request), cancellation_};
+            writing_ = false; waiting_ = false;
+            return next_action();
+        } else if constexpr (std::is_same_v<T, ResponseHead> || std::is_same_v<T, BufferedResponse>) {
+            if (head_started_) return transaction_failure(invalid_config(), StatusCode::InternalServerError);
+            head_started_ = true;
+            if constexpr (std::is_same_v<T, ResponseHead>) {
+                if (parser_.request().version == HttpVersion::http_1_0()) {
+                    value.response.version = HttpVersion::http_1_0();
+                    if (value.framing == BodyFraming::chunked) {
+                        value.framing = BodyFraming::close_delimited;
+                        value.response.headers.remove("Transfer-Encoding");
+                    }
+                }
+                if (value.framing == BodyFraming::close_delimited) close_demanded_ = true;
+            }
+            // Application may demand close but may never override client/limit close.
+            for (auto field : value.response.headers.get_all("Connection")) {
+                while (!field.empty()) {
+                    const auto comma = field.find(',');
+                    if (header_name_equals(trim_ws(field.substr(0, comma)), "close")) close_demanded_ = true;
+                    if (comma == std::string_view::npos) break;
+                    field.remove_prefix(comma + 1);
+                }
+            }
+            value.response.headers.set("Connection", close_demanded_ ? "close" : "keep-alive");
+            if (!value.response.headers.contains("Date")) value.response.headers.set("Date", format_http_date(config_.fixed_wall_time.value_or(wall_clock_->now())));
+            stats_.response_status = value.response.status_code;
+            if constexpr (std::is_same_v<T, ResponseHead>) {
+                result = writer_.begin(std::move(value.response), parser_.request().method, value.framing, value.length);
+            } else result = writer_.buffered(value.response, parser_.request().method);
+        } else if constexpr (std::is_same_v<T, ResponseBody>) {
+            result = value.bytes ? writer_.body(*value.bytes) : core::Result<void>(invalid_config());
+        } else if constexpr (std::is_same_v<T, ResponseFinished>) {
+            result = writer_.finish(value.trailers);
+            if (result && writer_.complete()) return finish_response();
+        }
+        if (!result) return transaction_failure(result.error(), StatusCode::InternalServerError);
+        writing_ = true; waiting_ = false;
+        stats_.peak_output_bytes = std::max(stats_.peak_output_bytes, writer_.pending().size());
+        last_progress_ = steady_clock_->now();
+        return next_action();
+    }, step);
+}
+
+concurrency::Action HttpSession::finish_response() {
+    config_.metrics->record(core::Metric::responses_completed);
+    config_.metrics->record(core::Metric::body_bytes, writer_.body_bytes());
+    if (cancellation_) cancellation_->cancel();
+    transaction_.reset(); work_.reset();
+    stats_.response_sent = true;
+    ++stats_.requests_served; ++requests_served_;
+    if (!should_keep_alive()) return close();
+    writer_ = ResponseWriter(config_.max_output_bytes);
+    head_started_ = false; writing_ = false; waiting_ = false;
+    parser_.reset();
+    last_progress_ = steady_clock_->now();
+    if (!input_.empty()) return process_parsed_input();
     return next_action();
 }
 
@@ -284,6 +388,9 @@ concurrency::Action HttpSession::process_parsed_input() {
         // The stream can no longer be framed, so answer and close.
         return prepare_response(parser_.error());
     }
+    if (peer_eof_) {
+        return close(core::make_error(core::ErrorCategory::eof, "HTTP request", 0, "Incomplete request at EOF"));
+    }
     if (read_capacity() == 0) {
         // An incomplete request has filled a bound the parser cannot see past.
         if (parser_.head_bytes() < config_.max_header_bytes) stats_.input_limit_exceeded = true;
@@ -298,10 +405,21 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
     if (is_closed()) return CloseAction{stats_.error};
     return event.visit([&](const auto& value) -> Action {
         using T = std::decay_t<decltype(value)>;
-        if constexpr (std::is_same_v<T, ReadDataEvent>) {
+        if constexpr (!std::is_same_v<T, StopEvent> && !std::is_same_v<T, WorkEvent>) {
+            if (value.id.transaction.sequence != 0 && value.id != downstream_id()) return next_action();
+            if (++downstream_sequence_ == 0) return close(core::make_error(core::ErrorCategory::io_error, "HTTP operation sequence exhausted"));
+        }
+        if constexpr (std::is_same_v<T, WorkEvent>) {
+            if (!work_ || value.id != work_->id) return next_action();
+            if (value.status == WorkStatus::rejected) config_.metrics->record(core::Metric::work_rejected);
+            if (value.status == WorkStatus::cancelled) config_.metrics->record(core::Metric::work_cancelled);
+            work_.reset();
+            last_progress_ = steady_clock_->now();
+            return advance_transaction(value);
+        } else if constexpr (std::is_same_v<T, ReadDataEvent>) {
             auto pending = next_action();
             if (pending.is_close()) return pending;
-            if (writing_ || value.data.empty() || value.data.size() > read_capacity()) {
+            if (writing_ || transaction_ || value.data.empty() || value.data.size() > read_capacity()) {
                 return close(core::make_error(core::ErrorCategory::io_error, "HTTP read", 0, "Invalid read event"));
             }
             waiting_ = false;
@@ -311,36 +429,25 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
             return process_parsed_input();
         } else if constexpr (std::is_same_v<T, ReadEofEvent>) {
             peer_eof_ = true;
-            if (writing_) return next_action();
+            if (writing_ || transaction_) return next_action();
             if (parser_.head_bytes() == 0 && input_.empty()) return close();
             return close(core::make_error(core::ErrorCategory::eof, "HTTP header", 0, "Incomplete header block"));
         } else if constexpr (std::is_same_v<T, WriteCompleteEvent>) {
             auto pending = next_action();
             if (pending.is_close()) return pending;
-            if (!writing_ || value.bytes_transferred == 0 ||
-                value.bytes_transferred > output_.size() - output_offset_) {
-                return close(core::make_error(core::ErrorCategory::io_error, "HTTP write", 0, "Invalid write event"));
-            }
-            output_offset_ += value.bytes_transferred;
-            last_progress_ = steady_clock_->now();
-            waiting_ = false;
-            if (output_offset_ == output_.size()) {
-                stats_.response_sent = true;
-                ++stats_.requests_served;
-                ++requests_served_;
-                if (!should_keep_alive()) {
-                    return close();
+            if (!writing_) return close(core::make_error(core::ErrorCategory::io_error, "HTTP write"));
+            auto ack = writer_.acknowledge(value.bytes_transferred);
+            if (!ack) return close(ack.error());
+            config_.metrics->record(core::Metric::wire_bytes, value.bytes_transferred);
+            last_progress_ = steady_clock_->now(); waiting_ = false;
+            if (writer_.pending().empty()) {
+                if (writer_.complete()) return finish_response();
+                if (!writer_.body_allowed()) {
+                    auto finished = writer_.finish();
+                    if (!finished) return close(finished.error());
+                    return finish_response();
                 }
-                output_.clear();
-                output_offset_ = 0;
-                writing_ = false;
-                waiting_ = false;
-                parser_.reset();
-                last_progress_ = steady_clock_->now();
-                if (!input_.empty()) {
-                    return process_parsed_input();
-                }
-                return next_action();
+                return advance_transaction(OutputDrained{writer_.body_capacity()});
             }
             return next_action();
         } else if constexpr (std::is_same_v<T, WouldBlockEvent>) {
@@ -362,16 +469,8 @@ concurrency::Action HttpSession::on_event(const concurrency::Event& event) {
             close_demanded_ = true;
             return next_action();
         } else if constexpr (std::is_same_v<T, TimeoutEvent>) {
-            if (requests_served_ > 0 && parser_.head_bytes() == 0 && input_.empty()) {
-                return close();
-            }
-            if (writing_) {
-                return close(core::make_error(core::ErrorCategory::timed_out, "HTTP output progress"));
-            }
-            if (parser_.head_bytes() > 0 || !input_.empty()) {
-                return close(core::make_error(core::ErrorCategory::timed_out, "HTTP request progress"));
-            }
-            return close(core::make_error(core::ErrorCategory::timed_out, "HTTP progress"));
+            // A timer from a previous request/phase may arrive after progress.
+            return next_action();
         } else if constexpr (std::is_same_v<T, ErrorEvent>) {
             return close(value.error);
         }

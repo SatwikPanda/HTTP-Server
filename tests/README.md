@@ -310,3 +310,26 @@ Name lookup is synchronous and should run outside an event loop. The outbound
 adapter takes already resolved candidates and shares one deadline across fresh
 socket attempts. IPv6 candidates with scope IDs are currently unsupported by
 Endpoint and are filtered; ordinary IPv4/IPv6 loopback is tested.
+
+## Parallel foundation (P0)
+
+The strict baseline now includes the two production-backed P0 suites:
+`parallel_foundation_test` and `parallel_work_test`. All 20 tests pass locally on
+Windows GCC 16.2, Clang 22.1.8 and MSVC 19.29; Linux/macOS results for P0 remain
+pending. Exact evidence is in [the handoff](../docs/branches/parallel-foundation.md).
+
+```powershell
+ctest --test-dir build/agents -C Release -L parallel_foundation --no-tests=error --output-on-failure
+ctest --test-dir build/agents -C Release -L 'milestone0[1-9]|parallel_foundation' --no-tests=error --output-on-failure
+```
+
+Configure with `-DBUILD_TESTING=ON -DREQUIRE_ALL_MILESTONES=ON` first. The root
+CMake file requires the explicit 20-test inventory; empty label selection is an
+error with these commands. Future local modules use `add_project_test` from
+`cmake/ProjectTests.cmake` and the optional paths in `cmake/ParallelModules.cmake`.
+
+P0 covers bounded streaming, all framing/no-body modes, parser pause/resume,
+writer commitment and abort, identity checks, file/resource ownership, job
+admission/cancellation/deadlines, actual upstream/client loopback, HTTP/1.0
+fallback, shared HTTP utilities, configuration and reservation rollback/pinning.
+See [contracts and fixtures](../docs/parallel_contracts.md) before extending them.

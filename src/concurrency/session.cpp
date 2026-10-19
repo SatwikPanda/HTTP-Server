@@ -154,6 +154,11 @@ Action EchoSession::on_event(const Event& event) {
             state_ = SessionState::closed;
             error_ = e.error;
             return CloseAction{error_};
+        } else {
+            closed_ = true;
+            state_ = SessionState::closed;
+            error_ = core::make_error(core::ErrorCategory::invalid_argument, "unexpected echo work completion");
+            return CloseAction{error_};
         }
     });
 }

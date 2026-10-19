@@ -1,7 +1,2 @@
 .cache
 /build
-*.md
-!/AGENTS.md
-!/CLAUDE.md
-!tests/README.md
-!IMPLEMENTATION_ROADMAP.md

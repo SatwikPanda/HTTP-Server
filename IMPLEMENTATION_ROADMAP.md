@@ -18,6 +18,19 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Verification record — 2026-10-20 (P0 and milestone 09 corrections)
+
+- Fixed milestone 09 EOF/pipeline, stale timeout and abstract-channel stop
+  handling; enabled keep-alive in the executable and made Date comparisons deterministic.
+- Implemented the parallel foundation described in
+  [roadmap/P0-parallel-foundation.md](roadmap/P0-parallel-foundation.md), with
+  [exact contracts](docs/parallel_contracts.md) and a
+  [verification handoff](docs/branches/parallel-foundation.md).
+- The strict 01–09 plus `parallel_foundation` gate passes all 20 runtime tests
+  without skips on Windows GCC 16.2, Clang 22.1.8 and MSVC 19.29, Release.
+  Linux/macOS and new remote CI results are pending. P0 does not mark milestones
+  10–32 complete. The delivered working tree is uncommitted.
+
 ## Verification record — 2026-10-20 (Milestone 09)
 
 - Milestone 09 is implemented: persistent connections, keep-alive, and pipelining

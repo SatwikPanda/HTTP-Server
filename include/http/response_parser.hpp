@@ -17,9 +17,17 @@
 
 namespace http {
 
+enum class ResponseEventKind { need_more, paused, informational_head, final_head, body, trailers, complete, error };
+struct ResponseEvent {
+    std::size_t consumed{};
+    ResponseEventKind kind{ResponseEventKind::need_more};
+    // Borrows the input passed to consume_stream; valid while that input lives.
+    std::span<const std::byte> body{};
+};
+
 // Incremental HTTP/1.x response parser for upstream origin responses.
 // Operates under the context of the originating request method (e.g. HEAD).
-// Bodies are transfer-decoded into a bounded string; Content-Encoding is opaque.
+// Transfer-decodes into bounded events or a bounded collector; encoding is opaque.
 // Completion leaves the next response's bytes unconsumed. Interim heads are
 // retained separately under the same cumulative header-byte budget.
 class ResponseParser {
@@ -28,6 +36,10 @@ public:
 
     ConsumeResult consume(std::span<const std::byte> bytes);
     ConsumeResult consume(std::string_view bytes);
+    // Use either consume or consume_stream between resets, never both. Each call
+    // delivers at most one event. Zero body capacity consumes no payload bytes.
+    ResponseEvent consume_stream(std::span<const std::byte> bytes, std::size_t body_capacity);
+    [[nodiscard]] std::uint64_t body_bytes() const noexcept { return body_bytes_; }
 
     // Signals stream closure from peer (EOF).
     // For close-delimited responses, EOF is normal completion.
@@ -52,6 +64,12 @@ public:
     }
 
 private:
+    ResponseEvent consume_next(std::span<const std::byte> bytes, std::size_t capacity);
+    enum class Mode { unset, buffered, streaming };
+    Mode mode_{Mode::unset};
+    std::uint64_t body_bytes_{};
+    bool final_head_delivered_{};
+    bool trailers_delivered_{};
     enum class State {
         status_line,
         headers,

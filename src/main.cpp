@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
     http::HttpServerConfig config;
     config.endpoint = ep_res.value();
     config.session_config.max_header_bytes = buffer_size;
+    config.session_config.keep_alive = true;
     // The connection buffer holds the head being parsed, so it must not be the
     // tighter bound when a larger header limit is requested.
     config.session_config.max_input_bytes = std::max(config.session_config.max_input_bytes, buffer_size);

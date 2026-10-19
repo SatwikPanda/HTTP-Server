@@ -4,6 +4,7 @@
 #include "core/error.hpp"
 #include "core/id.hpp"
 #include "net/poller.hpp"
+#include "concurrency/work.hpp"
 
 #include <chrono>
 #include <cstddef>
@@ -26,16 +27,19 @@ enum class SessionState {
 
 struct ReadAction {
     std::size_t max_bytes{0};
+    core::OperationId id{};
     bool operator==(const ReadAction&) const = default;
 };
 
 struct WriteAction {
     std::span<const std::byte> data{};
+    core::OperationId id{};
 };
 
 struct WaitAction {
     net::Interest interest{net::Interest::none};
     std::chrono::steady_clock::time_point deadline{};
+    core::OperationId id{};
 };
 
 struct CloseAction {
@@ -44,13 +48,15 @@ struct CloseAction {
 
 class Action {
 public:
-    using Storage = std::variant<std::monostate, ReadAction, WriteAction, WaitAction, CloseAction>;
+    using Storage = std::variant<std::monostate, ReadAction, WriteAction, WaitAction, CloseAction, WorkAction>;
 
     Action() noexcept = default;
     Action(ReadAction a) noexcept : storage_(a) {}
     Action(WriteAction a) noexcept : storage_(a) {}
     Action(WaitAction a) noexcept : storage_(a) {}
     Action(CloseAction a) noexcept : storage_(std::move(a)) {}
+    Action(WorkAction a) noexcept : storage_(std::move(a)) {}
+    [[nodiscard]] const WorkAction* as_work() const noexcept { return std::get_if<WorkAction>(&storage_); }
 
     [[nodiscard]] bool is_none() const noexcept { return std::holds_alternative<std::monostate>(storage_); }
     [[nodiscard]] bool is_read() const noexcept { return std::holds_alternative<ReadAction>(storage_); }
@@ -76,24 +82,28 @@ private:
 
 struct ReadDataEvent {
     std::span<const std::byte> data;
+    core::OperationId id{};
 };
 
-struct ReadEofEvent {};
+struct ReadEofEvent { core::OperationId id{}; };
 
 struct WriteCompleteEvent {
     std::size_t bytes_transferred{0};
+    core::OperationId id{};
 };
 
 struct ReadyEvent {
     bool readable{false};
     bool writable{false};
+    core::OperationId id{};
 };
 
 struct WouldBlockEvent {
     net::Interest interest{net::Interest::none};
+    core::OperationId id{};
 };
 
-struct TimeoutEvent {};
+struct TimeoutEvent { core::OperationId id{}; };
 
 struct StopEvent {
     std::chrono::milliseconds drain_timeout{0};
@@ -101,6 +111,7 @@ struct StopEvent {
 
 struct ErrorEvent {
     core::Error error;
+    core::OperationId id{};
 };
 
 class Event {
@@ -113,11 +124,12 @@ public:
         WouldBlockEvent,
         TimeoutEvent,
         StopEvent,
-        ErrorEvent
+        ErrorEvent,
+        WorkEvent
     >;
 
     template <typename T>
-    Event(T&& val) noexcept : storage_(std::forward<T>(val)) {}
+    Event(T&& val) : storage_(std::forward<T>(val)) {}
 
     [[nodiscard]] const Storage& storage() const noexcept { return storage_; }
 

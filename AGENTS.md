@@ -19,8 +19,8 @@ Read any applicable directory-specific instructions before editing those files.
   and generated compression require an explicit scope change.
 - Read `IMPLEMENTATION_ROADMAP.md`, `tests/README.md`, `CMakeLists.txt`, and the
   relevant implementation and tests before making a change. Read
-  `PROJECT_ARCHITECTURE.md` when present; it is currently ignored by Git and may
-  be absent from a fresh checkout. Preserve it if it exists.
+  `PROJECT_ARCHITECTURE.md` when present; it may be absent from a fresh checkout.
+  Preserve it if it exists.
 - The architecture and roadmap describe intended design. Actual source files,
   CMake target membership, and executed tests establish current behavior. Treat
   proposed signatures and CLI examples as plans rather than implemented APIs.
@@ -29,7 +29,10 @@ Read any applicable directory-specific instructions before editing those files.
   on Windows; milestone 06 also has historical local Linux verification.
   Linux/macOS acceptance of milestones 07–09 and new CI verification are pending.
   Recheck the roadmap and adapters instead of assuming this snapshot remains
-  current. The executable currently runs a fixed-response HTTP demo.
+  current. P0 is implemented and its strict 01–09/P0 gate passes locally on
+  Windows GCC, Clang and MSVC; Linux/macOS evidence for P0 is pending. Read
+  `docs/parallel_contracts.md` and `docs/branches/parallel-foundation.md` before
+  extending parallel tracks. The executable runs a persistent fixed-response HTTP demo.
 
 ## Working pattern
 
@@ -135,7 +138,7 @@ Enforce the recorded completed milestone gate with:
 ```powershell
 cmake -S . -B build/agents -DREQUIRE_ALL_MILESTONES=ON
 cmake --build build/agents --config Release
-ctest --test-dir build/agents -C Release -L 'milestone0[123456789]' --output-on-failure
+ctest --test-dir build/agents -C Release -L 'milestone0[123456789]|parallel_foundation' --no-tests=error --output-on-failure
 ```
 
 - Extend the strict label selection as additional milestones are verified. To

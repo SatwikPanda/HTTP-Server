@@ -11,6 +11,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Core library (Result, Error)
 add_library(core STATIC
+    src/core/config.cpp
+    src/core/budget.cpp
     src/core/error.cpp
 )
 target_include_directories(core PUBLIC
@@ -59,6 +61,12 @@ add_library(http STATIC
     src/http/version.cpp
     src/http/header.cpp
     src/http/date.cpp
+    src/http/date_parser.cpp
+    src/http/target.cpp
+    src/http/validators.cpp
+    src/http/response_writer.cpp
+    src/http/application.cpp
+    src/http/reference_application.cpp
     src/http/serializer.cpp
     src/http/limits.cpp
     src/http/framing.cpp
@@ -73,10 +81,13 @@ target_include_directories(http PUBLIC
 target_compile_features(http PUBLIC cxx_std_20)
 set_target_properties(http PROPERTIES CXX_EXTENSIONS OFF)
 find_package(Threads REQUIRED)
+target_link_libraries(core PUBLIC Threads::Threads)
 target_link_libraries(net PUBLIC Threads::Threads)
 
 # Concurrency library (ConnectionSession, EchoSession, SingleSessionDriver)
 add_library(concurrency STATIC
+    src/concurrency/work.cpp
+    src/concurrency/file_metadata.cpp
     src/concurrency/session.cpp
     src/concurrency/single_session_driver.cpp
 )
@@ -105,23 +116,14 @@ target_link_libraries(httpserver PRIVATE http concurrency net Threads::Threads)
 
 include(CTest)
 option(REQUIRE_ALL_MILESTONES "Fail rather than skip unimplemented milestone acceptance suites" OFF)
+include(cmake/ProjectTests.cmake)
 if(BUILD_TESTING)
     # Adding a future production adapter must trigger reconfiguration and rebuild
     # its suite; __has_include alone does not track previously absent headers.
     file(GLOB future_adapters CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/milestone0[456]_adapter.hpp")
     function(add_milestone_test name milestone)
-        add_executable(${name} tests/${name}.cpp)
-        target_link_libraries(${name} PRIVATE concurrency net http Threads::Threads)
-        if(MSVC)
-            target_compile_options(${name} PRIVATE /UNDEBUG)
-        else()
-            target_compile_options(${name} PRIVATE -UNDEBUG)
-        endif()
-        add_test(NAME ${name} COMMAND ${name})
-        set_tests_properties(${name} PROPERTIES TIMEOUT 30 LABELS "milestone${milestone}")
-        if(NOT REQUIRE_ALL_MILESTONES)
-            set_tests_properties(${name} PROPERTIES SKIP_RETURN_CODE 77)
-        endif()
+        add_project_test(${name} SOURCES tests/${name}.cpp
+            LINKS concurrency net http Threads::Threads LABELS milestone${milestone})
     endfunction()
     add_milestone_test(socket_ownership_test 01)
     add_milestone_test(echo_test_double_test 02)
@@ -157,4 +159,17 @@ if(BUILD_TESTING)
     add_test(NAME cli_validation_test COMMAND ${CMAKE_COMMAND}
         "-DSERVER=$<TARGET_FILE:httpserver>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_validation_test.cmake")
     set_tests_properties(cli_validation_test PROPERTIES TIMEOUT 10 LABELS "milestone03")
+endif()
+
+include(cmake/ParallelModules.cmake)
+if(BUILD_TESTING)
+    add_project_test(parallel_foundation_test SOURCES tests/parallel_foundation_test.cpp
+        LINKS http concurrency core LABELS parallel_foundation)
+    add_project_test(parallel_work_test SOURCES tests/parallel_work_test.cpp
+        LINKS http concurrency net Threads::Threads LABELS parallel_foundation TIMEOUT 30)
+    require_project_tests(socket_ownership_test echo_test_double_test echo_integration_test
+        milestone01_test milestone02_test milestone03_test milestone04_test milestone05_test
+        milestone06_test milestone07_test milestone08_test milestone09_test
+        http_serialization_test http_session_test http_integration_test http_parser_test
+        http_response_test cli_validation_test parallel_foundation_test parallel_work_test)
 endif()

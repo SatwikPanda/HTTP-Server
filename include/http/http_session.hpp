@@ -3,8 +3,11 @@
 #include "concurrency/session.hpp"
 #include "core/clock.hpp"
 #include "core/result.hpp"
+#include "core/metrics.hpp"
 #include "http/request_parser.hpp"
 #include "http/response.hpp"
+#include "http/application.hpp"
+#include "http/response_writer.hpp"
 #include "net/socket.hpp"
 #include "net/stream.hpp"
 
@@ -37,6 +40,8 @@ struct HttpSessionConfig {
     std::string content_type{"text/plain; charset=utf-8"};
     StatusCode response_status{StatusCode::OK};
     std::optional<core::SystemTimePoint> fixed_wall_time;
+    std::shared_ptr<const TransactionFactory> application;
+    core::MetricsSink* metrics{&core::null_metrics()}; // borrowed; must outlive sessions
 };
 
 struct HttpSessionStats {
@@ -66,7 +71,8 @@ struct HttpSessionStats {
     const core::SystemClock& clock = core::real_system_clock()
 );
 
-// Parses requests and answers bodyless GET/HEAD with the fixed demo response.
+// Parses bodyless GET/HEAD and executes an injected application transaction.
+// A fixed-response demo factory is used when no application is supplied.
 // Supports keep-alive and ordered pipelined requests when keep_alive is configured.
 // Rejects malformed framing, nonempty GET/HEAD, Expect, disabled methods, and
 // Upgrade, then closes. Clocks must outlive the session.
@@ -78,6 +84,7 @@ public:
         const core::SteadyClock& steady_clock = core::real_steady_clock(),
         const core::SystemClock& wall_clock = core::real_system_clock()
     );
+    ~HttpSession() override { if (cancellation_) cancellation_->cancel(); }
 
     [[nodiscard]] concurrency::Action initial_action() override;
     [[nodiscard]] concurrency::Action on_event(const concurrency::Event& event) override;
@@ -102,6 +109,10 @@ private:
     [[nodiscard]] concurrency::Action close(core::Error error = {});
     [[nodiscard]] concurrency::Action prepare_response(ParseError rejected);
     [[nodiscard]] concurrency::Action process_parsed_input();
+    [[nodiscard]] concurrency::Action advance_transaction(const TransactionEvent& event);
+    [[nodiscard]] concurrency::Action transaction_failure(core::Error error, StatusCode status);
+    [[nodiscard]] concurrency::Action finish_response();
+    [[nodiscard]] core::OperationId downstream_id() const noexcept;
     [[nodiscard]] std::size_t read_capacity() const noexcept;
     [[nodiscard]] bool should_keep_alive() const noexcept;
     [[nodiscard]] std::chrono::milliseconds effective_idle_timeout() const noexcept;
@@ -118,8 +129,13 @@ private:
     HttpSessionStats stats_;
     RequestParser parser_;
     std::string input_;
-    std::string output_;
-    std::size_t output_offset_{};
+    ResponseWriter writer_;
+    std::unique_ptr<Transaction> transaction_;
+    std::optional<concurrency::WorkAction> work_;
+    std::shared_ptr<concurrency::Cancellation> cancellation_;
+    std::uint64_t operation_sequence_{};
+    std::uint64_t downstream_sequence_{1};
+    bool head_started_{};
     std::size_t requests_served_{};
     bool writing_{};
     bool waiting_{};

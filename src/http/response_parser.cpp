@@ -33,61 +33,71 @@ ConsumeResult ResponseParser::consume(std::string_view bytes) {
 }
 
 ConsumeResult ResponseParser::consume(std::span<const std::byte> bytes) {
-    if (state_ == State::complete) return {0, ParseEvent::complete};
-    if (state_ == State::failed) return {0, ParseEvent::error};
-
-    std::size_t consumed = 0;
-    while (consumed < bytes.size()) {
-        if (state_ == State::complete) return {consumed, ParseEvent::complete};
-        if (state_ == State::failed) return {consumed, ParseEvent::error};
-
-        if (state_ == State::body_close_delimited) {
-            const std::size_t available = bytes.size() - consumed;
-            if (available > limits_.max_body_bytes - response_.body.size()) {
-                fail(ParseError::body_too_large);
-                return {consumed, ParseEvent::error};
-            }
-            const char* ptr = reinterpret_cast<const char*>(bytes.data() + consumed);
-            response_.body.append(ptr, available);
-            consumed += available;
-            continue;
-        }
-
-        if (state_ == State::body_fixed_length) {
-            const std::size_t available = bytes.size() - consumed;
-            const std::size_t take = std::min(static_cast<std::uint64_t>(available), body_bytes_remaining_);
-            const char* ptr = reinterpret_cast<const char*>(bytes.data() + consumed);
-            response_.body.append(ptr, take);
-            body_bytes_remaining_ -= take;
-            consumed += take;
-            if (body_bytes_remaining_ == 0) {
-                state_ = State::complete;
-                return {consumed, ParseEvent::complete};
-            }
-            continue;
-        }
-
-        if (state_ == State::chunk_data) {
-            const std::size_t available = bytes.size() - consumed;
-            const std::size_t take = std::min(static_cast<std::uint64_t>(available), chunk_bytes_remaining_);
-            const char* ptr = reinterpret_cast<const char*>(bytes.data() + consumed);
-            response_.body.append(ptr, take);
-            chunk_bytes_remaining_ -= take;
-            consumed += take;
-            if (chunk_bytes_remaining_ == 0) {
-                state_ = State::chunk_data_crlf;
-                chunk_crlf_phase_ = 0;
-            }
-            continue;
-        }
-
-        const auto byte = static_cast<char>(bytes[consumed]);
-        ++consumed;
-        if (!accept_byte(byte)) return {consumed, ParseEvent::error};
-        if (state_ == State::complete) return {consumed, ParseEvent::complete};
+    if (mode_ == Mode::streaming) { fail(ParseError::malformed_status_line); return {0, ParseEvent::error}; }
+    mode_ = Mode::buffered;
+    std::size_t total = 0;
+    for (;;) {
+        auto event = consume_next(bytes.subspan(total), bytes.size() - total);
+        total += event.consumed;
+        if (event.kind == ResponseEventKind::body) {
+            response_.body.append(reinterpret_cast<const char*>(event.body.data()), event.body.size());
+        } else if (event.kind == ResponseEventKind::complete) return {total, ParseEvent::complete};
+        else if (event.kind == ResponseEventKind::error) return {total, ParseEvent::error};
+        else if (event.kind == ResponseEventKind::need_more || event.kind == ResponseEventKind::paused)
+            return {total, ParseEvent::need_more};
     }
+}
 
-    return {consumed, state_ == State::complete ? ParseEvent::complete : ParseEvent::need_more};
+ResponseEvent ResponseParser::consume_stream(std::span<const std::byte> bytes, std::size_t capacity) {
+    if (mode_ == Mode::buffered) { fail(ParseError::malformed_status_line); return {0, ResponseEventKind::error, {}}; }
+    mode_ = Mode::streaming;
+    return consume_next(bytes, capacity);
+}
+
+ResponseEvent ResponseParser::consume_next(std::span<const std::byte> bytes, std::size_t capacity) {
+    std::size_t consumed = 0;
+    for (;;) {
+        if (failed()) return {consumed, ResponseEventKind::error, {}};
+        if (complete()) {
+            if (!final_head_delivered_) {
+                final_head_delivered_ = true;
+                return {consumed, ResponseEventKind::final_head, {}};
+            }
+            if (framing_ == BodyFraming::chunked && !trailers_delivered_) {
+                trailers_delivered_ = true;
+                return {consumed, ResponseEventKind::trailers, {}};
+            }
+            return {consumed, ResponseEventKind::complete, {}};
+        }
+        if (consumed == bytes.size()) return {consumed, ResponseEventKind::need_more, {}};
+        if (state_ == State::body_fixed_length || state_ == State::chunk_data || state_ == State::body_close_delimited) {
+            if (capacity == 0) return {consumed, ResponseEventKind::paused, {}};
+            auto take = std::min(bytes.size() - consumed, capacity);
+            if (state_ == State::body_fixed_length) take = static_cast<std::size_t>(std::min<std::uint64_t>(take, body_bytes_remaining_));
+            if (state_ == State::chunk_data) take = static_cast<std::size_t>(std::min<std::uint64_t>(take, chunk_bytes_remaining_));
+            if (take > limits_.max_body_bytes - body_bytes_) { fail(ParseError::body_too_large); continue; }
+            const auto body = bytes.subspan(consumed, take);
+            consumed += take;
+            body_bytes_ += take;
+            if (state_ == State::body_fixed_length) {
+                body_bytes_remaining_ -= take;
+                if (body_bytes_remaining_ == 0) state_ = State::complete;
+            } else if (state_ == State::chunk_data) {
+                chunk_bytes_remaining_ -= take;
+                if (chunk_bytes_remaining_ == 0) { state_ = State::chunk_data_crlf; chunk_crlf_phase_ = 0; }
+            }
+            return {consumed, ResponseEventKind::body, body};
+        }
+        const auto previous = state_;
+        const auto interim_count = informational_responses_.size();
+        if (!accept_byte(static_cast<char>(bytes[consumed++]))) continue;
+        if (informational_responses_.size() != interim_count)
+            return {consumed, ResponseEventKind::informational_head, {}};
+        if (previous == State::headers && state_ != State::headers) {
+            final_head_delivered_ = true;
+            return {consumed, ResponseEventKind::final_head, {}};
+        }
+    }
 }
 
 bool ResponseParser::finish_on_eof() {
@@ -102,6 +112,10 @@ bool ResponseParser::finish_on_eof() {
 }
 
 void ResponseParser::reset() {
+    mode_ = Mode::unset;
+    body_bytes_ = 0;
+    final_head_delivered_ = false;
+    trailers_delivered_ = false;
     state_ = State::status_line;
     error_ = ParseError::none;
     response_ = Response{};
@@ -170,7 +184,7 @@ bool ResponseParser::accept_byte(char byte) {
                 trailer_line_.clear();
                 trailer_bytes_ = 0;
             } else {
-                if (chunk_size_ > limits_.max_body_bytes - response_.body.size()) {
+                if (chunk_size_ > limits_.max_body_bytes - body_bytes_) {
                     return fail(ParseError::body_too_large);
                 }
                 chunk_bytes_remaining_ = chunk_size_;
@@ -215,7 +229,7 @@ bool ResponseParser::accept_byte(char byte) {
                 trailer_line_.clear();
                 trailer_bytes_ = 0;
             } else {
-                if (chunk_size_ > limits_.max_body_bytes - response_.body.size()) {
+                if (chunk_size_ > limits_.max_body_bytes - body_bytes_) {
                     return fail(ParseError::body_too_large);
                 }
                 chunk_bytes_remaining_ = chunk_size_;
@@ -356,7 +370,7 @@ bool ResponseParser::finish_head() {
             return fail(ParseError::body_too_large);
         }
         body_bytes_remaining_ = rf.content_length;
-        response_.body.reserve(static_cast<std::size_t>(rf.content_length));
+        if (mode_ == Mode::buffered) response_.body.reserve(static_cast<std::size_t>(rf.content_length));
         state_ = State::body_fixed_length;
         return true;
     }

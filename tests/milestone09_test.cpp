@@ -1,4 +1,5 @@
 #include "core/clock.hpp"
+#include "concurrency/single_session_driver.hpp"
 #include "core/result.hpp"
 #include "http/http_server.hpp"
 #include "http/http_session.hpp"
@@ -152,6 +153,7 @@ void test_pipelined_fragmented_reads() {
         http::HttpSessionConfig config;
         config.keep_alive = true;
         config.max_requests_per_connection = 5;
+        config.fixed_wall_time = std::chrono::system_clock::from_time_t(784111777);
         auto stats = http::run_http_session(ch, config);
         CHECK(stats.completed_cleanly && stats.requests_served == 3);
         baseline_output = ch.output();
@@ -165,6 +167,7 @@ void test_pipelined_fragmented_reads() {
         http::HttpSessionConfig config;
         config.keep_alive = true;
         config.max_requests_per_connection = 5;
+        config.fixed_wall_time = std::chrono::system_clock::from_time_t(784111777);
 
         auto stats = http::run_http_session(ch, config);
         CHECK(stats.completed_cleanly);
@@ -561,6 +564,41 @@ void test_real_socket_loopback_integration() {
     std::cout << "[PASS] test_real_socket_loopback_integration" << std::endl;
 }
 
+void test_stale_timer_eof_and_stop() {
+    http::HttpSessionConfig config;
+    config.keep_alive = true;
+    config.output_progress_timeout = 100ms;
+    core::ManualSteadyClock clock;
+    http::HttpSession session(config, {4, 1}, clock);
+    const std::string requests = "GET /1 HTTP/1.1\r\nHost: local\r\n\r\nGET /2 HTTP/1.1\r\nHost: local\r\n\r\n";
+    auto action = session.on_event(concurrency::ReadDataEvent{std::as_bytes(std::span(requests))});
+    CHECK(action.is_write());
+    clock.advance(50ms);
+    action = session.on_event(concurrency::WriteCompleteEvent{1});
+    clock.advance(60ms); // timer from before the partial write is stale
+    action = session.on_event(concurrency::TimeoutEvent{});
+    CHECK(action.is_write() && !session.is_closed());
+    action = session.on_event(concurrency::ReadEofEvent{});
+    action = session.on_event(concurrency::WriteCompleteEvent{action.as_write()->data.size()});
+    CHECK(action.is_write());
+    action = session.on_event(concurrency::WriteCompleteEvent{action.as_write()->data.size()});
+    CHECK(action.is_close() && !session.error() && session.stats().requests_served == 2);
+
+    http::HttpSession partial(config);
+    const std::string incomplete = "GET /1 HTTP/1.1\r\nHost: local\r\n\r\nGET /2";
+    action = partial.on_event(concurrency::ReadDataEvent{std::as_bytes(std::span(incomplete))});
+    action = partial.on_event(concurrency::ReadEofEvent{});
+    action = partial.on_event(concurrency::WriteCompleteEvent{action.as_write()->data.size()});
+    CHECK(action.is_close() && partial.error().category == core::ErrorCategory::eof);
+    CHECK(partial.stats().requests_served == 1);
+
+    ControlledChannel channel;
+    http::HttpSession stopped(config);
+    concurrency::SingleSessionDriver driver;
+    const auto stats = driver.drive_channel(channel, stopped, 1ms, [] { return true; });
+    CHECK(stats.completed_cleanly && stopped.is_closed());
+}
+
 } // namespace
 
 int main() {
@@ -571,6 +609,7 @@ int main() {
     test_http_1_0_persistence_semantics();
     test_max_requests_per_connection();
     test_deadlines_and_timeouts();
+    test_stale_timer_eof_and_stop();
     test_error_and_rejected_body_isolation();
     test_real_socket_loopback_integration();
     std::cout << "All Milestone 09 Tests Passed!" << std::endl;

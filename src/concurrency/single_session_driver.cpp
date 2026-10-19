@@ -17,6 +17,7 @@ DriverStats SingleSessionDriver::drive(
     const std::function<bool()>& stop_requested
 ) {
     DriverStats stats{};
+    ReferenceWorkExecutor work_executor;
     std::vector<std::byte> read_buffer;
     Action action = session.initial_action();
 
@@ -33,7 +34,13 @@ DriverStats SingleSessionDriver::drive(
             break;
         }
 
+        if (const auto* work = action.as_work()) {
+            auto completion = work_executor.execute(*work, stop_requested);
+            action = session.on_event(completion);
+            continue;
+        }
         if (action.is_read()) {
+            const auto id = action.as_read()->id;
             const std::size_t max_bytes = action.as_read()->max_bytes;
             if (read_buffer.size() < max_bytes) {
                 read_buffer.resize(max_bytes);
@@ -47,21 +54,22 @@ DriverStats SingleSessionDriver::drive(
                     break;
                 }
                 stats.total_bytes_read += count;
-                action = session.on_event(ReadDataEvent{std::span(read_buffer.data(), count)});
+                action = session.on_event(ReadDataEvent{std::span(read_buffer.data(), count), id});
             } else if (read_res.is_eof()) {
-                action = session.on_event(ReadEofEvent{});
+                action = session.on_event(ReadEofEvent{id});
             } else if (read_res.would_block()) {
                 ++stats.would_block_read_count;
-                action = session.on_event(WouldBlockEvent{net::Interest::read});
+                action = session.on_event(WouldBlockEvent{net::Interest::read, id});
             } else {
                 stats.error = read_res.error;
                 action = session.on_event(ErrorEvent{read_res.error});
                 break;
             }
         } else if (action.is_write()) {
+            const auto id = action.as_write()->id;
             const auto data = action.as_write()->data;
             if (data.empty()) {
-                action = session.on_event(WriteCompleteEvent{0});
+                action = session.on_event(WriteCompleteEvent{0, id});
                 continue;
             }
             auto write_res = socket.write_some(data);
@@ -76,16 +84,17 @@ DriverStats SingleSessionDriver::drive(
                     ++stats.short_write_count;
                 }
                 stats.total_bytes_written += count;
-                action = session.on_event(WriteCompleteEvent{count});
+                action = session.on_event(WriteCompleteEvent{count, id});
             } else if (write_res.would_block()) {
                 ++stats.would_block_write_count;
-                action = session.on_event(WouldBlockEvent{net::Interest::write});
+                action = session.on_event(WouldBlockEvent{net::Interest::write, id});
             } else {
                 stats.error = write_res.error;
                 action = session.on_event(ErrorEvent{write_res.error});
                 break;
             }
         } else if (action.is_wait()) {
+            const auto id = action.as_wait()->id;
             const auto interest = action.as_wait()->interest;
             const auto deadline = action.as_wait()->deadline;
             auto modified = poller.modify(token, interest);
@@ -115,7 +124,7 @@ DriverStats SingleSessionDriver::drive(
                         // Attempt I/O on error/hangup too: recv/send supplies the
                         // concrete error and recv drains any buffered bytes.
                         action = session.on_event(ReadyEvent{event.readable || event.hangup || event.error,
-                                                            event.writable || event.hangup || event.error});
+                                                            event.writable || event.hangup || event.error, id});
                         break;
                     }
                 }
@@ -143,6 +152,7 @@ DriverStats SingleSessionDriver::drive_channel(
     const std::function<bool()>& stop_requested
 ) {
     DriverStats stats{};
+    ReferenceWorkExecutor work_executor;
     std::vector<std::byte> read_buffer;
     Action action = session.initial_action();
 
@@ -159,7 +169,13 @@ DriverStats SingleSessionDriver::drive_channel(
             break;
         }
 
+        if (const auto* work = action.as_work()) {
+            auto completion = work_executor.execute(*work, stop_requested);
+            action = session.on_event(completion);
+            continue;
+        }
         if (action.is_read()) {
+            const auto id = action.as_read()->id;
             const std::size_t max_bytes = action.as_read()->max_bytes;
             if (read_buffer.size() < max_bytes) {
                 read_buffer.resize(max_bytes);
@@ -173,21 +189,22 @@ DriverStats SingleSessionDriver::drive_channel(
                     break;
                 }
                 stats.total_bytes_read += count;
-                action = session.on_event(ReadDataEvent{std::span(read_buffer.data(), count)});
+                action = session.on_event(ReadDataEvent{std::span(read_buffer.data(), count), id});
             } else if (read_res.is_eof()) {
-                action = session.on_event(ReadEofEvent{});
+                action = session.on_event(ReadEofEvent{id});
             } else if (read_res.would_block()) {
                 ++stats.would_block_read_count;
-                action = session.on_event(WouldBlockEvent{net::Interest::read});
+                action = session.on_event(WouldBlockEvent{net::Interest::read, id});
             } else {
                 stats.error = read_res.error;
                 action = session.on_event(ErrorEvent{read_res.error});
                 break;
             }
         } else if (action.is_write()) {
+            const auto id = action.as_write()->id;
             const auto data = action.as_write()->data;
             if (data.empty()) {
-                action = session.on_event(WriteCompleteEvent{0});
+                action = session.on_event(WriteCompleteEvent{0, id});
                 continue;
             }
             auto write_res = channel.write_some(data);
@@ -202,16 +219,17 @@ DriverStats SingleSessionDriver::drive_channel(
                     ++stats.short_write_count;
                 }
                 stats.total_bytes_written += count;
-                action = session.on_event(WriteCompleteEvent{count});
+                action = session.on_event(WriteCompleteEvent{count, id});
             } else if (write_res.would_block()) {
                 ++stats.would_block_write_count;
-                action = session.on_event(WouldBlockEvent{net::Interest::write});
+                action = session.on_event(WouldBlockEvent{net::Interest::write, id});
             } else {
                 stats.error = write_res.error;
                 action = session.on_event(ErrorEvent{write_res.error});
                 break;
             }
         } else if (action.is_wait()) {
+            const auto id = action.as_wait()->id;
             const auto deadline = action.as_wait()->deadline;
             const auto current_time = clock_->now();
             if (current_time >= deadline) {
@@ -233,12 +251,15 @@ DriverStats SingleSessionDriver::drive_channel(
                 break;
             }
 
-            action = session.on_event(ReadyEvent{true, true});
+            action = session.on_event(ReadyEvent{true, true, id});
         } else {
             break;
         }
     }
 
+    if (stop_requested() && !session.is_closed()) {
+        (void)session.on_event(StopEvent{std::chrono::milliseconds(0)});
+    }
     stats.completed_cleanly = session.is_closed() && !stats.error && !session.error();
     if (!stats.error && session.error()) {
         stats.error = session.error();

@@ -25,4 +25,4 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Verify completed milestones (pending suites cannot pass)
-        run: ctest --test-dir build -C Release -L "milestone0[123456789]" --output-on-failure
+        run: ctest --test-dir build -C Release -L "milestone0[123456789]|parallel_foundation" --no-tests=error --output-on-failure
