@@ -4,6 +4,7 @@
 #include "http/header.hpp"
 #include "http/request.hpp"
 #include "http/request_parser.hpp"
+#include "http/response.hpp"
 #include "http/status.hpp"
 
 #include <cstddef>
@@ -31,6 +32,14 @@ struct RequestFraming {
 // Detects ambiguous framing (TE + CL), conflicting or invalid Content-Length,
 // numeric overflow, and validates Transfer-Encoding.
 [[nodiscard]] RequestFraming select_request_framing(const HeaderMap& headers) noexcept;
+
+// Determines response body framing per RFC 9112 section 6.3:
+// - HEAD request -> none
+// - 1xx, 204, 304 -> none
+// - Transfer-Encoding ending in chunked -> chunked
+// - Content-Length -> fixed_length
+// - Otherwise -> close_delimited
+[[nodiscard]] RequestFraming select_response_framing(const Response& response, Method originating_method = Method::GET) noexcept;
 
 // RFC 9112 section 7.1.2: prohibited trailer fields that must never appear in trailers.
 [[nodiscard]] bool is_prohibited_trailer(std::string_view name) noexcept;

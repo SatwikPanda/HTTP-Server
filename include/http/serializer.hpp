@@ -5,7 +5,9 @@
 #include "http/response.hpp"
 
 #include <cstddef>
+#include <span>
 #include <string>
+#include <string_view>
 
 namespace http {
 
@@ -34,5 +36,12 @@ struct SerializationLimits {
     const Request& request,
     SerializationLimits limits = {}
 );
+
+// Encodes a chunk of data with hex size and CRLF: "<hex_size>\r\n<data>\r\n"
+[[nodiscard]] std::string encode_chunk(std::span<const std::byte> chunk_data);
+[[nodiscard]] std::string encode_chunk(std::string_view chunk_data);
+
+// Encodes the terminating 0 chunk and optional trailers: "0\r\n[trailers]\r\n"
+[[nodiscard]] std::string encode_final_chunk(const HeaderMap* trailers = nullptr);
 
 } // namespace http

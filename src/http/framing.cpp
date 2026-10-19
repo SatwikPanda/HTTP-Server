@@ -140,6 +140,69 @@ RequestFraming select_request_framing(const HeaderMap& headers) noexcept {
     return {BodyFraming::none, 0, ParseError::none};
 }
 
+RequestFraming select_response_framing(const Response& response, Method originating_method) noexcept {
+    // RFC 9112 section 6.3:
+    // 1. Any response to a HEAD request has no body.
+    if (originating_method == Method::HEAD) {
+        return {BodyFraming::none, 0, ParseError::none};
+    }
+
+    // 2. 1xx (informational), 204 (No Content), and 304 (Not Modified) have no body.
+    if ((response.status_code >= 100 && response.status_code < 200) ||
+        response.status_code == 204 || response.status_code == 304) {
+        return {BodyFraming::none, 0, ParseError::none};
+    }
+
+    // 3. Transfer-Encoding with chunked as final coding
+    if (response.headers.contains("Transfer-Encoding")) {
+        std::vector<std::string_view> codings;
+        for (const auto val : response.headers.get_all("Transfer-Encoding")) {
+            for (const auto token : split_comma_tokens(val)) {
+                codings.push_back(token);
+            }
+        }
+        if (!codings.empty() && ascii_case_equal(codings.back(), "chunked")) {
+            return {BodyFraming::chunked, 0, ParseError::none};
+        }
+    }
+
+    // 4. Content-Length
+    if (response.headers.contains("Content-Length")) {
+        std::vector<std::string_view> values;
+        for (const auto val : response.headers.get_all("Content-Length")) {
+            for (const auto token : split_comma_tokens(val)) {
+                values.push_back(token);
+            }
+        }
+        if (!values.empty()) {
+            std::uint64_t parsed_length = 0;
+            bool first = true;
+            for (const auto token : values) {
+                if (token.empty()) return {BodyFraming::none, 0, ParseError::invalid_content_length};
+                std::uint64_t current = 0;
+                for (char c : token) {
+                    if (c < '0' || c > '9') return {BodyFraming::none, 0, ParseError::invalid_content_length};
+                    auto d = static_cast<std::uint64_t>(c - '0');
+                    if (current > (std::numeric_limits<std::uint64_t>::max() - d) / 10) {
+                        return {BodyFraming::none, 0, ParseError::content_length_overflow};
+                    }
+                    current = current * 10 + d;
+                }
+                if (first) {
+                    parsed_length = current;
+                    first = false;
+                } else if (current != parsed_length) {
+                    return {BodyFraming::none, 0, ParseError::conflicting_content_length};
+                }
+            }
+            return {BodyFraming::fixed_length, parsed_length, ParseError::none};
+        }
+    }
+
+    // 5. Upstream response without CL/TE is close-delimited (reads until peer EOF)
+    return {BodyFraming::close_delimited, 0, ParseError::none};
+}
+
 bool is_prohibited_trailer(std::string_view name) noexcept {
     static constexpr std::string_view kProhibited[] = {
         "transfer-encoding",

@@ -2,6 +2,8 @@
 
 #include <charconv>
 #include <optional>
+#include <span>
+#include <sstream>
 #include <string_view>
 #include <utility>
 
@@ -14,14 +16,14 @@ core::Error invalid(std::string_view operation, std::string message) {
 }
 
 core::Result<std::optional<std::size_t>> content_length(
-    const HeaderMap& headers, std::string_view operation
+    const HeaderMap& headers, std::string_view operation, bool allow_te = false
 ) {
     std::optional<std::size_t> length;
     for (const auto& field : headers) {
         if (!is_valid_header_name(field.name) || !is_valid_header_value(field.value)) {
             return invalid(operation, "Invalid header name or value");
         }
-        if (header_name_equals(field.name, "Transfer-Encoding")) {
+        if (!allow_te && header_name_equals(field.name, "Transfer-Encoding")) {
             return invalid(operation, "Transfer-Encoding is not supported by the fixed-length serializer");
         }
         if (!header_name_equals(field.name, "Content-Length")) continue;
@@ -88,10 +90,18 @@ core::Result<std::string> response_head(
     if (response.reason.size() > limits.max_head_bytes || !is_valid_reason_phrase(response.reason)) {
         return invalid(operation, "Invalid or oversized reason phrase");
     }
-    auto length = content_length(response.headers, operation);
+    const bool has_te = response.headers.contains("Transfer-Encoding");
+    const bool has_cl = response.headers.contains("Content-Length");
+    if (has_te && has_cl) {
+        return invalid(operation, "Cannot generate both Transfer-Encoding and Content-Length");
+    }
+    auto length = content_length(response.headers, operation, has_te);
     if (!length) return length.error();
     if ((response.status_code < 200 || response.status_code == 204) && length.value()) {
         return invalid(operation, "Content-Length is forbidden for this status");
+    }
+    if (has_te) {
+        generated_length = std::nullopt;
     }
     return serialize_head(response.version.to_string() + " " +
                           std::to_string(response.status_code) + " " + response.reason,
@@ -110,7 +120,7 @@ core::Result<std::string> serialize_response(const Response& response, Serializa
     const bool body_forbidden = response.status_code < 200 ||
                                 response.status_code == 204 || response.status_code == 304;
     if (body_forbidden && !response.body.empty()) return invalid(operation, "Body is forbidden for this status");
-    auto length = content_length(response.headers, operation);
+    auto length = content_length(response.headers, operation, false);
     if (!length) return length.error();
     if (!body_forbidden && length.value() && *length.value() != response.body.size()) {
         return invalid(operation, "Content-Length does not match body size");
@@ -141,6 +151,35 @@ core::Result<std::string> serialize_request_head(const Request& request, Seriali
     if (!length) return length.error();
     return serialize_head(std::string(method) + " " + request.target + " " + request.version.to_string(),
                           request.headers, limits, operation);
+}
+
+std::string encode_chunk(std::span<const std::byte> chunk_data) {
+    std::stringstream ss;
+    ss << std::hex << chunk_data.size() << "\r\n";
+    std::string result = ss.str();
+    result.append(reinterpret_cast<const char*>(chunk_data.data()), chunk_data.size());
+    result.append("\r\n");
+    return result;
+}
+
+std::string encode_chunk(std::string_view chunk_data) {
+    const auto* ptr = reinterpret_cast<const std::byte*>(chunk_data.data());
+    return encode_chunk(std::span(ptr, chunk_data.size()));
+}
+
+std::string encode_final_chunk(const HeaderMap* trailers) {
+    if (!trailers || trailers->empty()) {
+        return "0\r\n\r\n";
+    }
+    std::string result = "0\r\n";
+    for (const auto& field : *trailers) {
+        result += field.name;
+        result += ": ";
+        result += field.value;
+        result += "\r\n";
+    }
+    result += "\r\n";
+    return result;
 }
 
 } // namespace http

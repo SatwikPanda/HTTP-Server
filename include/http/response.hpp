@@ -18,6 +18,7 @@ struct Response {
     std::string reason{"OK"};
     HeaderMap headers;
     std::string body;
+    HeaderMap trailers;
 
     Response() = default;
 

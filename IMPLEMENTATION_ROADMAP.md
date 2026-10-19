@@ -216,11 +216,11 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Add response status-line parsing using the shared header/framing machinery and the originating request method as context.
-- [ ] Support fixed-length, chunked, and close-delimited upstream bodies, with `finish_on_eof()` distinguishing valid completion from truncation.
-- [ ] Handle informational responses before the final response and reject protocol switching. HEAD, informational, 204, and 304 responses produce no body events.
-- [ ] Implement chunked output encoding and correct no-body serialization. Never generate both `Content-Length` and `Transfer-Encoding`.
-- [ ] Keep transfer decoding separate from content encoding: compressed representation bytes remain opaque.
+- [x] Add response status-line parsing using the shared header/framing machinery and the originating request method as context.
+- [x] Support fixed-length, chunked, and close-delimited upstream bodies, with `finish_on_eof()` distinguishing valid completion from truncation.
+- [x] Handle informational responses before the final response and reject protocol switching. HEAD, informational, 204, and 304 responses produce no body events.
+- [x] Implement chunked output encoding and correct no-body serialization. Never generate both `Content-Length` and `Transfer-Encoding`.
+- [x] Keep transfer decoding separate from content encoding: compressed representation bytes remain opaque.
 
 **Completion checks:** Fake origin byte streams cover all framing modes, interim responses, invalid status lines, premature EOF, and HEAD/204/304 boundaries. Serializer checks distinguish body length metadata from whether bytes are actually sent.
 
