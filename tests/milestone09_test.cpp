@@ -10,8 +10,10 @@
 #include "test_support.hpp"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <condition_variable>
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <mutex>
@@ -19,6 +21,7 @@
 #include <string>
 #include <string_view>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -427,7 +430,7 @@ private:
 };
 
 net::Socket connect_to(const http::HttpServer& server) {
-    const std::array candidates{server.local_endpoint()};
+    const std::array<net::Endpoint, 1> candidates{server.local_endpoint()};
     return test::take(net::connect_candidates(candidates, test::Clock::now() + 2s));
 }
 
