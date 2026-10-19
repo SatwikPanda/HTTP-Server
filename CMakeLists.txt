@@ -144,6 +144,7 @@ if(BUILD_TESTING)
     target_link_libraries(milestone07_test PRIVATE http)
     add_milestone_test(milestone08_test 08)
     add_milestone_test(http_response_test 08)
+    add_milestone_test(milestone09_test 09)
     foreach(milestone IN ITEMS 04 05 06)
         # Compile future assertions now, without linking or simulating a missing
         # production feature. These are compile checks, never passing CTests.
