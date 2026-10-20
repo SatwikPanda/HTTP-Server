@@ -182,7 +182,9 @@ void upstream_actions() {
     if (connected.error) std::cerr << connected.error.to_string() << '\n';
     CHECK(connected.status == WorkStatus::complete);
     CHECK(executor.execute(make(UpstreamWaitWork{net::Interest::write})).status == WorkStatus::complete);
-    auto raw = bytes(request()); auto outgoing = std::make_shared<const Bytes>(raw.begin(), raw.end());
+    const auto request_text = request();
+    const auto raw = bytes(request_text);
+    auto outgoing = std::make_shared<const Bytes>(raw.begin(), raw.end());
     std::size_t offset = 0;
     while (offset < outgoing->size()) {
         auto wrote = executor.execute(make(UpstreamWriteWork{outgoing, offset, outgoing->size() - offset}));

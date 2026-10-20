@@ -112,7 +112,7 @@ These are planned tracks, not missing P0 behavior. P0's fixed resource factories
 and no-op metrics are working reference implementations, not production feature
 completion claims for those tracks.
 
-## macOS connect-fallback fixture correction
+## macOS connect-fallback and request-buffer lifetime corrections
 
 The [macOS job for commit 604205d](https://github.com/SatwikPanda/HTTP-Server/actions/runs/39316609510/job/118279609910)
 failed `parallel_work_test` at the `connected.status == WorkStatus::complete`
@@ -121,14 +121,20 @@ a bound, non-listening socket. Darwin can silently drop SYNs for that socket
 state, leaving no time to attempt the live second candidate. The Linux and Windows
 jobs for that commit succeeded.
 
-The test now uses the same refusal fixture as milestone 03: create a temporary
-listener, capture its endpoint, verify it differs from the live origin, and close
-it before connecting. The first candidate is then a closed loopback port. This
-exercises actual refusal and fresh-socket fallback under the existing shared
-deadline.
+Commit `20dbfef74c97f7e96d51330e473df8d4db46575d` updated the test to use the
+same refusal fixture as milestone 03: create a temporary listener, capture its
+endpoint, verify it differs from the live origin, and close it before connecting.
+With that change, `ConnectWork` succeeded on macOS, exposing a second test bug in
+the [macOS job for commit 20dbfef](https://github.com/SatwikPanda/HTTP-Server/actions/runs/39317645294/job/118283178194):
+`origin.wait_for_request()` timed out at `parallel_io.hpp:54` because
+`auto raw = bytes(request());` bound a `std::span` to a temporary `std::string`
+that was destroyed before `outgoing` copied `[raw.begin(), raw.end())`. On Darwin,
+the freed heap buffer was overwritten before the copy, so the upstream write sent
+bytes lacking `\r\n\r\n` and `ControlledOrigin` waited for the request terminator.
+Keeping the `std::string` alive across `bytes(...)` and `outgoing` construction
+eliminates the dangling span.
 
-After this correction, the Windows GCC Release strict 01–09/P0 gate passed all
-20 tests with zero failures/skips (11.86 seconds). `parallel_work_test` also passed
-five consecutive `--repeat until-fail:5` runs. The production connect code and
-deadline were unchanged. macOS CI verification of the correction is pending;
-the local Windows checks do not establish a macOS pass.
+After these corrections, the Windows GCC Release strict 01–09/P0 gate passed all
+20 tests with zero failures/skips. The production connect and work execution code
+were unchanged. macOS CI verification of the second correction is pending; local
+Windows checks do not establish a macOS pass.
