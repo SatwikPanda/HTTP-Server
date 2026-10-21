@@ -5,6 +5,7 @@
 #include "net/socket.hpp"
 
 #include <algorithm>
+#include <cerrno>
 #include <fstream>
 #include <limits>
 #include <mutex>
@@ -160,9 +161,16 @@ WorkEvent ReferenceWorkExecutor::execute(const WorkAction& action, const std::fu
                     fail(core::make_error(core::ErrorCategory::invalid_argument, "file open kind")); return;
                 }
                 auto file = std::make_shared<FileResource>();
+                errno = 0;
                 file->stream.open(work.path, std::ios::binary | std::ios::ate);
+                const int open_errno = errno; // capture before any further stream call
                 const auto size = file->stream.tellg();
-                if (!file->stream || size < 0) { fail(core::make_error(core::ErrorCategory::io_error, "file open")); return; }
+                if (!file->stream || size < 0) {
+                    // Metadata succeeded, so a refusal here is usually a permission problem.
+                    result.file_failure = (open_errno == EACCES || open_errno == EPERM) ? FileFailure::forbidden :
+                                          (open_errno == ENOENT || open_errno == ENOTDIR) ? FileFailure::missing : FileFailure::io;
+                    fail(core::make_error(core::ErrorCategory::io_error, "file open", open_errno)); return;
+                }
                 result.info.size = static_cast<std::uint64_t>(size);
                 result.file.resource_ = std::move(file);
             }

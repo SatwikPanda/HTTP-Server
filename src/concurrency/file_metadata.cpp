@@ -14,7 +14,8 @@ namespace concurrency::detail {
 core::Result<FileInfo> file_metadata(const std::filesystem::path& path, FileFailure& failure) {
     std::error_code error;
     auto fail = [&](std::string operation) {
-        failure = error == std::errc::no_such_file_or_directory ? FileFailure::missing :
+        // A path below a regular file (not_a_directory) names nothing: missing, not an I/O fault.
+        failure = (error == std::errc::no_such_file_or_directory || error == std::errc::not_a_directory) ? FileFailure::missing :
                   error == std::errc::permission_denied ? FileFailure::forbidden : FileFailure::io;
         return core::make_error(core::ErrorCategory::io_error, std::move(operation), error.value());
     };
