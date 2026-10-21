@@ -6,3 +6,4 @@ endfunction()
 
 add_static_test(path_policy_test 10)
 add_static_test(mime_test 11)
+add_static_test(conditional_test 12)
