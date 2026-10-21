@@ -2,6 +2,7 @@
 # against the shared http/concurrency targets and never edits root main.
 add_library(server STATIC
     path_policy.cpp
+    mime.cpp
 )
 target_include_directories(server PUBLIC "${PROJECT_SOURCE_DIR}/include")
 target_compile_features(server PUBLIC cxx_std_20)
