@@ -202,6 +202,12 @@ private:
                 declared.framing == http::BodyFraming::fixed_length) {
                 downstream_framing_ = http::BodyFraming::fixed_length; length = declared.content_length;
             } else downstream_framing_ = http::BodyFraming::none;
+            // HttpSession completes bodyless responses immediately when their
+            // head drains and never sends OutputDrained, so complete here.
+            phase_ = Phase::complete;
+            stats_->record(Outcome::completed);
+            if (observer_) observer_->on_complete(trailers_);
+            return http::ResponseHead{std::move(head.value()), downstream_framing_, length};
         } else if (framing.framing == http::BodyFraming::fixed_length) {
             downstream_framing_ = http::BodyFraming::fixed_length; length = framing.content_length;
         } else {

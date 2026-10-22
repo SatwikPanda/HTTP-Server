@@ -8,3 +8,5 @@ add_project_test(milestone13_test SOURCES milestone13_test.cpp
 
 add_project_test(milestone14_test SOURCES milestone14_test.cpp
     LINKS proxy http concurrency net Threads::Threads LABELS milestone14 TIMEOUT 60)
+add_project_test(milestone15_test SOURCES milestone15_test.cpp
+    LINKS proxy http concurrency net Threads::Threads LABELS milestone15 TIMEOUT 90)
