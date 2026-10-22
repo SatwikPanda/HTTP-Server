@@ -77,6 +77,9 @@ public:
         if (const auto* drained = std::get_if<http::OutputDrained>(&event)) {
             if (phase_ != Phase::streaming || drained->body_capacity == 0) return fail(StatusCode::InternalServerError, {});
             capacity_ = std::min(drained->body_capacity, config_.limits.max_read_bytes);
+            // Downstream was paused while draining the previous segment; only
+            // start counting upstream stall time now that we are ready to read.
+            body_deadline_ = steady_.now() + config_.limits.body_timeout;
             return pump();
         }
         return on_work(std::get<WorkEvent>(event));
