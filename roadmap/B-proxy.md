@@ -1,6 +1,6 @@
 # B — proxy
 
-**Status:** implemented on `codex/proxy` (verified locally on Windows GCC 16.2 Release; see [handoff](../docs/branches/proxy.md)). **Branch:** `codex/proxy`. **Milestones:** 13–16.
+**Status:** implemented on `proxy` (verified locally on Windows GCC 16.2 Release; see [handoff](../docs/branches/proxy.md)). **Branch:** `proxy`. **Milestones:** 13–16.
 **Start:** [P0](P0-parallel-foundation.md). Enforced asynchronous DNS deadlines
 also require [E](E-helpers.md); combined driver acceptance belongs to
 [L](L-application-assembly.md). Follow the [shared workflow](README.md).

@@ -2,7 +2,7 @@
 
 ## Base identity and dependencies
 
-- **Branch:** `codex/proxy`
+- **Branch:** `proxy`
 - **Base commit (`PARALLEL_BASE` / `main`):** `4547b48687d70b4d2d54370f01b6dfa946b80181`
 - **Direct prerequisites:** [P0 (`parallel_foundation`)](parallel-foundation.md)
 - **Downstream consumers:**
