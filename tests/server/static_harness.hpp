@@ -201,3 +201,16 @@ inline std::string pattern_bytes(std::size_t size, unsigned seed = 1) {
 
 inline void unsupported(const char* what) { std::cout << "UNSUPPORTED (not counted as exercised): " << what << '\n'; }
 } // namespace server_test
+
+namespace server_test {
+// One request through the real session, factory and file executor.
+inline Parsed fetch_response(const std::shared_ptr<const http::TransactionFactory>& factory, std::string_view target,
+                             std::string_view method = "GET", Fields fields = {}, std::size_t window = 64 * 1024) {
+    Channel channel(request(target, method, fields, true));
+    auto stats = http::run_http_session(channel, session_config(factory, window));
+    CHECK(stats.completed_cleanly);
+    auto parsed = parse_stream(channel.output, {method == "HEAD" ? http::Method::HEAD : http::Method::GET});
+    CHECK(parsed.complete && parsed.responses.size() == 1);
+    return parsed.responses[0];
+}
+} // namespace server_test
