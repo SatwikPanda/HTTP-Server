@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cache/contracts.hpp"
 #include "http/application.hpp"
 #include "http/limits.hpp"
 #include "proxy/forwarding.hpp"
@@ -65,11 +66,7 @@ private:
     std::atomic<std::uint64_t> unavailable_{}, internal_error_{}, cancelled_{};
 };
 
-struct ExchangeTiming {
-    core::SteadyTimePoint request_sent{};         // outbound request fully written
-    core::SteadyTimePoint final_head_received{};  // final head delivered by parser
-    core::SystemTimePoint final_head_wall{};
-};
+using ExchangeTiming = cache::Timing;
 
 // Per-transaction seam for K. Callbacks run on the session owner thread and
 // must not block. Returning an error fails the transaction through the normal
@@ -84,7 +81,10 @@ public:
         http::Response& /*downstream*/, const ExchangeTiming&) { return {}; }
     // Transfer-decoded representation bytes; the span is valid only for this call.
     [[nodiscard]] virtual core::Result<void> on_body(std::span<const std::byte>) { return {}; }
-    // Successful parser completion only.
+    // Successful parser completion only. For a conditional validation request
+    // that received 304 Not Modified, `on_complete` runs before the upstream
+    // close action; K may intercept the ResponseHead step to substitute its
+    // refreshed 200 representation.
     virtual void on_complete(const http::HeaderMap& /*trailers*/) {}
     // Failure or cancellation; called at most once and never after on_complete.
     virtual void on_failure(const core::Error&) {}

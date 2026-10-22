@@ -143,6 +143,7 @@ private:
             phase_ = Phase::complete;
             stats_->record(Outcome::completed);
             if (observer_) observer_->on_complete(trailers_);
+            if (buffered_head_) return std::move(*buffered_head_);
             return http::ResponseFinished{std::move(trailers_)};
         default:
             return fail(StatusCode::InternalServerError, {});
@@ -205,12 +206,15 @@ private:
                 declared.framing == http::BodyFraming::fixed_length) {
                 downstream_framing_ = http::BodyFraming::fixed_length; length = declared.content_length;
             } else downstream_framing_ = http::BodyFraming::none;
-            // HttpSession completes bodyless responses immediately when their
-            // head drains and never sends OutputDrained, so complete here.
-            phase_ = Phase::complete;
-            stats_->record(Outcome::completed);
-            if (observer_) observer_->on_complete(trailers_);
-            return http::ResponseHead{std::move(head.value()), downstream_framing_, length};
+            // Close the origin before emitting the downstream head so K can
+            // intercept the returned ResponseHead (e.g. turning a validation
+            // 304 into a cached 200 with a body) without leaving an open
+            // upstream socket or missing UpstreamCloseWork.
+            buffered_head_ = http::ResponseHead{std::move(head.value()), downstream_framing_, length};
+            input_.reset();
+            phase_ = Phase::validating;
+            body_deadline_ = steady_.now() + config_.limits.body_timeout;
+            return work(UpstreamCloseWork{});
         } else if (framing.framing == http::BodyFraming::fixed_length) {
             downstream_framing_ = http::BodyFraming::fixed_length; length = framing.content_length;
         } else {
@@ -262,6 +266,7 @@ private:
     std::size_t sent_{}, consumed_{}, capacity_{1};
     core::SteadyTimePoint connect_deadline_{}, head_deadline_{}, body_deadline_{};
     ExchangeTiming timing_;
+    std::optional<http::ResponseHead> buffered_head_;
     http::HeaderMap trailers_;
     http::BodyFraming downstream_framing_{http::BodyFraming::none};
     Phase phase_{Phase::prepared};
