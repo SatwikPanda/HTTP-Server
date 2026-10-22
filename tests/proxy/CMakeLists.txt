@@ -5,3 +5,6 @@ if(NOT TARGET proxy)
 endif()
 add_project_test(milestone13_test SOURCES milestone13_test.cpp
     LINKS proxy http LABELS milestone13)
+
+add_project_test(milestone14_test SOURCES milestone14_test.cpp
+    LINKS proxy http concurrency net Threads::Threads LABELS milestone14 TIMEOUT 60)

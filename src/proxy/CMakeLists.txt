@@ -1,7 +1,8 @@
-# B — uncached forwarding proxy. Depends on http (and transitively on
+# B - uncached forwarding proxy. Depends on http (and transitively on
 # concurrency/net/core). src/proxy/cached is reserved for K.
 add_library(proxy STATIC
     forwarding.cpp
+    transaction.cpp
 )
 target_include_directories(proxy PUBLIC "${PROJECT_SOURCE_DIR}/include")
 target_compile_features(proxy PUBLIC cxx_std_20)
