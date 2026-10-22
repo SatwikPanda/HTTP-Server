@@ -175,18 +175,20 @@ private:
 
 // Open descriptors of this process, where the platform lets us count them.
 inline std::optional<std::size_t> open_descriptor_count() {
+#if defined(__linux__) || defined(__APPLE__)
 #if defined(__linux__)
     const char* directory = "/proc/self/fd";
-#elif defined(__APPLE__)
-    const char* directory = "/dev/fd";
 #else
-    return std::nullopt;
+    const char* directory = "/dev/fd";
 #endif
     std::error_code error;
     std::size_t count = 0;
     for (const auto& entry : std::filesystem::directory_iterator(directory, error)) { (void)entry; ++count; }
     if (error) return std::nullopt;
     return count;
+#else
+    return std::nullopt; // no portable descriptor listing (for example Windows)
+#endif
 }
 
 inline std::string pattern_bytes(std::size_t size, unsigned seed = 1) {
