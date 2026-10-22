@@ -3,7 +3,15 @@
 #include "http/date.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
+#include <filesystem>
+#include <fstream>
+#include <string_view>
+#include <system_error>
 #include <thread>
+#include <variant>
+#include <vector>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
