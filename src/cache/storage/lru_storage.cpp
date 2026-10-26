@@ -297,7 +297,7 @@ LookupResult LruStorage::lookup(const Key& key) {
         return {StorageOutcome::hit, std::move(pin), entry->version, {}};
     } catch (const std::bad_alloc&) { return {StorageOutcome::failed, {}, entry->version, allocation_error()}; }
 }
-StoreResult LruStorage::replace(const Key& key, EntryVersion expected, Snapshot candidate) {
+StoreResult LruStorage::replace(const Key& key, EntryVersion expected, Snapshot candidate) try {
     auto source = owner_of(candidate);
     if (!source || source->domain != impl_->domain || !candidate->body || candidate->key != key)
         return {StorageOutcome::failed, {}, invalid()};
@@ -334,8 +334,11 @@ StoreResult LruStorage::replace(const Key& key, EntryVersion expected, Snapshot 
         impl_->retire(std::prev(impl_->recency.end()), retired);
     lock.unlock(); // Retired bodies and candidate temporaries are destroyed outside the lock.
     return {StorageOutcome::stored, version, {}};
+} catch (const std::bad_alloc&) {
+    // Some standard libraries allocate list sentinels in the default constructor.
+    return {StorageOutcome::failed, {}, allocation_error()};
 }
-StoreResult LruStorage::erase(const Key& key, EntryVersion expected) {
+StoreResult LruStorage::erase(const Key& key, EntryVersion expected) try {
     std::list<Snapshot> retired;
     std::unique_lock lock(impl_->mutex);
     if (impl_->observed(key) != expected) return {StorageOutcome::version_conflict, impl_->observed(key), {}};
@@ -347,8 +350,10 @@ StoreResult LruStorage::erase(const Key& key, EntryVersion expected) {
     impl_->epoch = version;
     lock.unlock();
     return {present ? StorageOutcome::stored : StorageOutcome::miss, version, {}};
+} catch (const std::bad_alloc&) {
+    return {StorageOutcome::failed, {}, allocation_error()};
 }
-core::Result<void> LruStorage::clear() {
+core::Result<void> LruStorage::clear() try {
     std::list<Snapshot> retired;
     std::unique_lock lock(impl_->mutex);
     const auto version = next_version();
@@ -357,6 +362,8 @@ core::Result<void> LruStorage::clear() {
     impl_->epoch = version;
     lock.unlock();
     return {};
+} catch (const std::bad_alloc&) {
+    return allocation_error();
 }
 Statistics LruStorage::statistics() const {
     std::lock_guard lock(impl_->mutex);

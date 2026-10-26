@@ -1,5 +1,32 @@
 # Milestone acceptance tests
 
+## Cache tracks C/D (2026-10-26)
+
+`cache_storage` and `cache_policy` are production targets discovered through P0's
+module CMake paths. Six runtime suites cover bounded LRU and allocation failures
+(milestone 17), eligibility/directives (18), freshness/Age (19), pure revalidation
+(part of 21), concurrent accounting (part of 24), and a C/D late-304/version-conflict
+regression (parts of 21/24). No test simulates cache behavior in an adapter.
+
+The track labels select these six cases without asserting that the entire proxy
+integration milestones 21/24 are complete. Configure strict mode, build, then run:
+
+```powershell
+ctest --test-dir build/cache-cd -C Release -L 'cache_storage|cache_policy' --no-tests=error --output-on-failure
+ctest --test-dir build/cache-cd -C Release -L 'milestone0[1-9]|parallel_foundation|cache_storage|cache_policy' --no-tests=error --output-on-failure
+```
+
+The combined inventory is 26 tests. Windows GCC 16.2, Clang 22.1.8 and MSVC 19.29
+pass the combined gate with zero failures/skips. MSVC passed after
+fixing allocation failure in its allocating list constructor. Existing MSVC
+NDEBUG override warnings are expected. The sandbox denies loopback access, so
+socket gates need approved loopback execution. Linux/macOS and remote CI evidence
+remain pending; CI's label selection includes the new track suites. See the
+[storage handoff](../docs/branches/cache-storage.md) and
+[policy handoff](../docs/branches/cache-policy.md) for APIs, costs and limitations.
+
+## Earlier milestone suites
+
 The milestone 01–06 suites were written before milestone 03 implementation. `CHECK` remains
 active in Release builds; the original regression tests are compiled with
 `NDEBUG` undefined. Every CTest executable has a timeout so a deadlock fails.

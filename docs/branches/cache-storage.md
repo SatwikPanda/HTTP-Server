@@ -88,3 +88,33 @@ shared-body refresh, stale miss/ABA conflicts, budget rejection, cancellation,
 real allocation-failure injection and eight synchronized concurrent callers.
 Linux/macOS execution and race diagnostics remain pending. Full milestone 24
 still requires K/L's real proxy transactions and both concurrency drivers.
+
+### Combined C/D follow-up
+
+`cache_policy_storage_test` additionally verifies late-304 compare-and-replace,
+version-checked invalidation, normal metadata refresh and pinned body identity
+using both production modules. `Body`'s private members now destroy its vector
+before releasing its reservation; public P0 signatures are unchanged.
+MSVC's allocating `std::list` default constructor exposed an uncaught allocation
+failure before insertion. Replace/erase/clear now translate that failure with
+unchanged storage. Allocation-failure tests cover those constructors, replacement,
+erase and clear, in addition to candidate creation/growth/publication and pins.
+
+All targets build on Windows GCC 16.2 (`build/cache-cd`), Clang 22.1.8 with
+libstdc++ (`build/cache-cd-clang`), and MSVC 19.29 (`build/cache-cd-msvc`). The
+26-test combined gate passes on all three, with zero failures/skips; the final
+MSVC gate took 9.43 seconds. After the MSVC-specific correction the six affected
+C/D tests were rerun successfully on GCC/Clang too. GCC/Clang combined gates took
+11.54/12.17 seconds before that correction.
+Clang uses the GCC configure command with its compiler path changed to
+`C:/msys64/ucrt64/bin/clang++.exe`. MSVC uses:
+
+```powershell
+cmake -S . -B build/cache-cd-msvc -G 'Visual Studio 16 2019' -A x64 -DBUILD_TESTING=ON -DREQUIRE_ALL_MILESTONES=ON
+cmake --build build/cache-cd-msvc --config Release -- /m:1 /nr:false
+ctest --test-dir build/cache-cd-msvc -C Release -L 'milestone0[1-9]|parallel_foundation|cache_storage|cache_policy' --no-tests=error --output-on-failure
+```
+
+The same final label selection applies to the GCC/Clang directories and CI.
+Transport buffers owned by callers are outside the storage budget; K/L must
+account for their separate bounded I/O windows when composing total process limits.

@@ -1,6 +1,11 @@
 if(NOT TARGET cache_storage)
     message(FATAL_ERROR "Cache storage acceptance requires cache_storage")
 endif()
-add_project_test(cache_storage_test SOURCES storage_test.cpp LINKS cache_storage LABELS milestone17)
-add_project_test(cache_storage_concurrency_test SOURCES concurrency_test.cpp LINKS cache_storage LABELS milestone24 TIMEOUT 30)
+add_project_test(cache_storage_test SOURCES storage_test.cpp LINKS cache_storage LABELS milestone17 cache_storage)
+add_project_test(cache_storage_concurrency_test SOURCES concurrency_test.cpp LINKS cache_storage LABELS milestone24 cache_storage TIMEOUT 30)
 require_project_tests(cache_storage_test cache_storage_concurrency_test)
+if(TARGET cache_policy)
+    add_project_test(cache_policy_storage_test SOURCES policy_storage_test.cpp
+        LINKS cache_storage cache_policy LABELS milestone21 milestone24 cache_storage cache_policy)
+    require_project_tests(cache_policy_storage_test)
+endif()

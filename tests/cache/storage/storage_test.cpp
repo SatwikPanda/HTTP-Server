@@ -173,6 +173,33 @@ void refresh_body_and_failures() {
         CHECK(store->clear());
         CHECK(store->statistics().total_bytes == baseline);
     }
+    for (int point = 0; point < 30; ++point) {
+        insert(*store, target, "old");
+        const auto version = store->lookup(target).observed;
+        auto next = candidate(*store, target, "new");
+        fail_after = point;
+        auto replaced = store->replace(target, version, std::move(next));
+        fail_after = -1;
+        auto current = store->lookup(target);
+        CHECK(current.outcome == StorageOutcome::hit);
+        if (replaced.outcome == StorageOutcome::failed) {
+            CHECK(current.observed == version && current.entry->body->bytes()[0] == std::byte{'o'});
+        } else {
+            CHECK(replaced.outcome == StorageOutcome::stored && current.entry->body->bytes()[0] == std::byte{'n'});
+        }
+        current.entry.reset();
+        fail_after = point;
+        auto erased = store->erase(target, current.observed);
+        fail_after = -1;
+        CHECK(erased.outcome == StorageOutcome::stored || erased.outcome == StorageOutcome::failed);
+        if (erased.outcome == StorageOutcome::failed) CHECK(store->lookup(target).observed == current.observed);
+        fail_after = point;
+        auto cleared = store->clear();
+        fail_after = -1;
+        if (!cleared) CHECK(cleared.error().category == core::ErrorCategory::system_error);
+        CHECK(store->clear());
+        CHECK(store->statistics().total_bytes == baseline);
+    }
 }
 } // namespace
 

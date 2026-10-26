@@ -3,7 +3,10 @@
 These guides expand [the parallel roadmap](../implementation_roadmap2.md).
 They preserve the original milestone 10–32 requirements while explaining how
 each owner should implement, integrate and verify its portion of the project.
-P0 is implemented and locally verified; A–N remain planned. See the
+P0, C and D are implemented and locally verified on Windows; other tracks remain
+planned. C/D share `codex/cache-storage-policy`; see their
+[storage](../docs/branches/cache-storage.md) and [policy](../docs/branches/cache-policy.md)
+handoffs for scope and remaining platform/integration acceptance. See the
 [contract reference](../docs/parallel_contracts.md) and
 [P0 handoff](../docs/branches/parallel-foundation.md) for exact APIs and evidence.
 
@@ -15,8 +18,9 @@ P0 is implemented and locally verified; A–N remain planned. See the
    checkout until tracked; these guides retain the relevant design.
 2. Use the verified milestone 09 base and P0 implementation recorded in the
    [handoff](../docs/branches/parallel-foundation.md).
-3. Commit the completed [P0](P0-parallel-foundation.md) working tree and record
-   its SHA as `PARALLEL_BASE`. Then start A–J from that same commit.
+3. The C/D `PARALLEL_BASE` is `4547b48687d70b4d2d54370f01b6dfa946b80181`,
+   containing committed [P0](P0-parallel-foundation.md) and its macOS fixture fixes.
+   Start independent feature work from a recorded compatible P0 commit.
 4. Read the guide for the assigned track, its linked dependencies, and the actual
    production code. Shared filenames/types are fixed in
    [docs/parallel_contracts.md](../docs/parallel_contracts.md).

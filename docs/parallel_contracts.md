@@ -255,6 +255,11 @@ reader counts. This is logical allocation accounting, not an exact process RSS
 measurement. Publish only const snapshots and relinquish mutable aliases. Storage
 alone reclassifies shared reservations. Failure/rollback and last-reader release
 are exercised by P0 tests.
+The C/D follow-up orders `Body` members so payload destruction precedes releasing
+its reservation; public signatures are unchanged. C's concrete reader admission,
+miss epochs, logical costs and lock order are documented in
+[the storage handoff](branches/cache-storage.md). D's bounded directive and
+validation decisions are documented in [the policy handoff](branches/cache-policy.md).
 
 ## Configuration, metrics and lifecycle
 

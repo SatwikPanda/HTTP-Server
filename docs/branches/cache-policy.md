@@ -108,3 +108,13 @@ expiry and request constraints, validator preference and metadata merge/refetch/
 reject outcomes. Linux/macOS and race diagnostics remain pending. Full milestone
 21 requires K's live origin transactions and downstream behavior; pure decisions
 do not establish its wire-level acceptance.
+
+The combined C/D regression additionally runs the real store: a newer fetch makes
+the delayed validation/update/invalidation conflict, while an uncontested 304
+refresh preserves body identity and recalculates Age. Final verification also
+builds with Windows Clang 22.1.8 and MSVC 19.29; all six cache tests pass on each.
+All three pass the full 26-test baseline/C/D gate. Compiler commands and the
+MSVC allocation-failure correction are in the [storage handoff](cache-storage.md).
+Use `-L 'cache_storage|cache_policy'` for the six C/D tests or
+`-L 'milestone0[1-9]|parallel_foundation|cache_storage|cache_policy'` for the full
+gate; both selections use `--no-tests=error --output-on-failure` and strict mode.
