@@ -5,7 +5,7 @@ add_library(event_loop STATIC
 target_include_directories(event_loop PUBLIC "${PROJECT_SOURCE_DIR}/include")
 target_compile_features(event_loop PUBLIC cxx_std_20)
 set_target_properties(event_loop PROPERTIES CXX_EXTENSIONS OFF)
-target_link_libraries(event_loop PUBLIC concurrency net core Threads::Threads)
+target_link_libraries(event_loop PUBLIC concurrency concurrency_helpers net core Threads::Threads)
 if(MSVC)
     target_compile_options(event_loop PRIVATE /W4)
 else()

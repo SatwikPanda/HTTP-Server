@@ -6,7 +6,12 @@ if(NOT DEFINED CONFIG)
     set(CONFIG "Release")
 endif()
 if(NOT DEFINED LABELS)
-    set(LABELS "milestone0[1-9]|milestone1[012]|milestone2[89]|milestone30|parallel_foundation")
+    set(LABELS "milestone[0-9]+|parallel_foundation")
+endif()
+
+file(STRINGS "${BUILD_DIR}/CMakeCache.txt" strict_mode REGEX "^REQUIRE_ALL_MILESTONES:BOOL=ON$")
+if(NOT strict_mode)
+    message(FATAL_ERROR "Configure REQUIRE_ALL_MILESTONES=ON before running the strict gate")
 endif()
 
 execute_process(

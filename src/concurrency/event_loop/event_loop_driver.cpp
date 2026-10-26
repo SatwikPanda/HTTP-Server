@@ -1,4 +1,5 @@
 #include "concurrency/event_loop/event_loop_driver.hpp"
+#include "concurrency/helpers/helper_pool.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -169,11 +170,13 @@ public:
     Impl(
         EventLoopConfig config,
         SessionFactory session_factory,
-        std::shared_ptr<WorkExecutor> helper_executor
+        std::shared_ptr<WorkExecutor> helper_executor,
+        std::shared_ptr<helpers::HelperPool> helper_pool
     )
         : config_(std::move(config)),
           session_factory_(std::move(session_factory)),
           helper_executor_(std::move(helper_executor)),
+          helper_pool_(std::move(helper_pool)),
           completion_port_(std::make_shared<CompletionPortState>()) {
         completion_port_->max_queue = config_.limits.max_completion_queue;
     }
@@ -395,6 +398,14 @@ private:
             completion_port_->closed = false;
             completion_port_->max_queue = config_.limits.max_completion_queue;
         }
+        if (helper_pool_) {
+            auto port = completion_port_;
+            helper_destination_ = helpers::CompletionPort::create(config_.limits.max_completion_queue, [port] {
+                std::lock_guard lock(port->mutex);
+                if (port->poller) (void)port->poller->wake();
+            });
+            helper_executor_ = std::make_shared<helpers::HelperExecutor>(helper_pool_, helper_destination_);
+        }
         return {};
     }
 
@@ -437,7 +448,9 @@ private:
         }
 
         // 2. Deliver bounded helper completions, dropping stale results
-        const bool more_completions = process_completions();
+        if (helper_destination_) helper_destination_->drain(config_.budgets.max_completions_per_turn);
+        const bool more_completions = process_completions() ||
+            (helper_destination_ && helper_destination_->has_ready());
 
         // 3. Advance bounded accepts and runnable sessions
         const bool more_accepts = process_accepts();
@@ -1514,7 +1527,6 @@ private:
                 completion.status = WorkStatus::rejected;
                 completion.error = core::make_error(core::ErrorCategory::invalid_argument, "too many resolved candidates");
             }
-            net::Poller* poller_to_wake = nullptr;
             {
                 std::lock_guard lock(port->mutex);
                 if (port->closed || port->queue.size() >= port->max_queue) {
@@ -1526,10 +1538,9 @@ private:
                 }
                 port->queue.push_back(std::move(completion));
                 port->peak_queued = std::max<std::uint64_t>(port->peak_queued, port->queue.size());
-                poller_to_wake = port->poller;
-            }
-            if (poller_to_wake) {
-                (void)poller_to_wake->wake();
+                // Keep the lifetime lock through wake: cleanup can destroy the
+                // poller immediately after clearing this pointer.
+                if (port->poller) (void)port->poller->wake();
             }
         });
 
@@ -1735,6 +1746,7 @@ private:
     }
 
     void cleanup_all_on_owner() noexcept {
+        if (helper_destination_) helper_destination_->close();
         {
             std::lock_guard port_lock(completion_port_->mutex);
             completion_port_->closed = true;
@@ -1856,6 +1868,8 @@ private:
     EventLoopConfig config_;
     SessionFactory session_factory_;
     std::shared_ptr<WorkExecutor> helper_executor_;
+    std::shared_ptr<helpers::HelperPool> helper_pool_;
+    std::shared_ptr<helpers::CompletionPort> helper_destination_;
     std::shared_ptr<CompletionPortState> completion_port_;
 
     net::Socket listener_;
@@ -1897,12 +1911,13 @@ private:
 EventLoopDriver::EventLoopDriver(
     EventLoopConfig config,
     SessionFactory session_factory,
-    std::shared_ptr<WorkExecutor> helper_executor
+    std::shared_ptr<WorkExecutor> helper_executor,
+    std::shared_ptr<helpers::HelperPool> helper_pool
 )
     : impl_(std::make_unique<Impl>(
           std::move(config),
           std::move(session_factory),
-          std::move(helper_executor)
+          std::move(helper_executor), std::move(helper_pool)
       )) {}
 
 EventLoopDriver::~EventLoopDriver() = default;
@@ -1946,17 +1961,19 @@ EventLoopStats EventLoopDriver::stats() const noexcept {
 core::Result<std::unique_ptr<EventLoopDriver>> make_event_loop_driver(
     EventLoopConfig config,
     SessionFactory session_factory,
-    std::shared_ptr<WorkExecutor> helper_executor
+    std::shared_ptr<WorkExecutor> helper_executor,
+    std::shared_ptr<helpers::HelperPool> helper_pool
 ) {
     auto valid = validate_event_loop_config(config);
     if (!valid) return valid.error();
     if (!session_factory) {
         return invalid_config("SessionFactory must be callable");
     }
+    if (helper_executor && helper_pool) return invalid_config("Choose one helper backend");
     return std::make_unique<EventLoopDriver>(
         std::move(config),
         std::move(session_factory),
-        std::move(helper_executor)
+        std::move(helper_executor), std::move(helper_pool)
     );
 }
 

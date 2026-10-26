@@ -1,0 +1,12 @@
+add_library(application STATIC runtime.cpp)
+target_include_directories(application PUBLIC "${PROJECT_SOURCE_DIR}/include")
+target_compile_features(application PUBLIC cxx_std_20)
+set_target_properties(application PROPERTIES CXX_EXTENSIONS OFF)
+target_link_libraries(application PUBLIC http server proxy cache_proxy observability
+    concurrency_helpers concurrency_thread_pool event_loop)
+if(MSVC)
+    target_compile_options(application PRIVATE /W4)
+else()
+    target_compile_options(application PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+target_link_libraries(httpserver PRIVATE application)

@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <memory>
 
+namespace concurrency::helpers { class HelperPool; }
 namespace concurrency::event_loop {
 
 struct EventLoopBudgets {
@@ -98,7 +99,8 @@ public:
     EventLoopDriver(
         EventLoopConfig config,
         SessionFactory session_factory,
-        std::shared_ptr<WorkExecutor> helper_executor = nullptr
+        std::shared_ptr<WorkExecutor> helper_executor = nullptr,
+        std::shared_ptr<helpers::HelperPool> helper_pool = nullptr
     );
     ~EventLoopDriver() override;
 
@@ -129,7 +131,8 @@ private:
 [[nodiscard]] core::Result<std::unique_ptr<EventLoopDriver>> make_event_loop_driver(
     EventLoopConfig config,
     SessionFactory session_factory,
-    std::shared_ptr<WorkExecutor> helper_executor = nullptr
+    std::shared_ptr<WorkExecutor> helper_executor = nullptr,
+    std::shared_ptr<helpers::HelperPool> helper_pool = nullptr
 );
 
 } // namespace concurrency::event_loop

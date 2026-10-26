@@ -158,10 +158,10 @@ if(BUILD_TESTING)
     target_link_libraries(milestone05_contract PRIVATE http)
     add_test(NAME cli_validation_test COMMAND ${CMAKE_COMMAND}
         "-DSERVER=$<TARGET_FILE:httpserver>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_validation_test.cmake")
+    set_property(GLOBAL APPEND PROPERTY REGISTERED_RUNTIME_TESTS cli_validation_test)
     set_tests_properties(cli_validation_test PROPERTIES TIMEOUT 10 LABELS "milestone03")
 endif()
 
-include(cmake/ParallelModules.cmake)
 if(BUILD_TESTING)
     add_project_test(parallel_foundation_test SOURCES tests/parallel_foundation_test.cpp
         LINKS http concurrency core LABELS parallel_foundation)
@@ -173,3 +173,5 @@ if(BUILD_TESTING)
         http_serialization_test http_session_test http_integration_test http_parser_test
         http_response_test cli_validation_test parallel_foundation_test parallel_work_test)
 endif()
+
+include(cmake/ParallelModules.cmake)

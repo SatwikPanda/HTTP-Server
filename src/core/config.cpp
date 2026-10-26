@@ -45,7 +45,7 @@ Error cli_error(std::string message) {
 Result<void> validate_config(const RuntimeConfig& c) {
     const auto positive = [](auto n) { return n > 0 && n <= 1000000; };
     const auto duration = [](auto d) { return d > std::chrono::milliseconds::zero() && d <= std::chrono::hours(24); };
-    if (c.bind_address.empty() || c.bind_address.size() > 255 || c.bind_address.find('\0') != std::string::npos || c.port == 0 ||
+    if (c.bind_address.empty() || c.bind_address.size() > 255 || c.bind_address.find('\0') != std::string::npos ||
         !positive(c.workers) || !positive(c.helpers) || !positive(c.sessions) || !positive(c.upstreams) ||
         !positive(c.accept_queue) || !positive(c.job_queue) || !positive(c.completion_queue) || !positive(c.max_requests) ||
         c.header_limit < 4 || c.header_limit > 16 * 1024 * 1024 ||
@@ -162,8 +162,8 @@ Result<CliParseOutcome> parse_cli(std::span<const std::string_view> args, std::s
             }
             cfg.bind_address = std::string(val);
         } else if (arg == "--port") {
-            if (!next_val(val) || !parse_unsigned_strict(val, cfg.port) || cfg.port == 0) {
-                return cli_error("Invalid port: expected an integer from 1 to 65535");
+            if (!next_val(val) || !parse_unsigned_strict(val, cfg.port)) {
+                return cli_error("Invalid port: expected an integer from 0 to 65535");
             }
         } else if (arg == "--root") {
             if (!next_val(val) || val.empty() || val.find('\0') != std::string_view::npos) {

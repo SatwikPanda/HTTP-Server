@@ -16,7 +16,7 @@ struct SuiteInventoryEntry {
 };
 
 // Explicit runtime test inventory mapping milestones/tracks to CTest targets.
-inline constexpr std::array<SuiteInventoryEntry, 30> kRuntimeSuiteInventory{{
+inline constexpr std::array<SuiteInventoryEntry, 48> kRuntimeSuiteInventory{{
     {"socket_ownership_test", "Base", "milestone01", true},
     {"milestone01_test", "Base", "milestone01", true},
     {"echo_test_double_test", "Base", "milestone02", true},
@@ -42,6 +42,24 @@ inline constexpr std::array<SuiteInventoryEntry, 30> kRuntimeSuiteInventory{{
     {"mime_test", "A", "milestone11", true},
     {"static_response_test", "A", "milestone11", true},
     {"conditional_test", "A", "milestone12", true},
+    {"milestone13_test", "B", "milestone13", true},
+    {"milestone14_test", "B", "milestone14", true},
+    {"milestone15_test", "B", "milestone15", true},
+    {"milestone16_test", "B", "milestone16", true},
+    {"cache_storage_test", "C", "milestone17", true},
+    {"cache_storage_concurrency_test", "C", "milestone24", true},
+    {"cache_policy_storage_test", "C/D", "milestone21;milestone24", true},
+    {"cache_policy_test", "D", "milestone18", true},
+    {"cache_freshness_test", "D", "milestone19", true},
+    {"cache_revalidation_test", "D", "milestone21", true},
+    {"cache_proxy_test", "K", "milestone20;milestone21", true},
+    {"cache_proxy_concurrency_test", "K", "milestone24", true},
+    {"helper_pool_test", "E", "milestone22", true},
+    {"thread_pool_test", "F", "milestone23", true},
+    {"milestone25_test", "G", "milestone25", true},
+    {"milestone26_test", "G", "milestone26", true},
+    {"milestone27_test", "G", "milestone27", true},
+    {"milestone28_test", "G", "milestone28", true},
     {"config_parser_test", "H", "milestone29", true},
     {"metrics_and_logging_test", "H", "milestone29", true},
     {"stop_hooks_test", "H", "milestone28;milestone29", true},
@@ -60,12 +78,12 @@ struct ProductMatrixEntry {
 // The 6 required product combinations (plus reference single-driver static server).
 inline constexpr std::array<ProductMatrixEntry, 7> kProductMatrixInventory{{
     {core::ApplicationMode::static_files, core::DriverMode::single, false, "P0 + A", true},
-    {core::ApplicationMode::static_files, core::DriverMode::thread_pool, false, "P0 + A + E + F + L", false},
-    {core::ApplicationMode::static_files, core::DriverMode::event_loop, false, "P0 + A + E + G + L", false},
-    {core::ApplicationMode::proxy, core::DriverMode::thread_pool, false, "P0 + B + E + F + L", false},
-    {core::ApplicationMode::proxy, core::DriverMode::event_loop, false, "P0 + B + E + G + L", false},
-    {core::ApplicationMode::proxy, core::DriverMode::thread_pool, true, "P0 + B + C + D + K + E + F + L", false},
-    {core::ApplicationMode::proxy, core::DriverMode::event_loop, true, "P0 + B + C + D + K + E + G + L", false}
+    {core::ApplicationMode::static_files, core::DriverMode::thread_pool, false, "P0 + A + E + F + L", true},
+    {core::ApplicationMode::static_files, core::DriverMode::event_loop, false, "P0 + A + E + G + L", true},
+    {core::ApplicationMode::proxy, core::DriverMode::thread_pool, false, "P0 + B + E + F + L", true},
+    {core::ApplicationMode::proxy, core::DriverMode::event_loop, false, "P0 + B + E + G + L", true},
+    {core::ApplicationMode::proxy, core::DriverMode::thread_pool, true, "P0 + B + C + D + K + E + F + L", true},
+    {core::ApplicationMode::proxy, core::DriverMode::event_loop, true, "P0 + B + C + D + K + E + G + L", true}
 }};
 
 } // namespace test

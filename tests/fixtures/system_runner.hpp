@@ -1,5 +1,6 @@
 #pragma once
 
+#include "application/runtime.hpp"
 #include "concurrency/lifecycle.hpp"
 #include "concurrency/single_session_driver.hpp"
 #include "core/config.hpp"
@@ -58,16 +59,7 @@ struct SystemScenarioSpec {
 // Checks whether the production modules required for a given scenario combination
 // are compiled into this checkout. Never substitutes a mock for an absent module.
 [[nodiscard]] inline FeatureAvailability check_scenario_availability(const SystemScenarioSpec& spec) noexcept {
-    if (spec.application == core::ApplicationMode::proxy) {
-        return spec.cache_enabled ? FeatureAvailability::pending_track_k_cached_proxy
-                                  : FeatureAvailability::pending_track_b_proxy;
-    }
-    if (spec.driver == core::DriverMode::thread_pool) {
-        return FeatureAvailability::pending_track_f_thread_pool;
-    }
-    if (spec.driver == core::DriverMode::event_loop) {
-        return FeatureAvailability::pending_track_g_event_loop;
-    }
+    (void)spec; // All required production targets are linked by CMake.
     return FeatureAvailability::available;
 }
 
@@ -87,27 +79,31 @@ struct SystemScenarioSpec {
 class LoopbackSystemHarness {
 public:
     explicit LoopbackSystemHarness(const SystemScenarioSpec& spec)
-        : spec_(spec),
-          listener_(listener()),
-          endpoint_(take(listener_.local_endpoint())) {
-        diagnostics_.scenario_name = spec_.name;
-        diagnostics_.application = spec_.application;
-        diagnostics_.driver = spec_.driver;
-        diagnostics_.cache_enabled = spec_.cache_enabled;
-
-        if (spec_.application == core::ApplicationMode::static_files) {
-            server::StaticConfig scfg;
-            scfg.document_root = spec_.document_root;
-            factory_ = take(server::make_static_factory(scfg));
-        } else if (spec_.application == core::ApplicationMode::demo) {
-            http::Response demo_resp(http::StatusCode::OK);
-            demo_resp.set_body("Hello, World!\r\n", "text/plain; charset=utf-8");
-            factory_ = http::make_demo_factory(std::move(demo_resp));
-        } else {
-            CHECK(false); // Caller must check_scenario_availability() first.
-        }
-
-        server_thread_ = std::thread([this] { accept_loop(); });
+        : spec_(spec) {
+        core::RuntimeConfig config;
+        config.port = 0;
+        config.application = spec.application;
+        config.driver = spec.driver;
+        config.cache.enabled = spec.cache_enabled;
+        if (!spec.document_root.empty()) config.document_root = spec.document_root;
+        config.buffers.output = spec.max_output_bytes;
+        config.buffers.high_water = spec.max_output_bytes * 3 / 4;
+        config.buffers.low_water = spec.max_output_bytes / 4;
+        config.max_requests = spec.max_requests_per_connection;
+        config.workers = 4;
+        config.helpers = 2;
+        config.idle_timeout = 500ms;
+        config.progress_timeout = 2000ms;
+        config.connect_timeout = 2000ms;
+        config.work_timeout = 2000ms;
+        config.drain_timeout = 100ms;
+        app_ = take(application::Runtime::start(config));
+        endpoint_ = app_->local_endpoint();
+        diagnostics_.scenario_name = spec.name;
+        diagnostics_.application = spec.application;
+        diagnostics_.driver = spec.driver;
+        diagnostics_.cache_enabled = spec.cache_enabled;
+        diagnostics_.last_transition = "listening";
     }
 
     ~LoopbackSystemHarness() {
@@ -120,15 +116,13 @@ public:
 
     [[nodiscard]] const net::Endpoint& endpoint() const noexcept { return endpoint_; }
 
-    void stop() noexcept {
-        stop_.store(true, std::memory_order_release);
-    }
-
+    void stop() noexcept { app_->request_stop(); }
     void join() noexcept {
-        if (server_thread_.joinable()) {
-            server_thread_.join();
-        }
+        app_->join();
+        std::lock_guard lock(diag_mutex_);
+        diagnostics_.last_transition = "stopped";
     }
+    [[nodiscard]] std::string statistics_json() const { return app_->statistics_json(); }
 
     [[nodiscard]] ScenarioDiagnostics diagnostics() const {
         std::lock_guard lock(diag_mutex_);
@@ -138,6 +132,10 @@ public:
     // Connect a client socket, send raw request wire bytes, and read until the expected
     // number of HTTP responses have been received or peer closes.
     [[nodiscard]] std::string send_and_receive(std::string_view wire_request) {
+        {
+            std::lock_guard lock(diag_mutex_);
+            ++diagnostics_.accepted_connections; // Client connections observed by this fixture.
+        }
         auto client = take(net::create_tcp_socket());
         CHECK(client.connect(endpoint_));
         CHECK(client.set_nonblocking(true));
@@ -162,6 +160,7 @@ public:
         while (sent < raw_bytes.size()) {
             const auto wrote = client.write_some(raw_bytes.subspan(sent));
             if (wrote.is_ok()) {
+                CHECK(wrote.bytes_transferred > 0);
                 sent += wrote.bytes_transferred;
             } else {
                 CHECK(wrote.would_block());
@@ -175,6 +174,7 @@ public:
             const auto read = client.read_some(buf);
             if (read.is_eof()) break;
             if (read.is_ok()) {
+                CHECK(response.size() + read.bytes_transferred <= 32 * 1024 * 1024);
                 response.append(reinterpret_cast<const char*>(buf.data()), read.bytes_transferred);
             } else {
                 CHECK(read.would_block());
@@ -187,71 +187,10 @@ public:
     }
 
 private:
-    void set_transition(std::string_view state) {
-        std::lock_guard lock(diag_mutex_);
-        diagnostics_.last_transition = std::string(state);
-    }
-
-    void accept_loop() {
-        auto poller = take(net::Poller::create());
-        auto token = take(poller.watch(listener_, net::Interest::read, {500, 1}));
-        const auto deadline = Clock::now() + 10s;
-        set_transition("listening");
-
-        std::uint64_t conn_seq = 0;
-        while (!stop_.load(std::memory_order_acquire) && Clock::now() < deadline) {
-            auto events = take(poller.wait(std::min(deadline, Clock::now() + 20ms)));
-            bool ready = false;
-            for (const auto& ev : events) {
-                if (ev.token == token && poller.is_current(ev)) ready = true;
-            }
-            if (!ready) continue;
-
-            auto accepted = listener_.accept();
-            if (!accepted) {
-                if (accepted.error().category == core::ErrorCategory::would_block) continue;
-                break;
-            }
-            net::Socket client_sock = std::move(accepted.value());
-            {
-                std::lock_guard lock(diag_mutex_);
-                ++diagnostics_.accepted_connections;
-                diagnostics_.active_connections = 1;
-                diagnostics_.last_transition = "serving_session";
-            }
-
-            http::HttpSessionConfig cfg;
-            cfg.application = factory_;
-            cfg.keep_alive = true;
-            cfg.max_output_bytes = spec_.max_output_bytes;
-            cfg.max_requests_per_connection = spec_.max_requests_per_connection;
-            cfg.idle_timeout = 200ms;
-            cfg.request_progress_timeout = 2000ms;
-            cfg.output_progress_timeout = 2000ms;
-
-            (void)conn_seq;
-            (void)http::run_http_session(client_sock, cfg);
-            client_sock.close();
-
-            {
-                std::lock_guard lock(diag_mutex_);
-                diagnostics_.active_connections = 0;
-                diagnostics_.last_transition = "session_closed";
-            }
-        }
-        CHECK(poller.unwatch(token));
-        listener_.close();
-        set_transition("stopped");
-    }
-
     SystemScenarioSpec spec_;
-    net::Socket listener_;
     net::Endpoint endpoint_;
-    std::shared_ptr<const http::TransactionFactory> factory_;
-    std::atomic<bool> stop_{false};
+    std::unique_ptr<application::Runtime> app_;
     mutable std::mutex diag_mutex_;
     ScenarioDiagnostics diagnostics_;
-    std::thread server_thread_;
 };
-
 } // namespace test

@@ -93,8 +93,10 @@ void test_invalid_and_conflicting_options() {
         CHECK(!res && res.error().category == core::ErrorCategory::invalid_argument);
     };
 
-    // Numeric syntax: negative, plus sign, overflow, trailing junk, zero port
-    expect_invalid({"--port", "0"});
+    // Port zero asks the OS for an ephemeral port, used by isolated runs.
+    const std::array<std::string_view, 2> ephemeral{"--port", "0"};
+    CHECK(test::take(core::parse_cli(ephemeral)).config.port == 0);
+    // Numeric syntax: negative, plus sign, overflow, trailing junk
     expect_invalid({"--port", "-1"});
     expect_invalid({"--port", "+8080"});
     expect_invalid({"--port", "65536"});
