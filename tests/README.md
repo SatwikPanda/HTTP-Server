@@ -11,8 +11,11 @@ The inventory checks registration, not merely target compilation.
 `system_matrix` selects I's seven real application/driver/cache combinations and
 lifecycle regression suite. `milestone31` selects benchmark unit acceptance and
 all 11 non-demo workload families through both drivers. All socket traffic is
-local. Windows GCC/Clang/MSVC complete gates pass; see the [integration record](../docs/branches/application-assembly.md)
-for MSVC, exact commands, commits and limitations. Linux/macOS/remote CI and final
+local. Windows GCC/Clang/MSVC complete gates pass. Windows/Linux/macOS CI passes
+all 52 suites after two socket-buffer fixture corrections; see the
+[CI portability record](../docs/branches/ci-portability.md) for exact revisions,
+results and limitations, and the [integration record](../docs/branches/application-assembly.md)
+for composition. M's additional resource/diagnostic qualification and N's final
 performance comparisons remain pending. The records below are historical branch evidence.
 
 ## Cached proxy K (2026-10-26)

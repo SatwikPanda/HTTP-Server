@@ -1,5 +1,8 @@
 # Application integration record — 2026-10-26
 
+CI follow-up: [the portability record](ci-portability.md) identifies the fixture
+fixes and verified Windows/Linux/macOS results after this initial integration snapshot.
+
 A–I and K are integrated into `main`; J is implemented and the executable now
 selects real demo/static/forwarding/cached applications. The integration needed
 for I/J supplies L's application composition. M's final cross-platform acceptance

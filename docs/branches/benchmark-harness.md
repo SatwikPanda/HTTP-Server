@@ -30,5 +30,6 @@ is explicitly marked forced; I separately tests graceful shutdown in process.
 Missing metrics remain unavailable, and lifetime server snapshots are not interval
 deltas. No qualified M performance run or N comparison is claimed.
 
-N takes result/report ownership after qualification; Linux/macOS and remote CI
-acceptance remain pending. See [integration record](application-assembly.md).
+N takes result/report ownership after qualification. The strict Windows/Linux/macOS
+CI gates, including J's three suites, now pass; see the [CI record](ci-portability.md)
+and [integration record](application-assembly.md). Full performance runs remain pending.

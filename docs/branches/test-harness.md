@@ -20,10 +20,10 @@ that each was actually registered, so a compiled target alone is insufficient.
 J adds three optional CTests when `BUILD_BENCHMARKS=ON`. `run_matrix.cmake` requires
 strict mode and selects all milestone labels. CI runs all registered suites.
 
-Windows GCC/Clang/MSVC pass the complete 52-test gate. Platform details are
-recorded in [application-assembly.md](application-assembly.md). M still owns final
-Linux/macOS/CI qualification; passing Windows alone is not full milestone 30
-portability acceptance.
+Windows GCC/Clang/MSVC pass the complete 52-test gate. The integrated
+Windows/Linux/macOS CI matrix also passes 52/52 after the socket-buffer fixture
+corrections; exact commits and results are in [ci-portability.md](ci-portability.md).
+M still owns additional resource-soak and diagnostic qualification.
 
 ## Historical branch preparation
 

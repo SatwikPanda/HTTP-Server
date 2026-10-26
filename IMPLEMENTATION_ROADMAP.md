@@ -24,9 +24,10 @@ A–I and K are merged; J and the application composition needed by I/J are
 implemented. The executable selects static/uncached-proxy/cached-proxy modes on
 both production drivers. I runs seven real combinations with no placeholders;
 J smokes every scenario family on both drivers. The strict Windows GCC/Clang/MSVC gate
-passes 52 tests. See [the integration record](docs/branches/application-assembly.md)
-for compiler results, commits and limitations. M's combined Linux/macOS/CI
-qualification and N's final performance results remain pending. Earlier records
+and the Windows/Linux/macOS CI matrix pass 52 tests. See the
+[integration record](docs/branches/application-assembly.md) and
+[CI follow-up](docs/branches/ci-portability.md) for results, commits and limitations.
+M's resource-soak/diagnostic qualification and N's final performance results remain pending. Earlier records
 below describe their historical branch snapshots.
 
 ## Verification record — 2026-10-26 (Track K)
