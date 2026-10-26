@@ -59,6 +59,10 @@ int main() {
     invalid = response; invalid.set_status(http::StatusCode::OK);
     CHECK(test::take(policy.revalidate(selected, invalid, timing)).outcome == ValidationOutcome::refetch);
     CHECK(!policy.revalidate({}, response, timing));
+    for (const auto name : {"Cache-Control", "Age", "Expires", "Content-Encoding"}) {
+        auto nominated = response; nominated.headers.set("Connection", name);
+        CHECK(test::take(policy.revalidate(selected, nominated, timing)).outcome == ValidationOutcome::refetch);
+    }
     selected->headers.remove("ETag");
     selected->headers.add("Last-Modified", http::format_http_date(wall() - 60s));
     response.headers.remove("ETag");

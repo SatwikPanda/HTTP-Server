@@ -82,8 +82,8 @@ public:
     // Transfer-decoded representation bytes; the span is valid only for this call.
     [[nodiscard]] virtual core::Result<void> on_body(std::span<const std::byte>) { return {}; }
     // Successful parser completion only. For a conditional validation request
-    // that received 304 Not Modified, `on_complete` runs before the upstream
-    // close action; K may intercept the ResponseHead step to substitute its
+    // that received 304 Not Modified, `on_complete` runs after the upstream
+    // close action completes; K may intercept the ResponseHead step to substitute its
     // refreshed 200 representation.
     virtual void on_complete(const http::HeaderMap& /*trailers*/) {}
     // Failure or cancellation; called at most once and never after on_complete.

@@ -31,6 +31,10 @@ public:
         core::SteadyTimePoint, core::SystemTimePoint) const override;
     [[nodiscard]] bool can_store(const http::Request&, const http::Response&,
         http::BodyFraming, bool complete) const override;
+    // Preliminary metadata/framing gate only; completion and byte count must
+    // still pass can_store_stream before a candidate may become resident.
+    [[nodiscard]] bool can_store_head(const http::Request&, const http::Response&,
+        http::BodyFraming) const;
     // Streaming callers must pass the parser's total transfer-decoded byte count;
     // Response::body is intentionally empty in that path.
     [[nodiscard]] bool can_store_stream(const http::Request&, const http::Response&,

@@ -12,3 +12,6 @@ add_project_test(milestone15_test SOURCES milestone15_test.cpp
     LINKS proxy http concurrency net Threads::Threads LABELS milestone15 TIMEOUT 90)
 add_project_test(milestone16_test SOURCES milestone16_test.cpp
     LINKS proxy http concurrency net Threads::Threads LABELS milestone16 TIMEOUT 60)
+if(TARGET cache_proxy)
+    add_subdirectory(cached)
+endif()

@@ -227,6 +227,7 @@ struct LruStorage::Impl {
     std::unordered_map<Key, std::list<Snapshot>::iterator, Hash> index;
     EntryVersion epoch;
     std::size_t resident_bytes{};
+    std::uint64_t evictions{};
 
     EntryVersion observed(const Key& key) const {
         const auto found = index.find(key);
@@ -330,8 +331,10 @@ StoreResult LruStorage::replace(const Key& key, EntryVersion expected, Snapshot 
     impl_->recency.splice(impl_->recency.begin(), pending);
     impl_->resident_bytes += cost;
     impl_->epoch = version;
-    while (impl_->index.size() > impl_->domain->limits.entries || impl_->resident_bytes > impl_->domain->limits.resident_bytes)
+    while (impl_->index.size() > impl_->domain->limits.entries || impl_->resident_bytes > impl_->domain->limits.resident_bytes) {
         impl_->retire(std::prev(impl_->recency.end()), retired);
+        ++impl_->evictions;
+    }
     lock.unlock(); // Retired bodies and candidate temporaries are destroyed outside the lock.
     return {StorageOutcome::stored, version, {}};
 } catch (const std::bad_alloc&) {
@@ -370,6 +373,6 @@ Statistics LruStorage::statistics() const {
     const auto& budget = impl_->domain->budget;
     return {impl_->index.size(), impl_->resident_bytes, budget.used(),
         budget.used(core::AllocationKind::candidate), budget.used(core::AllocationKind::pinned),
-        budget.used(core::AllocationKind::temporary), impl_->domain->readers.load()};
+        budget.used(core::AllocationKind::temporary), impl_->domain->readers.load(), impl_->evictions};
 }
 } // namespace cache::storage

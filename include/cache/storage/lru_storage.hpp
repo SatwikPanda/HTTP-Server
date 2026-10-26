@@ -18,6 +18,7 @@ struct Limits {
 struct Statistics {
     std::size_t entries{}, resident_bytes{}, total_bytes{};
     std::size_t candidate_bytes{}, retained_bytes{}, reader_bytes{}, readers{};
+    std::uint64_t evictions{}; // capacity/LRU removals; excludes erase and clear
 };
 
 class Candidate {

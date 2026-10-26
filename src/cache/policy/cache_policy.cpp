@@ -127,6 +127,16 @@ bool nominated(const http::HeaderMap& headers, std::string_view name) {
     }
     return false;
 }
+bool nominated_cache_metadata(const http::HeaderMap& headers) {
+    // Sanitization must not turn no-cache into freshness, erase received Age,
+    // or relabel an encoded representation. Such responses may be forwarded
+    // but cannot safely participate in cache capture/metadata refresh.
+    for (const auto name : {"Cache-Control", "Date", "Age", "Expires", "ETag", "Last-Modified",
+            "Vary", "Set-Cookie", "Content-Encoding", "Content-Type", "Content-Location",
+            "Content-Range", "Content-Length"})
+        if (nominated(headers, name)) return true;
+    return false;
+}
 }
 
 PolicyDecision CachePolicy::evaluate(const http::Request& request, const Snapshot& snapshot,
@@ -188,18 +198,27 @@ bool CachePolicy::can_store(const http::Request& request, const http::Response& 
 }
 bool CachePolicy::can_store_stream(const http::Request& request, const http::Response& response,
     http::BodyFraming framing, bool complete, std::uint64_t body_bytes) const {
+    if (!complete || body_bytes > limits_.object_bytes || !can_store_head(request, response, framing)) return false;
+    if (response.headers.contains("Content-Length")) {
+        const auto selected = http::select_response_framing(response);
+        if (selected.content_length != body_bytes) return false;
+    }
+    if (!bounded(response.trailers)) return false;
+    for (const auto& field : response.trailers) if (http::is_prohibited_trailer(field.name, &response.headers)) return false;
+    return true;
+}
+bool CachePolicy::can_store_head(const http::Request& request, const http::Response& response,
+    http::BodyFraming framing) const {
     const auto request_control = parse_cache_control(request.headers);
     const auto response_control = parse_cache_control(response.headers);
-    if (!complete || body_bytes > limits_.object_bytes || request_control.only_if_cached ||
+    if (request_control.only_if_cached || nominated_cache_metadata(response.headers) ||
         !request_allowed(request, request_control) || !response_allowed(response.status_code, response.headers, response_control) ||
         (framing != http::BodyFraming::fixed_length && framing != http::BodyFraming::chunked)) return false;
     if (response.headers.contains("Content-Length") || response.headers.contains("Transfer-Encoding")) {
         const auto selected = http::select_response_framing(response);
         if (selected.error != http::ParseError::none || selected.framing != framing ||
-            (framing == http::BodyFraming::fixed_length && selected.content_length != body_bytes)) return false;
+            (framing == http::BodyFraming::fixed_length && selected.content_length > limits_.object_bytes)) return false;
     }
-    if (!bounded(response.trailers)) return false;
-    for (const auto& field : response.trailers) if (http::is_prohibited_trailer(field.name, &response.headers)) return false;
     // No heuristic lifetime. Zero/absent freshness is worth retaining only with
     // a syntactically useful validator. Actual date interpretation uses Timing.
     const auto origin_date = date(response.headers, "Date", {});
@@ -230,8 +249,7 @@ core::Result<RevalidationDecision> CachePolicy::revalidate(const Snapshot& selec
             const auto new_date = date(response.headers, "Last-Modified", timing.final_head_wall);
             if (!old_date || !new_date || old_date != new_date || response.headers.contains("ETag")) return decision;
         }
-        if (nominated(response.headers, "ETag") || nominated(response.headers, "Last-Modified") ||
-            nominated(response.headers, "Date") || nominated(response.headers, "Cache-Control")) return decision;
+        if (nominated_cache_metadata(response.headers)) return decision;
         // Representation metadata cannot relabel the retained bytes.
         for (const auto field : {"Content-Encoding", "Content-Type", "Content-Location"}) {
             if (response.headers.contains(field) && response.headers.get_all(field) != selected->headers.get_all(field)) {

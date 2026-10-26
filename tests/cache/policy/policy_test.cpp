@@ -34,6 +34,16 @@ void eligibility_matrix() {
     for (auto framing : {http::BodyFraming::none, http::BodyFraming::close_delimited})
         CHECK(!policy.can_store(req, res, framing, true));
     CHECK(!policy.can_store(req, res, http::BodyFraming::fixed_length, false));
+    CHECK(policy.can_store_head(req, res, http::BodyFraming::fixed_length));
+    auto sized = res; sized.headers.set("Content-Length", "3");
+    CHECK(policy.can_store_head(req, sized, http::BodyFraming::fixed_length));
+    CHECK(!policy.can_store_stream(req, sized, http::BodyFraming::fixed_length, true, 2));
+    sized.headers.set("Content-Length", "4");
+    CHECK(!policy.can_store_head(req, sized, http::BodyFraming::fixed_length));
+    for (const auto name : {"Cache-Control", "Age", "Expires", "Content-Encoding"}) {
+        auto nominated = res; nominated.headers.set("Connection", name);
+        CHECK(!policy.can_store_head(req, nominated, http::BodyFraming::fixed_length));
+    }
     CHECK(!policy.can_store_stream(req, res, http::BodyFraming::chunked, true, 4));
     res.body.clear();
     CHECK(policy.can_store_stream(req, res, http::BodyFraming::chunked, true, 3));
