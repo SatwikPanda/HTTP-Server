@@ -137,7 +137,7 @@ void run_cache_scenario(const test::SystemScenarioSpec& spec) {
     test::ScriptedOrigin origin({
         Script::fixed_length(200, "OK", "version-one", {{"Date", date}, {"Cache-Control", "max-age=0"}, {"ETag", "\"v1\""}}),
         Script::raw({"HTTP/1.1 304 Not Modified\r\nDate: " + date + "\r\nCache-Control: max-age=3600\r\nETag: \"v1\"\r\n\r\n"}),
-        Script::fixed_length(200, "OK", "version-two", {{"Date", date}, {"Cache-Control", "max-age=3600"}, {"ETag", "\"v2\""}})
+        Script::fixed_length(200, "OK", "version-two", {{"Date", date}, {"Cache-Control", "max-age=3600"}, {"ETag", "\"v2\""}}, 97, "replacement")
     });
     auto miss = test::inspect_fixed_wire_response(harness.send_and_receive(
         proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n")));
@@ -156,7 +156,15 @@ void run_cache_scenario(const test::SystemScenarioSpec& spec) {
     }));
     for (auto& reader : readers) expect_wire(reader.get(), 200, "version-one");
     CHECK(origin.request_count() == 2);
-    expect_wire(harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: no-cache\r\n")), 200, "version-two");
+    auto replacing = std::async(std::launch::async, [&] {
+        return harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: no-cache\r\n"));
+    });
+    origin.wait_for_barrier("replacement");
+    // A delayed validation must not block unrelated hits or expose new metadata
+    // paired with the old body before the replacement commits.
+    expect_wire(harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n")), 200, "version-one");
+    origin.release_barrier("replacement");
+    expect_wire(replacing.get(), 200, "version-two");
     expect_wire(harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n")), 200, "version-two");
     CHECK(origin.request_count() == 3);
     harness.stop(); harness.join();

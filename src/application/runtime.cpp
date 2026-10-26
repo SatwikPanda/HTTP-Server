@@ -4,6 +4,7 @@
 #include "http/http_server.hpp"
 #include "http/serializer.hpp"
 #include "observability/metrics_registry.hpp"
+#include "observability/process_sampler.hpp"
 #include "proxy/cache_transaction.hpp"
 #include "server/static_service.hpp"
 #include <algorithm>
@@ -15,6 +16,7 @@ namespace application {
 struct Runtime::State {
     core::RuntimeConfig config;
     observability::MetricsRegistry metrics;
+    mutable observability::ProcessSampler sampler;
     std::shared_ptr<proxy::ProxyStats> proxy_stats{std::make_shared<proxy::ProxyStats>()};
     std::shared_ptr<proxy::CacheStats> cache_stats{std::make_shared<proxy::CacheStats>()};
     std::shared_ptr<cache::storage::LruStorage> storage;
@@ -179,6 +181,11 @@ std::string Runtime::statistics_json() const {
     out << "{\"schema_version\":1,\"scope\":\"process_lifetime\",\"wire_bytes_completed\":"
         << m.counter(observability::Counter::wire_bytes_completed)
         << ",\"responses_completed\":" << m.counter(observability::Counter::responses_completed);
+    const auto process = s.sampler.sample();
+    out << ",\"process_cpu_microseconds\":";
+    if (process.total_cpu_time) out << process.total_cpu_time->count(); else out << "null";
+    out << ",\"process_rss_bytes\":";
+    if (process.resident_memory_bytes) out << *process.resident_memory_bytes; else out << "null";
     if (s.pool) {
         auto d = s.pool->stats();
         out << ",\"accepted\":" << d.accepted << ",\"active\":" << d.active
@@ -205,7 +212,9 @@ std::string Runtime::statistics_json() const {
             << ",\"cache_revalidations\":" << s.cache_stats->count(proxy::CacheEvent::validation_request)
             << ",\"cache_304\":" << s.cache_stats->count(proxy::CacheEvent::validation_304)
             << ",\"cache_entries\":" << c.entries << ",\"cache_resident_bytes\":" << c.resident_bytes
-            << ",\"cache_total_bytes\":" << c.total_bytes << ",\"cache_evictions\":" << c.evictions;
+            << ",\"cache_total_bytes\":" << c.total_bytes << ",\"cache_evictions\":" << c.evictions
+            << ",\"cache_candidate_bytes\":" << c.candidate_bytes << ",\"cache_retained_bytes\":" << c.retained_bytes
+            << ",\"cache_readers\":" << c.readers;
     }
     out << '}';
     return out.str();

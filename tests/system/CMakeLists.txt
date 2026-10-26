@@ -6,6 +6,9 @@ add_project_test(system_matrix_test
 )
 
 require_project_tests(system_matrix_test)
+add_project_test(application_lifecycle_test SOURCES lifecycle_test.cpp LINKS application
+    LABELS milestone28 milestone30 system_matrix TIMEOUT 45)
+require_project_tests(application_lifecycle_test)
 
 # The C++ inventory is also the configure-time source of truth. A compiled
 # executable without a registered CTest does not satisfy this contract.

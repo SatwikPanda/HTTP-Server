@@ -7,6 +7,7 @@
 #include "net/stream.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -236,23 +237,24 @@ struct IndependentWireFrame {
 
         const auto colon = line.find(':');
         if (colon != std::string_view::npos) {
-            const auto name = line.substr(0, colon);
+            auto name = std::string(line.substr(0, colon));
+            for (auto& ch : name) if (ch >= 'A' && ch <= 'Z') ch = static_cast<char>(ch - 'A' + 'a');
             auto val = line.substr(colon + 1);
             while (!val.empty() && (val.front() == ' ' || val.front() == '\t')) val.remove_prefix(1);
             while (!val.empty() && (val.back() == ' ' || val.back() == '\t')) val.remove_suffix(1);
-            if (name == "Content-Length" || name == "content-length") {
+            if (name == "content-length") {
                 std::size_t parsed = 0;
-                for (char ch : val) {
-                    if (ch < '0' || ch > '9') return out;
-                    parsed = parsed * 10 + static_cast<std::size_t>(ch - '0');
-                }
+                auto conversion = std::from_chars(val.data(), val.data() + val.size(), parsed);
+                if (val.empty() || conversion.ec != std::errc{} || conversion.ptr != val.data() + val.size() || content_len) return out;
                 content_len = parsed;
-            } else if ((name == "Transfer-Encoding" || name == "transfer-encoding") && val == "chunked") {
+            } else if (name == "transfer-encoding") {
+                if (is_chunked || val != "chunked") return out;
                 is_chunked = true;
             }
         }
     }
 
+    if (is_chunked && content_len) return out;
     if (is_chunked) {
         std::size_t pos = body_offset;
         while (pos < wire.size()) {
@@ -263,22 +265,22 @@ struct IndependentWireFrame {
             if (semi != std::string_view::npos) size_str = size_str.substr(0, semi);
             if (size_str.empty()) return out;
             std::size_t chunk_len = 0;
-            for (char ch : size_str) {
-                chunk_len *= 16;
-                if (ch >= '0' && ch <= '9') chunk_len += static_cast<std::size_t>(ch - '0');
-                else if (ch >= 'a' && ch <= 'f') chunk_len += static_cast<std::size_t>(10 + ch - 'a');
-                else if (ch >= 'A' && ch <= 'F') chunk_len += static_cast<std::size_t>(10 + ch - 'A');
-                else return out;
-            }
+            auto conversion = std::from_chars(size_str.data(), size_str.data() + size_str.size(), chunk_len, 16);
+            if (conversion.ec != std::errc{} || conversion.ptr != size_str.data() + size_str.size()) return out;
             pos = line_end + 2;
             if (chunk_len == 0) {
-                const auto trailer_end = wire.find("\r\n", pos);
-                if (trailer_end == std::string_view::npos) return out;
-                out.total_wire_bytes = trailer_end + 2;
+                for (;;) {
+                    const auto trailer_end = wire.find("\r\n", pos);
+                    if (trailer_end == std::string_view::npos) return out;
+                    if (trailer_end == pos) { pos += 2; break; }
+                    if (wire.substr(pos, trailer_end - pos).find(':') == std::string_view::npos) return out;
+                    pos = trailer_end + 2;
+                }
+                out.total_wire_bytes = pos;
                 out.valid = true;
                 return out;
             }
-            if (wire.size() < pos + chunk_len + 2) return out;
+            if (wire.size() - pos < 2 || chunk_len > wire.size() - pos - 2) return out;
             out.body.append(wire.substr(pos, chunk_len));
             if (wire.substr(pos + chunk_len, 2) != "\r\n") return out;
             pos += chunk_len + 2;
@@ -293,7 +295,7 @@ struct IndependentWireFrame {
         return out;
     }
 
-    if (wire.size() < body_offset + *content_len) {
+    if (*content_len > wire.size() - body_offset) {
         return out;
     }
     out.body = std::string(wire.substr(body_offset, *content_len));

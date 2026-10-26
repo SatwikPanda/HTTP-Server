@@ -1595,7 +1595,10 @@ private:
             return;
         }
         net::Interest desired = net::Interest::read;
-        if (stopping_ || sessions_.size() >= config_.limits.max_sessions) {
+        // Continue bounded accepts at capacity so new clients receive the
+        // configured overload close/503 instead of waiting for an idle session.
+        // process_accepts' per-turn budget preserves timer/session fairness.
+        if (stopping_) {
             desired = net::Interest::none;
         }
         if (desired != listener_interest_) {
