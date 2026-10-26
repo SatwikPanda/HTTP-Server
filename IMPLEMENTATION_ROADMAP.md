@@ -20,7 +20,7 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 ## Verification record — 2026-10-26 (Tracks C and D)
 
-- Tracks C/D are implemented on `codex/cache-storage-policy`, based on P0 commit
+- Tracks C/D are implemented on `cache-storage-policy`, based on P0 commit
   `4547b48687d70b4d2d54370f01b6dfa946b80181`. Milestones 17–19 have production
   storage/policy implementations, module-local CMake and runtime acceptance.
 - Storage adds bounded immutable candidates/snapshots, LRU eviction, conditional

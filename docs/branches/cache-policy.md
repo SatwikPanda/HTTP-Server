@@ -1,6 +1,6 @@
 # Cache policy handoff — 2026-10-26
 
-Track D is implemented on `codex/cache-storage-policy`, based on
+Track D is implemented on `cache-storage-policy`, based on
 `4547b48687d70b4d2d54370f01b6dfa946b80181`. Target `cache_policy` implements the
 P0 `cache::Policy` port through
 [`CachePolicy`](../../include/cache/policy/cache_policy.hpp), independent of

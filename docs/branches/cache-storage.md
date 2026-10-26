@@ -1,6 +1,6 @@
 # Cache storage handoff — 2026-10-26
 
-Track C is implemented on `codex/cache-storage-policy`, based on
+Track C is implemented on `cache-storage-policy`, based on
 `4547b48687d70b4d2d54370f01b6dfa946b80181` (P0 plus the macOS fixture fixes).
 The production target is `cache_storage`; its public entry point is
 `cache::storage::LruStorage::create(Limits)` in

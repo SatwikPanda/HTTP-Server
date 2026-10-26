@@ -13,7 +13,7 @@ their strictly sequential execution order with the dependencies below; it does
 not remove their requirements or acceptance checks. **P0** is an additional
 shared integration step between milestone 09 and parallel feature development.
 P0, C and D are implemented and locally verified on Windows; other tracks remain
-planned. C/D are delivered together on `codex/cache-storage-policy`; see the
+planned. C/D are delivered together on `cache-storage-policy`; see the
 [storage](docs/branches/cache-storage.md) and [policy](docs/branches/cache-policy.md)
 handoffs for evidence and remaining integration/platform acceptance. See the
 [P0 handoff](docs/branches/parallel-foundation.md) for current evidence.

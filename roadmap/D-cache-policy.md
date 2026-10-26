@@ -1,7 +1,7 @@
 # D — cache-policy
 
 **Status:** implemented; verified locally on Windows. **Delivery branch:**
-`codex/cache-storage-policy` (combined C/D). See the
+`cache-storage-policy` (combined C/D). See the
 [handoff](../docs/branches/cache-policy.md) for exact checks and limitations.
 **Milestones:** 18–19 and pure revalidation decisions for 21.
 **Start:** [P0](P0-parallel-foundation.md). [K](K-cache-proxy.md) executes decisions.

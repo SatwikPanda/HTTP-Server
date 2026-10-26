@@ -4,7 +4,7 @@ These guides expand [the parallel roadmap](../implementation_roadmap2.md).
 They preserve the original milestone 10–32 requirements while explaining how
 each owner should implement, integrate and verify its portion of the project.
 P0, C and D are implemented and locally verified on Windows; other tracks remain
-planned. C/D share `codex/cache-storage-policy`; see their
+planned. C/D share `cache-storage-policy`; see their
 [storage](../docs/branches/cache-storage.md) and [policy](../docs/branches/cache-policy.md)
 handoffs for scope and remaining platform/integration acceptance. See the
 [contract reference](../docs/parallel_contracts.md) and
