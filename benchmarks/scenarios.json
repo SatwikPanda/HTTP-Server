@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "axes": {
+    "concurrency": [
+      1,
+      10,
+      50,
+      100,
+      500,
+      1000
+    ],
+    "workers": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "object_bytes": [
+      1024,
+      65536,
+      1048576,
+      16777216
+    ],
+    "reuse": [
+      true,
+      false
+    ]
+  },
+  "defaults": {
+    "seed": 1729,
+    "warmup_seconds": 10,
+    "measurement_seconds": 60,
+    "repeats": 5,
+    "request_timeout_seconds": 10,
+    "settings": {
+      "helpers": 4,
+      "max_sessions": 2048,
+      "max_upstreams": 2048,
+      "accept_queue": 2048,
+      "job_queue": 2048,
+      "completion_queue": 2048,
+      "input_bytes": 16384,
+      "output_bytes": 65536,
+      "idle_timeout_ms": 30000,
+      "progress_timeout_ms": 30000,
+      "connect_timeout_ms": 10000,
+      "work_timeout_ms": 30000,
+      "drain_timeout_ms": 3000,
+      "max_requests_per_connection": 100000,
+      "cache_entries": 1024,
+      "cache_object_bytes": 16777216,
+      "cache_resident_bytes": 67108864,
+      "cache_total_bytes": 134217728
+    }
+  },
+  "families": [
+    {
+      "id": "demo-smoke",
+      "application": "demo",
+      "drivers": [
+        "single"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": false
+    },
+    {
+      "id": "hot-file",
+      "application": "server",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "varied-files",
+      "application": "server",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "uniform",
+      "objects": 16,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "head-file",
+      "application": "server",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "HEAD",
+      "required": false
+    },
+    {
+      "id": "proxy-off",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "proxy-cold",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "uniform",
+      "objects": 16,
+      "cache": "cold",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "proxy-warm",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "warm",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "proxy-revalidation",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "revalidation",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "proxy-mixed",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "zipf",
+      "objects": 16,
+      "cache": "mixed",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "delayed-origin",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 50,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "slow-origin",
+      "application": "proxy",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 65536,
+      "client_bytes_per_second": 0,
+      "method": "GET",
+      "required": true
+    },
+    {
+      "id": "slow-client",
+      "application": "server",
+      "drivers": [
+        "thread-pool",
+        "event-loop"
+      ],
+      "distribution": "hot",
+      "objects": 1,
+      "cache": "off",
+      "origin_delay_ms": 0,
+      "origin_bytes_per_second": 0,
+      "client_bytes_per_second": 65536,
+      "method": "GET",
+      "required": true
+    }
+  ]
+}
