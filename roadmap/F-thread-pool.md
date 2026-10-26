@@ -1,6 +1,6 @@
 # F — thread-pool
 
-**Status:** planned. **Branch:** `codex/thread-pool`.
+**Status:** implemented on branch `thread-pool` (based on `helpers`); Linux verified, Windows/macOS and L integration pending.
 **Milestones:** 23 and driver portions of 27–28.
 **Start:** [P0](P0-parallel-foundation.md). Full acceptance requires
 [E](E-helpers.md), real A/B/K services and [L](L-application-assembly.md).
