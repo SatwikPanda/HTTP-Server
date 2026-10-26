@@ -312,8 +312,11 @@ public:
     }
 
     EventLoopStats stats() const noexcept {
-        std::lock_guard lock(stats_mutex_);
-        EventLoopStats snap = stats_;
+        EventLoopStats snap;
+        {
+            std::lock_guard lock(stats_mutex_);
+            snap = stats_;
+        }
         {
             std::lock_guard port_lock(completion_port_->mutex);
             snap.queued_completions = completion_port_->queue.size();
@@ -1500,14 +1503,17 @@ private:
             return;
         }
 
+        bool full = false;
         {
             std::lock_guard port_lock(completion_port_->mutex);
-            if (pending_jobs_count_ >= config_.limits.max_pending_jobs ||
-                completion_port_->queue.size() + pending_jobs_count_ >= completion_port_->max_queue) {
-                rejected.error = core::make_error(core::ErrorCategory::would_block, "helper queue full");
-                deliver_event(entry, rejected);
-                return;
-            }
+            full = pending_jobs_count_ >= config_.limits.max_pending_jobs ||
+                completion_port_->queue.size() + pending_jobs_count_ >= completion_port_->max_queue;
+        }
+        // Application/metric callbacks must run outside the completion lock.
+        if (full) {
+            rejected.error = core::make_error(core::ErrorCategory::would_block, "helper queue full");
+            deliver_event(entry, rejected);
+            return;
         }
 
         // Register helper_wait before calling submit() so even an inline test double

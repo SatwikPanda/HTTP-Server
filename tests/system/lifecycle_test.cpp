@@ -89,6 +89,41 @@ void startup_rollback(core::DriverMode driver) {
     auto app = test::take(application::Runtime::start(cfg));
     app->request_stop(); app->join();
 }
+
+void helper_pressure_with_metrics() {
+    test::TemporaryDirectory root;
+    (void)root.write("index.html", std::string(65536, 'x'));
+    core::RuntimeConfig cfg;
+    cfg.application = core::ApplicationMode::static_files;
+    cfg.driver = core::DriverMode::event_loop;
+    cfg.document_root = root.path(); cfg.port = 0;
+    cfg.helpers = 1; cfg.job_queue = 1; cfg.completion_queue = 1;
+    auto app = test::take(application::Runtime::start(cfg));
+    std::jthread sampler([&](std::stop_token stop) {
+        while (!stop.stop_requested()) {
+            (void)app->statistics_json();
+            std::this_thread::yield();
+        }
+    });
+    std::vector<std::jthread> clients;
+    for (int i = 0; i < 8; ++i) clients.emplace_back([&] {
+        for (int request = 0; request < 4; ++request) {
+            auto socket = test::take(net::create_tcp_socket());
+            CHECK(socket.connect(app->local_endpoint()));
+            const std::string wire = "HEAD / HTTP/1.1\r\nHost: local\r\nConnection: close\r\n\r\n";
+            auto sent = socket.write_some(std::as_bytes(std::span(wire)));
+            CHECK(sent.is_ok() && sent.bytes_transferred == wire.size());
+            const auto response = test::inspect_fixed_wire_response(receive_closed(socket), true);
+            // A reports rejected file work as 500 and timed-out work as 503.
+            // Both must terminate cleanly; neither is a successful benchmark response.
+            CHECK(response.valid && (response.status_code == 200 || response.status_code == 500 || response.status_code == 503));
+        }
+    });
+    for (auto& client : clients) client.join();
+    sampler.request_stop(); sampler.join();
+    app->request_stop(); app->join();
+    CHECK(app->statistics_json().find("\"active\":0") != std::string::npos);
+}
 } // namespace
 
 int main() {
@@ -97,4 +132,5 @@ int main() {
         pressure_and_recovery(driver);
         startup_rollback(driver);
     }
+    helper_pressure_with_metrics();
 }

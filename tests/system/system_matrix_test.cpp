@@ -4,7 +4,7 @@
 #include "fixtures/system_runner.hpp"
 #include "http/response_parser.hpp"
 #include "http/date.hpp"
-#include <future>
+#include <thread>
 
 namespace {
 using namespace std::chrono_literals;
@@ -150,21 +150,25 @@ void run_cache_scenario(const test::SystemScenarioSpec& spec) {
     expect_wire(hit, 200, "version-one");
     CHECK(hit.find("Age: ") != std::string::npos && origin.request_count() == 2);
     // Concurrent readers all observe the same published metadata/body pair.
-    std::vector<std::future<std::string>> readers;
-    for (int i = 0; i < 8; ++i) readers.push_back(std::async(std::launch::async, [&] {
-        return harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n"));
-    }));
-    for (auto& reader : readers) expect_wire(reader.get(), 200, "version-one");
+    std::array<std::string, 8> results;
+    std::vector<std::jthread> readers;
+    for (std::size_t i = 0; i < results.size(); ++i) readers.emplace_back([&, i] {
+        results[i] = harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n"));
+    });
+    for (auto& reader : readers) reader.join();
+    for (const auto& result : results) expect_wire(result, 200, "version-one");
     CHECK(origin.request_count() == 2);
-    auto replacing = std::async(std::launch::async, [&] {
-        return harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: no-cache\r\n"));
+    std::string replaced;
+    std::jthread replacing([&] {
+        replaced = harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: no-cache\r\n"));
     });
     origin.wait_for_barrier("replacement");
     // A delayed validation must not block unrelated hits or expose new metadata
     // paired with the old body before the replacement commits.
     expect_wire(harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n")), 200, "version-one");
     origin.release_barrier("replacement");
-    expect_wire(replacing.get(), 200, "version-two");
+    replacing.join();
+    expect_wire(replaced, 200, "version-two");
     expect_wire(harness.send_and_receive(proxy_request(origin, "/object", "Cache-Control: only-if-cached\r\n")), 200, "version-two");
     CHECK(origin.request_count() == 3);
     harness.stop(); harness.join();

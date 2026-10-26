@@ -26,7 +26,7 @@ void serves_files_and_maps_targets() {
     tree.write("a b.txt", "space");
     tree.write("a+b.txt", "plus");
     tree.write("%41.txt", "percent literal");
-    tree.write("caf\xC3\xA9.txt", "utf8");
+    tree.write(std::filesystem::path(u8"caf\u00E9.txt"), "utf8");
     tree.write("sub/index.html", "not the root index");
     const auto factory = make_factory(tree.root());
 
