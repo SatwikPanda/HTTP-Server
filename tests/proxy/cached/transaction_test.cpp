@@ -87,6 +87,14 @@ void limits_and_incomplete_capture() {
     CHECK(cancelled.stats->count(CacheEvent::cancelled) == 1);
     Environment empty; fill(empty, response("")); CHECK(empty.entry() && empty.entry()->body->bytes().empty());
     Exchange empty_hit(empty); empty_hit.finish(); CHECK(!empty_hit.failure && empty_hit.resolves == 0);
+
+    limits = {}; limits.readers = 1;
+    Environment readers(limits); fill(readers);
+    auto pin = readers.entry();
+    Exchange exhausted(readers, {}, "Cache-Control: only-if-cached\r\n"); exhausted.finish();
+    CHECK(exhausted.failure == 504 && exhausted.resolves == 0 && exhausted.connections == 0);
+    pin.reset();
+    Exchange available(readers); available.finish(); CHECK(available.output == "old");
 }
 
 void validators_and_changes() {
@@ -177,6 +185,14 @@ void real_origin_streaming_and_commitment() {
     for (const auto& answer : answers) CHECK(answer.complete && answer.response.status_code == 200 && answer.response.body == "old");
     CHECK(validator.connections() == 2 && validator.requests()[1].find("If-None-Match: W/\"same\"") != std::string::npos);
     CHECK(refreshed.stats->count(CacheEvent::validation_304) == 1 && refreshed.stats->count(CacheEvent::hit) == 1);
+
+    proxy_test::MultiOrigin cancelled_origin({{{response(std::string(10000, 'c'))}}});
+    Environment cancelled;
+    proxy_test::Channel disconnected(proxy_test::get(cancelled_origin.url()), 5); disconnected.fail_after = 220;
+    CHECK(!http::run_http_session(disconnected, session(cancelled)).completed_cleanly); cancelled_origin.join();
+    CHECK(disconnected.output.find("200 OK") != std::string::npos);
+    CHECK(cancelled.storage->statistics().entries == 0 && cancelled.storage->statistics().candidate_bytes == 0);
+    CHECK(cancelled.stats->count(CacheEvent::cancelled) == 1);
 }
 } // namespace
 

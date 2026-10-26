@@ -89,6 +89,27 @@ void concurrent_candidates_stay_bounded() {
     CHECK(after.total_bytes == baseline && after.readers == 0 && after.retained_bytes == 0 && after.candidate_bytes == 0);
 }
 
+void parallel_hits_survive_eviction() {
+    auto limits = cache::storage::Limits{}; limits.entries = 1;
+    Environment env(limits); const std::string body(900, 'p'); fill(env, response(body));
+    std::barrier gate(5);
+    std::vector<std::thread> workers;
+    for (unsigned i = 0; i < 4; ++i) workers.emplace_back([&] {
+        Exchange hit(env); hit.until_head();
+        gate.arrive_and_wait(); gate.arrive_and_wait();
+        hit.body_window = 1; hit.finish();
+        CHECK(hit.resolves == 0 && hit.output == body);
+    });
+    gate.arrive_and_wait();
+    CHECK(env.storage->statistics().readers == 4);
+    fill(env, response("replacement"), "/other");
+    CHECK(env.storage->statistics().retained_bytes > 0 && env.storage->statistics().evictions == 1);
+    gate.arrive_and_wait();
+    for (auto& worker : workers) worker.join();
+    CHECK(env.storage->statistics().readers == 0 && env.storage->statistics().retained_bytes == 0);
+    CHECK(env.stats->count(CacheEvent::hit) == 4);
+}
+
 void gated_real_origin_loses_to_competing_completion() {
     auto runtime = test::take(net::initialize_network());
     test::ControlledOrigin origin({response("late network")}, 3, true);
@@ -113,7 +134,7 @@ void gated_real_origin_loses_to_competing_completion() {
 
 int main() {
     duplicate_misses_and_validation_conflicts(); changed_response_cannot_erase_new_version();
-    pinned_eviction_admission_and_release(); concurrent_candidates_stay_bounded();
+    pinned_eviction_admission_and_release(); concurrent_candidates_stay_bounded(); parallel_hits_survive_eviction();
     gated_real_origin_loses_to_competing_completion();
     std::cout << "cache proxy concurrency acceptance passed\n";
 }
