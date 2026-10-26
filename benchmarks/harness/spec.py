@@ -131,22 +131,50 @@ def matrix(spec, max_connections=100, max_dataset_bytes=256 * 1024 * 1024):
 
 def validate_result(value):
     """Structural and arithmetic checks on our emitted raw record, including failures."""
+    require(isinstance(value, dict), "result must be an object")
     require(value.get("schema_version") == VERSION, "unsupported result version")
     for key in ("run_id", "repeat", "evidence", "state", "scenario", "provenance", "environment", "processes", "phases", "diagnostics"):
         require(key in value, f"missing result {key}")
     require(value["evidence"] in {"smoke", "measurement"}, "invalid evidence kind")
     require(value["state"] in {"complete", "failed", "interrupted"}, "invalid run state")
+    require(isinstance(value['run_id'], str) and len(value['run_id']) == 32 and
+            all(ch in '0123456789abcdef' for ch in value['run_id']), 'invalid run id')
+    number(value['repeat'], 1, 100, 'repeat', True)
+    require(isinstance(value['phases'], dict) and set(value['phases']) <= {'warmup', 'measurement'}, 'invalid phases')
+    require(isinstance(value['processes'], list) and len(value['processes']) <= 2, 'invalid owned process inventory')
+    require(isinstance(value['diagnostics'], list), 'invalid diagnostics')
+    if value['state'] == 'complete':
+        require('measurement' in value['phases'], 'complete run has no measurement')
     for phase in value["phases"].values():
+        require(isinstance(phase, dict) and all(key in phase for key in
+            ('counts', 'success_latency', 'dispatch_latency', 'queue_delay', 'duration_seconds')), 'invalid phase shape')
         counts = phase["counts"]
+        require(isinstance(counts, dict), 'counts must be an object')
         for key in ("attempted", "issued", "successful", "errors", "timeouts", "overload_dropped", "useful_bytes", "response_wire_bytes", "request_wire_bytes"):
+            require(key in counts, f'missing counter {key}')
             number(counts[key], 0, 2**63 - 1, key, True)
         require(counts["attempted"] == counts["successful"] + counts["errors"], "attempt accounting mismatch")
         require(counts["issued"] <= counts["attempted"] and counts["timeouts"] <= counts["errors"], "invalid issue/timeout count")
         require(counts["overload_dropped"] <= counts["errors"], "invalid overload count")
         for name in ("success_latency", "dispatch_latency", "queue_delay"):
             hist = phase[name]
+            require(isinstance(hist, dict) and all(key in hist for key in ('upper_bounds_us', 'counts', 'count')), 'invalid histogram')
+            require(isinstance(hist['counts'], list) and isinstance(hist['upper_bounds_us'], list) and
+                2 <= len(hist['counts']) <= 512, 'invalid histogram size')
             require(len(hist["upper_bounds_us"]) == len(hist["counts"]), "invalid histogram shape")
+            number(hist['count'], 0, 2**63 - 1, 'histogram count', True)
+            previous = 0
+            for bound in hist['upper_bounds_us'][:-1]:
+                number(bound, previous + 1, 2**63 - 1, 'histogram upper bound', True)
+                previous = bound
+            require(hist['upper_bounds_us'][-1] is None, 'histogram needs overflow bucket')
+            for bucket in hist['counts']:
+                number(bucket, 0, 2**63 - 1, 'histogram bucket', True)
             require(sum(hist["counts"]) == hist["count"], "histogram count mismatch")
         require(phase["success_latency"]["count"] == counts["successful"], "successful latency count mismatch")
-        require(phase["duration_seconds"] > 0, "invalid duration")
+        require(phase['dispatch_latency']['count'] == counts['attempted'] - counts['overload_dropped'] and
+                phase['queue_delay']['count'] == phase['dispatch_latency']['count'], 'dispatch count mismatch')
+        number(phase['duration_seconds'], 1e-9, 86400, 'duration')
+        if value['state'] == 'complete':
+            require(counts['successful'] > 0 and counts['errors'] == 0, 'complete run contains failed or empty phase')
     return value

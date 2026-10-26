@@ -255,11 +255,13 @@ class Origin:
                     while offset < size:
                         count = min(CHUNK, size - offset)
                         data = payload(scenario["seed"], index, offset, count)
+                        rate = scenario["origin_bytes_per_second"]
+                        if rate:
+                            await asyncio.sleep(count / rate)
                         writer.write(b"!" * count if self.fault == "wrong" else data)
                         await asyncio.wait_for(writer.drain(), scenario["timeout"])
                         offset += count
-                        rate = scenario["origin_bytes_per_second"]
-                        await asyncio.sleep(count / rate if rate else 0)
+                        await asyncio.sleep(0)
                 await asyncio.wait_for(writer.drain(), scenario["timeout"])
                 if close or self.fault == "truncated":
                     break

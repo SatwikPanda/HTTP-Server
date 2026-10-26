@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "assembled-httpserver-v1",
+  "applications": {
+    "demo": [
+      "--mode",
+      "demo"
+    ],
+    "server": [
+      "--mode",
+      "server"
+    ],
+    "proxy": [
+      "--mode",
+      "proxy"
+    ]
+  },
+  "drivers": {
+    "single": [
+      "--concurrency",
+      "single"
+    ],
+    "thread-pool": [
+      "--concurrency",
+      "thread-pool"
+    ],
+    "event-loop": [
+      "--concurrency",
+      "event-loop"
+    ]
+  },
+  "options": {
+    "helpers": "--helpers",
+    "max_sessions": "--max-sessions",
+    "max_upstreams": "--max-upstreams",
+    "accept_queue": "--accept-queue",
+    "job_queue": "--job-queue",
+    "completion_queue": "--completion-queue",
+    "input_bytes": "--input-bytes",
+    "output_bytes": "--output-bytes",
+    "idle_timeout_ms": "--idle-timeout-ms",
+    "progress_timeout_ms": "--progress-timeout-ms",
+    "connect_timeout_ms": "--connect-timeout-ms",
+    "work_timeout_ms": "--work-timeout-ms",
+    "drain_timeout_ms": "--drain-timeout-ms",
+    "max_requests_per_connection": "--max-requests-per-connection",
+    "cache_entries": "--cache-entries",
+    "cache_object_bytes": "--cache-object-bytes",
+    "cache_resident_bytes": "--cache-resident-bytes",
+    "cache_total_bytes": "--cache-total-bytes",
+    "bind": "--bind",
+    "port": "--port",
+    "root": "--root",
+    "cache": "--cache",
+    "workers": "--workers"
+  },
+  "readiness_regex": "Listening on\\s*:\\s*(?P<host>127\\.0\\.0\\.1):(?P<port>[0-9]+)"
+}

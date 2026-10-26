@@ -1,10 +1,12 @@
 """Explicit executable profiles, owned child processes, and bounded diagnostics."""
 import asyncio
 import hashlib
+import json
 import os
 import platform
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 from .spec import VERSION, DRIVERS, APPLICATIONS, load_json, require, SpecError
@@ -67,6 +69,7 @@ class OwnedProcess:
         self.ready = asyncio.Event()
         self.endpoint = None
         self.forced_stop = False
+        self.metrics = None
 
     async def start(self):
         self.process = await asyncio.create_subprocess_exec(*self.args, stdout=asyncio.subprocess.PIPE,
@@ -82,15 +85,25 @@ class OwnedProcess:
             if len(self.tail) > 65536:
                 del self.tail[:-65536]
                 self.truncated = True
-            if stdout and self.pattern and not self.endpoint:
+            if stdout:
                 window = (window + data.decode("utf-8", errors="replace"))[-8192:]
                 complete_lines = window.rsplit("\n", 1)[0] if "\n" in window else ""
-                match = self.pattern.search(complete_lines)
+                match = self.pattern.search(complete_lines) if self.pattern and not self.endpoint else None
                 if match:
                     port = int(match["port"])
                     if match["host"] == "127.0.0.1" and 0 < port <= 65535:
                         self.endpoint = match["host"], port
                         self.ready.set()
+                for line in complete_lines.splitlines():
+                    if line.startswith("METRICS "):
+                        try:
+                            candidate = json.loads(line[8:])
+                            if candidate.get("schema_version") == 1:
+                                self.metrics = candidate
+                        except (ValueError, AttributeError):
+                            pass
+                if "\n" in window:
+                    window = window.rsplit("\n", 1)[1]
 
     async def wait_ready(self, timeout):
         waiter = asyncio.create_task(self.ready.wait())
@@ -207,10 +220,17 @@ def provenance(repo, binary, build_dir):
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     status = git("status", "--porcelain")
-    diff = git("diff", "HEAD", "--binary")
+    diff_digest = hashlib.sha256()
+    with tempfile.TemporaryFile() as diff:
+        result = subprocess.run(["git", "-C", str(repo), "diff", "HEAD", "--binary"],
+            stdout=diff, stderr=subprocess.PIPE, timeout=5, **process_options())
+        require(result.returncode == 0, "cannot hash Git diff")
+        diff.seek(0)
+        for chunk in iter(lambda: diff.read(65536), b""):
+            diff_digest.update(chunk)
     return dict(commit=git("rev-parse", "HEAD").decode().strip(),
                 tree=git("rev-parse", "HEAD^{tree}").decode().strip(), dirty=bool(status),
                 status=status[:65536].decode(errors="replace"), status_truncated=len(status) > 65536,
-                tracked_diff_sha256=hashlib.sha256(diff).hexdigest(), binary=str(binary),
+                tracked_diff_sha256=diff_digest.hexdigest(), binary=str(binary),
                 binary_sha256=digest.hexdigest(), cmake=cache,
                 binary_source_match="operator/build provenance; hash alone does not prove source equivalence")

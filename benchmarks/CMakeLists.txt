@@ -7,4 +7,13 @@ if(BUILD_TESTING)
         TIMEOUT 60 LABELS "benchmark_harness;milestone31"
         ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
     require_project_tests(benchmark_harness_test)
+    foreach(driver IN ITEMS thread-pool event-loop)
+        add_test(NAME benchmark_smoke_${driver}
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/smoke_matrix.py"
+                --binary "$<TARGET_FILE:httpserver>" --build-dir "${PROJECT_BINARY_DIR}" --driver "${driver}")
+        set_tests_properties(benchmark_smoke_${driver} PROPERTIES
+            TIMEOUT 180 LABELS "benchmark_harness;milestone31;executable_matrix"
+            ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
+        require_project_tests(benchmark_smoke_${driver})
+    endforeach()
 endif()

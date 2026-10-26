@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("plan", "run", "validate-result"))
     parser.add_argument("--manifest", default=str(ROOT / "scenarios.json"))
-    parser.add_argument("--profile", default=str(ROOT / "profiles/demo.json"))
+    parser.add_argument("--profile", default=str(ROOT / "profiles/assembled.json"))
     parser.add_argument("--result")
     parser.add_argument("--binary")
     parser.add_argument("--build-dir")

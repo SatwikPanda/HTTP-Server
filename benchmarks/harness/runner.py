@@ -103,7 +103,12 @@ def check_origin(scenario, measurement, delta):
     elif scenario["cache"] == "off":
         require(delta["requests"] == count, "cache-disabled origin count mismatch")
     elif scenario["cache"] == "revalidation":
-        require(delta["responses_304"] == count and delta["responses_200"] == 0, "validation traffic mismatch")
+        # Concurrent validations may select the same version. K retries a
+        # conflicting 304 once unconditionally instead of publishing stale metadata.
+        require(delta["responses_304"] == count and delta["responses_200"] <= count and
+                delta["requests"] == count + delta["responses_200"], "validation traffic mismatch")
+        if scenario["concurrency"] == 1:
+            require(delta["responses_200"] == 0, "serial validation unexpectedly refetched")
     elif scenario["cache"] == "cold":
         require(delta["responses_200"] > 0, "cold-start measurement never fetched from origin")
     else:
@@ -119,7 +124,7 @@ async def repeat(scenario, profile, args, provenance_data, destination, ordinal)
                   started_utc=datetime.now(timezone.utc).isoformat(), scenario=scenario,
                   provenance=provenance_data, environment=environment(), processes=[], phases={}, diagnostics=[],
                   profile=profile, preparation={}, server_metrics={"available": False,
-                      "reason": "H CLI metrics export awaits L; missing cache/queue counters are unavailable, not zero"},
+                      "reason": "no periodic server snapshot observed during this short run"},
                   filesystem_preparation="new deterministic files written immediately before warmup; OS cache not flushed")
     temporary = None
     origin = None
@@ -185,6 +190,9 @@ async def repeat(scenario, profile, args, provenance_data, destination, ordinal)
             sampling_stop.set()
             await sampler
         record["server_process_after"] = sample_process(child.process.pid)
+        if child.metrics is not None:
+            record["server_metrics"] = dict(available=True, snapshot=child.metrics,
+                note="latest periodic process-lifetime snapshot, includes preparation/warmup; not measurement deltas")
         record["server_sampled_peak_rss_bytes"] = peak_rss
         record["server_sample_count"] = observations
         require(child.process.returncode is None, "server exited during measurement")
@@ -211,9 +219,17 @@ async def repeat(scenario, profile, args, provenance_data, destination, ordinal)
                 record["diagnostics"].append(f"child cleanup: {str(error)[:512]}")
         record["processes"] = [child.diagnostic() for child in children]
         if origin:
-            await origin.close()
+            try:
+                await origin.close()
+            except Exception as error:
+                record["state"] = "failed"
+                record["diagnostics"].append(f"origin cleanup: {str(error)[:512]}")
         if temporary:
-            temporary.cleanup()  # only the TemporaryDirectory owned by this repeat
+            try:
+                temporary.cleanup()  # only the TemporaryDirectory owned by this repeat
+            except OSError as error:
+                record["state"] = "failed"
+                record["diagnostics"].append(f"temporary cleanup: {str(error)[:512]}")
         record["finished_utc"] = datetime.now(timezone.utc).isoformat()
         validate_result(record)
         with (output / "result.json").open("x", encoding="utf-8") as stream:
@@ -226,8 +242,7 @@ async def repeat(scenario, profile, args, provenance_data, destination, ordinal)
 
 async def run(spec, profile, args, repo):
     scenario = scenario_from(spec, args)
-    args.binary = Path(args.binary).resolve(strict=True)
-    require(args.binary.is_file(), "binary is not a file")
+    args.binary = Path(args.binary).resolve()
     if args.build:
         require(args.build_dir, "--build requires --build-dir")
         builder = await OwnedProcess(["cmake", "--build", str(Path(args.build_dir).resolve()), "--config", "Release", "--target", "httpserver"]).start()
@@ -237,6 +252,7 @@ async def run(spec, profile, args, repo):
             require(builder.process.returncode == 0, "build failed: " + builder.diagnostic()["tail"][-2048:])
         finally:
             await builder.stop()
+    require(args.binary.is_file(), "binary is not a file")
     source = provenance(repo, args.binary, args.build_dir)
     source["qualification_commit_attestation"] = args.qualified_commit
     source["invocation"] = args.invocation
