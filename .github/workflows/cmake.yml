@@ -25,4 +25,4 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Verify completed milestones (pending suites cannot pass)
-        run: ctest --test-dir build -C Release -L "milestone0[123456789]|parallel_foundation|cache_storage|cache_policy" --no-tests=error --output-on-failure
+        run: ctest --test-dir build -C Release -L "milestone0[123456789]|parallel_foundation|milestone1[3-6]|cache_storage|cache_policy|cache_proxy" --no-tests=error --output-on-failure

@@ -1,5 +1,26 @@
 # Milestone acceptance tests
 
+## Cached proxy K (2026-10-26)
+
+The `cache_proxy` target composes B/C/D through the existing transaction and work
+interfaces. `cache_proxy_test` covers milestones 20–21; `cache_proxy_concurrency_test`
+covers K's transaction portion of 24. Both are Release-active production-backed
+suites, combining scripted I/O/clocks with real controlled loopback origins.
+They check cache-only zero work, miss/hit/Age, limits, cancellation, conditional
+refresh/retry, late conflicts, exact metadata/body pairing, concurrent candidates,
+pinned eviction, and reservation release. B's four suites are also present.
+
+```powershell
+ctest --test-dir build/cache-proxy -C Release -L 'cache_proxy' --no-tests=error --output-on-failure
+ctest --test-dir build/cache-proxy -C Release -L 'milestone0[1-9]|parallel_foundation|milestone1[3-6]|cache_storage|cache_policy|cache_proxy' --no-tests=error --output-on-failure
+```
+
+With `REQUIRE_ALL_MILESTONES=ON`, all 32 tests pass on Windows GCC 16.2, Clang
+22.1.8 and MSVC 19.29, with zero failures/skips. Linux/macOS, remote CI and race
+diagnostics remain pending. CI selects the same B/C/D/K and base/P0 inventory.
+Full E/F/G driver acceptance remains L; the executable is still the fixed-response
+demo. See the [K handoff](../docs/branches/cache-proxy.md) for setup and results.
+
 ## Cache tracks C/D (2026-10-26)
 
 `cache_storage` and `cache_policy` are production targets discovered through P0's

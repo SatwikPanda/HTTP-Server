@@ -42,7 +42,7 @@ handoffs for scope and remaining platform/integration acceptance. See the
 | [H — config-observability](H-config-observability.md) | `codex/config-observability` | 29, stop hooks for 28 | P0 |
 | [I — test-harness](I-test-harness.md) | `codex/test-harness` | Fixtures and matrix preparation for 30 | P0 |
 | [J — benchmark-harness](J-benchmark-harness.md) | `codex/benchmark-harness` | Workload/tooling preparation for 31 | P0 |
-| [K — cache-proxy](K-cache-proxy.md) | `codex/cache-proxy` | 20–21, integration part of 24 | B + C + D |
+| [K — cache-proxy](K-cache-proxy.md) | `cache-proxy` (implemented; local Windows verified) | 20–21, integration part of 24 | B + C + D |
 | [L — application-assembly](L-application-assembly.md) | `codex/application-assembly` | 24, 27–28 and combined application acceptance | Incrementally after P0; finish after A–I + K |
 | [M — correctness-gate](M-correctness-gate.md) | `codex/correctness-gate` | 30 | L + I |
 | [N — results](N-results.md) | `codex/results` | Finish 31 and implement 32 | L + J for smoke runs; M for measurements |

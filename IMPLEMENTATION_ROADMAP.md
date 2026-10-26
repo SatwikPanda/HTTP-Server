@@ -18,6 +18,22 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Verification record — 2026-10-26 (Track K)
+
+- Branch `cache-proxy` combines B `96ad613` and C/D `55c5333` on P0.
+  The cached transaction composes B forwarding, C storage and D policy; fresh
+  hits, bounded streamed fills and exact-version revalidation are implemented.
+- Milestones 20–21 pass at the transaction/reference-driver boundary. K's portion
+  of 24 covers duplicate misses, conflicting validations, pinned eviction,
+  concurrent candidates, cancellation and release using deterministic barriers.
+- All 32 strict tests pass on Windows GCC 16.2, Clang 22.1.8 and MSVC 19.29,
+  with no failures/skips. CI's gate includes B/C/D/K and base/P0. Linux/macOS,
+  remote CI and race diagnostics remain pending for K.
+- Factories select enabled/disabled caching through `HttpSessionConfig::application`.
+  The executable still runs the fixed-response demo. L owns CLI assembly and
+  full E/F/G acceptance; full milestone 24 is not marked complete.
+  Details and stable commits: [K handoff](docs/branches/cache-proxy.md).
+
 ## Verification record — 2026-10-26 (Tracks C and D)
 
 - Tracks C/D are implemented on `cache-storage-policy`, based on P0 commit
@@ -492,12 +508,12 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Consult policy/storage before resolving an origin. Serve a usable fresh hit with newly serialized framing and current Age.
-- [ ] On a miss, forward normally and build a bounded cache candidate alongside downstream streaming. Commit only after full valid receipt.
-- [ ] Stop retaining candidate bytes when an object exceeds its limit, while continuing to forward it.
-- [ ] Track resident entries, pinned response references, and candidate buffers separately. Enforce a global in-flight memory budget as well as resident limits.
-- [ ] Return 504 for unsatisfied only-if-cached requests without DNS/connect activity. Until milestone 21, fetch stale entries unconditionally; never serve them as fresh.
-- [ ] Add cache-enabled/disabled configuration and hit/miss/bypass/insertion/eviction counters.
+- [x] Consult policy/storage before resolving an origin. Serve a usable fresh hit with newly serialized framing and current Age.
+- [x] On a miss, forward normally and build a bounded cache candidate alongside downstream streaming. Commit only after full valid receipt.
+- [x] Stop retaining candidate bytes when an object exceeds its limit, while continuing to forward it.
+- [x] Track resident entries, pinned response references, and candidate buffers separately. Enforce a global in-flight memory budget as well as resident limits.
+- [x] Return 504 for unsatisfied only-if-cached requests without DNS/connect activity. Never serve stale entries as fresh.
+- [x] Add cache-enabled/disabled factory configuration and hit/miss/bypass/insertion/eviction counters. CLI selection remains L.
 
 **Completion checks:** A second fresh GET causes no origin request. Expiry causes a fetch. Interrupted or oversized responses never become hits. Cache-only requests produce zero origin traffic even on bypass paths, and all memory categories stay bounded.
 
@@ -509,12 +525,12 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 
 **Implement:**
 
-- [ ] Prefer a stored ETag in If-None-Match; otherwise use Last-Modified in If-Modified-Since. Preserve weak validator syntax.
-- [ ] On a matching 304, merge permitted metadata, recompute freshness/age, retain the body, and serve cached 200 to the unconditional client GET.
-- [ ] Handle unexpected or mismatching 304 with an unconditional retry or upstream error; never attach an unrelated cached body.
-- [ ] Replace with a new 200 only after complete eligible receipt. Remove entries when revalidation changes eligibility or an authoritative changed response cannot replace them.
-- [ ] Return an error on upstream failure rather than stale content. Keep client conditional requests on the bypass path.
-- [ ] Record validation requests/results separately from ordinary hits and misses.
+- [x] Prefer a stored ETag in If-None-Match; otherwise use Last-Modified in If-Modified-Since. Preserve weak validator syntax.
+- [x] On a matching 304, merge permitted metadata, recompute freshness/age, retain the body, and serve cached 200 to the unconditional client GET.
+- [x] Handle unexpected or mismatching 304 with an unconditional retry or upstream error; never attach an unrelated cached body.
+- [x] Replace with a new 200 only after complete eligible receipt. Remove entries when revalidation changes eligibility or an authoritative changed response cannot replace them.
+- [x] Return an error on upstream failure rather than stale content. Keep client conditional requests on the bypass path.
+- [x] Record validation requests/results separately from ordinary hits and misses.
 
 **Completion checks:** Test unchanged 304, changed 200, weak validators, Last-Modified fallback, metadata changes, changed cache eligibility, mismatched 304, interrupted replacement, and failed revalidation.
 
