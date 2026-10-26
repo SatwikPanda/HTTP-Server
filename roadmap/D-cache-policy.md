@@ -1,6 +1,8 @@
 # D — cache-policy
 
-**Status:** planned. **Branch:** `codex/cache-policy`.
+**Status:** implemented; verified locally on Windows. **Delivery branch:**
+`cache-storage-policy` (combined C/D). See the
+[handoff](../docs/branches/cache-policy.md) for exact checks and limitations.
 **Milestones:** 18–19 and pure revalidation decisions for 21.
 **Start:** [P0](P0-parallel-foundation.md). [K](K-cache-proxy.md) executes decisions.
 Follow the [shared workflow](README.md).
@@ -124,8 +126,8 @@ base/P0 gate. K/L add wire-level checks proving the decisions are obeyed.
 
 ## Done and handoff
 
-- [ ] Pure policy uses bounded parsers and deterministic clock inputs.
-- [ ] Every decision explains network/lookup/storage permission unambiguously.
-- [ ] `docs/branches/cache-policy.md` contains the policy matrix, timestamp
+- [x] Pure policy uses bounded parsers and deterministic clock inputs.
+- [x] Every decision explains network/lookup/storage permission unambiguously.
+- [x] `docs/branches/cache-policy.md` contains the policy matrix, timestamp
   conventions, malformed-input rules and actual test results.
-- [ ] No live resolver, socket or LRU implementation is needed to test this track.
+- [x] No live resolver, socket or LRU implementation is needed to test this track.

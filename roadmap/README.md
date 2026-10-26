@@ -3,7 +3,10 @@
 These guides expand [the parallel roadmap](../implementation_roadmap2.md).
 They preserve the original milestone 10–32 requirements while explaining how
 each owner should implement, integrate and verify its portion of the project.
-P0 is implemented and locally verified; A–N remain planned. See the
+P0, C and D are implemented and locally verified on Windows; other tracks remain
+planned. C/D share `cache-storage-policy`; see their
+[storage](../docs/branches/cache-storage.md) and [policy](../docs/branches/cache-policy.md)
+handoffs for scope and remaining platform/integration acceptance. See the
 [contract reference](../docs/parallel_contracts.md) and
 [P0 handoff](../docs/branches/parallel-foundation.md) for exact APIs and evidence.
 
@@ -15,8 +18,9 @@ P0 is implemented and locally verified; A–N remain planned. See the
    checkout until tracked; these guides retain the relevant design.
 2. Use the verified milestone 09 base and P0 implementation recorded in the
    [handoff](../docs/branches/parallel-foundation.md).
-3. Commit the completed [P0](P0-parallel-foundation.md) working tree and record
-   its SHA as `PARALLEL_BASE`. Then start A–J from that same commit.
+3. The C/D `PARALLEL_BASE` is `4547b48687d70b4d2d54370f01b6dfa946b80181`,
+   containing committed [P0](P0-parallel-foundation.md) and its macOS fixture fixes.
+   Start independent feature work from a recorded compatible P0 commit.
 4. Read the guide for the assigned track, its linked dependencies, and the actual
    production code. Shared filenames/types are fixed in
    [docs/parallel_contracts.md](../docs/parallel_contracts.md).
@@ -38,7 +42,7 @@ P0 is implemented and locally verified; A–N remain planned. See the
 | [H — config-observability](H-config-observability.md) | `codex/config-observability` | 29, stop hooks for 28 | P0 |
 | [I — test-harness](I-test-harness.md) | `codex/test-harness` | Fixtures and matrix preparation for 30 | P0 |
 | [J — benchmark-harness](J-benchmark-harness.md) | `codex/benchmark-harness` | Workload/tooling preparation for 31 | P0 |
-| [K — cache-proxy](K-cache-proxy.md) | `codex/cache-proxy` | 20–21, integration part of 24 | B + C + D |
+| [K — cache-proxy](K-cache-proxy.md) | `cache-proxy` (implemented; local Windows verified) | 20–21, integration part of 24 | B + C + D |
 | [L — application-assembly](L-application-assembly.md) | `codex/application-assembly` | 24, 27–28 and combined application acceptance | Incrementally after P0; finish after A–I + K |
 | [M — correctness-gate](M-correctness-gate.md) | `codex/correctness-gate` | 30 | L + I |
 | [N — results](N-results.md) | `codex/results` | Finish 31 and implement 32 | L + J for smoke runs; M for measurements |

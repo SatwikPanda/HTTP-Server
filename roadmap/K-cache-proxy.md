@@ -1,6 +1,7 @@
 # K — cache-proxy
 
-**Status:** planned. **Branch:** `codex/cache-proxy`.
+**Status:** implemented; strict Windows GCC/Clang/MSVC acceptance passed.
+**Branch:** `cache-proxy`. Linux/macOS and full E/F/G acceptance remain pending.
 **Milestones:** 20–21 and transaction/concurrency portions of 24.
 **Start:** merged [B](B-proxy.md), [C](C-cache-storage.md), [D](D-cache-policy.md)
 on P0. Full concurrent acceptance occurs in [L](L-application-assembly.md).
@@ -10,7 +11,7 @@ Follow the [shared workflow](README.md).
 
 Compose policy, storage and uncached forwarding into a cache-enabled proxy
 transaction. Own `include/proxy/cache_transaction.hpp`,
-`src/proxy/cache_transaction.cpp`, `tests/proxy_cache/` and separate module CMake.
+`src/proxy/cached/cache_transaction.cpp`, `tests/proxy/cached/` and separate module CMake.
 Names remain subject to P0's published contracts. Keep B's uncached factory fully
 usable and avoid copying its network state machine.
 
@@ -136,8 +137,11 @@ base/P0 tests. L repeats the same integration scenarios through F/G with E.
 
 ## Done and handoff
 
-- [ ] All origin traffic passes through B and all cache decisions through D/C.
-- [ ] Cache-disabled and enabled factories are selectable by L without alternate
+- [x] All origin traffic passes through B and all cache decisions through D/C.
+- [x] Cache-disabled and enabled factories are selectable by L without alternate
   protocol implementations.
-- [ ] `docs/branches/cache-proxy.md` records conflict/retry semantics, memory
+- [x] `docs/branches/cache-proxy.md` records conflict/retry semantics, memory
   ownership, clock capture points, counters and actual integration results.
+
+See the [K handoff](../docs/branches/cache-proxy.md) for prerequisite SHAs,
+stable checkpoints, exact APIs, executed checks and remaining L acceptance.

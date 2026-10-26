@@ -1,6 +1,8 @@
 # C — cache-storage
 
-**Status:** planned. **Branch:** `codex/cache-storage`.
+**Status:** implemented; verified locally on Windows. **Delivery branch:**
+`cache-storage-policy` (combined C/D). See the
+[handoff](../docs/branches/cache-storage.md) for exact checks and limitations.
 **Milestones:** 17 and storage/accounting portions of 24.
 **Start:** [P0](P0-parallel-foundation.md). Runtime consumers are
 [K](K-cache-proxy.md) and [L](L-application-assembly.md). [D](D-cache-policy.md)
@@ -129,9 +131,9 @@ exercise real cache transactions under both drivers.
 
 ## Done and handoff
 
-- [ ] Production store, immutable snapshots, conditional updates and reservation
+- [x] Production store, immutable snapshots, conditional updates and reservation
   ownership work under concurrent callers without I/O under locks.
-- [ ] Publish cost/category definitions, conflict outcomes and lock order in
+- [x] Publish cost/category definitions, conflict outcomes and lock order in
   `docs/branches/cache-storage.md` with actual verification results.
-- [ ] K receives an API that cannot accidentally combine old metadata with a new
+- [x] K receives an API that cannot accidentally combine old metadata with a new
   body or bypass the global memory bound.

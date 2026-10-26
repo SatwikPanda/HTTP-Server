@@ -34,9 +34,10 @@ public:
     void reclassify(core::AllocationKind kind) const noexcept { reservation_.reclassify(kind); }
 private:
     Body(std::vector<std::byte> bytes, core::Reservation reservation)
-        : bytes_(std::move(bytes)), reservation_(std::move(reservation)) {}
-    std::vector<std::byte> bytes_;
+        : reservation_(std::move(reservation)), bytes_(std::move(bytes)) {}
+    // Members die in reverse order: free payload before returning its budget.
     mutable core::Reservation reservation_;
+    std::vector<std::byte> bytes_;
 };
 struct Entry {
     Key key;

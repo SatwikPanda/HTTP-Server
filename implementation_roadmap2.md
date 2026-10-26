@@ -12,7 +12,10 @@ The milestone numbers **10–32 retain their meanings** from
 their strictly sequential execution order with the dependencies below; it does
 not remove their requirements or acceptance checks. **P0** is an additional
 shared integration step between milestone 09 and parallel feature development.
-P0 is implemented and locally verified; A–N remain planned. See the
+P0, C and D are implemented and locally verified on Windows; other tracks remain
+planned. C/D are delivered together on `cache-storage-policy`; see the
+[storage](docs/branches/cache-storage.md) and [policy](docs/branches/cache-policy.md)
+handoffs for evidence and remaining integration/platform acceptance. See the
 [P0 handoff](docs/branches/parallel-foundation.md) for current evidence.
 
 Detailed implementation guides for P0 and every A–N track are in
@@ -29,8 +32,8 @@ Milestone 09 is implemented. Its base commit is
 all 20 strict 01–09/P0 tests on Windows GCC 16.2, Clang 22.1.8 and MSVC 19.29.
 Linux/macOS execution of these changes and remote CI verification remain pending.
 The [handoff](docs/branches/parallel-foundation.md) records exact commands and
-results. Changes are uncommitted; record the resulting commit as `PARALLEL_BASE`
-before starting A–J branches.
+results. C/D use `4547b48687d70b4d2d54370f01b6dfa946b80181` as `PARALLEL_BASE`,
+including committed P0 and its subsequent macOS fixture corrections.
 
 - [x] Preserve unconsumed bytes and ordered responses across sequential/pipelined requests.
 - [x] Respect persistence/close semantics and close on framing or unsafe output failures.
@@ -286,16 +289,16 @@ boundary so K can wrap forwarding without copying its state machine.
 and a storage-specific CMake file. P0 decides how the old unused cache headers
 are retired or adapted before C and D split; they are not a production baseline.
 
-- [ ] **17:** Implement map/list LRU with immutable shared snapshots. Use the
+- [x] **17:** Implement map/list LRU with immutable shared snapshots. Use the
   agreed key including exact escaped path/query; store end-to-end metadata and
   transfer-decoded, content-encoded body bytes. Enforce entry-count, resident-byte
   and per-object limits with documented metadata costs.
-- [ ] Keep mutation locks short; never hold them during serialization or I/O.
+- [x] Keep mutation locks short; never hold them during serialization or I/O.
   Return snapshots that remain valid through replacement/eviction.
-- [ ] Implement reservations for candidates and retained/pinned allocations;
+- [x] Implement reservations for candidates and retained/pinned allocations;
   eviction cannot pretend to free an allocation still referenced by a response.
   Bound temporary copies and transfer reservations correctly on insertion.
-- [ ] Provide version-checked replacement/metadata update and explicit failure
+- [x] Provide version-checked replacement/metadata update and explicit failure
   results so a late validation cannot update a different body.
 
 **Acceptance:** deterministic eviction/replacement, exact budget boundaries,
@@ -309,23 +312,23 @@ storage behavior; real concurrent proxy/cache acceptance remains in K/L.
 a policy-specific CMake file. Depend on shared cache/HTTP value types, not C's
 storage implementation or either driver.
 
-- [ ] **18:** Store only complete eligible 200 responses to unconditional GET.
+- [x] **18:** Store only complete eligible 200 responses to unconditional GET.
   Bypass Authorization, Cookie, Range and client conditionals; forward HEAD
   without replacing a cached GET. Reject Set-Cookie, any Vary, no-store/private,
   partial/malformed/interrupted/oversized and initially close-delimited responses.
-- [ ] Parse Cache-Control case-insensitively with quoted values and conservative
+- [x] Parse Cache-Control case-insensitively with quoted values and conservative
   malformed/conflicting handling. Field-qualified restrictions apply to the whole
   response. Separate lookup, storage and validation decisions; request no-store
   bypasses lookup and insertion. Check only-if-cached before any network path.
-- [ ] **19:** Prefer s-maxage, then max-age, then Expires. No explicit lifetime
+- [x] **19:** Prefer s-maxage, then max-age, then Expires. No explicit lifetime
   means immediately stale; retain only useful validation candidates. Apply
   request max-age/min-fresh and request/response no-cache. Require validation when
   stale; never use max-stale to serve stale content. Honor must/proxy-revalidate.
-- [ ] Use paired wall/steady times: apparent age is max(0, response time minus
+- [x] Use paired wall/steady times: apparent age is max(0, response time minus
   Date); corrected initial age is max(apparent age, received Age plus response
   delay); current age adds monotonic resident time. Clamp arithmetic, handle bad
   dates conservatively, use strict age < lifetime freshness, and generate Age.
-- [ ] Define validator selection and permitted 304 metadata merging as pure
+- [x] Define validator selection and permitted 304 metadata merging as pure
   decisions, with ETag preferred over Last-Modified and body/version identity
   required. K owns their execution against an origin and store.
 

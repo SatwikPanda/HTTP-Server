@@ -1,6 +1,6 @@
 # B — proxy
 
-**Status:** planned. **Branch:** `codex/proxy`. **Milestones:** 13–16.
+**Status:** implemented on `proxy` (verified locally on Windows GCC 16.2 Release; see [handoff](../docs/branches/proxy.md)). **Branch:** `proxy`. **Milestones:** 13–16.
 **Start:** [P0](P0-parallel-foundation.md). Enforced asynchronous DNS deadlines
 also require [E](E-helpers.md); combined driver acceptance belongs to
 [L](L-application-assembly.md). Follow the [shared workflow](README.md).
@@ -144,8 +144,8 @@ checks require E. Later rerun the same production tests through both drivers.
 
 ## Done and handoff
 
-- [ ] Uncached factory is usable independently of storage/policy.
-- [ ] P0's K integration hooks cover request preparation, final metadata, decoded
+- [x] Uncached factory is usable independently of storage/policy.
+- [x] P0's K integration hooks cover request preparation, final metadata, decoded
   segments, successful completion and failure without bypassing budgets.
-- [ ] `docs/branches/proxy.md` records limits, deadlines, header rules, tests and
+- [x] `docs/branches/proxy.md` records limits, deadlines, header rules, tests and
   exact dependencies; L owns CLI selection and final main wiring.
