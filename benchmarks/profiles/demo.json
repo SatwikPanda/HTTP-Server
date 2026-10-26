@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "current-fixed-response-demo",
+  "applications": {"demo": []},
+  "drivers": {"single": []},
+  "options": {"bind": "--host", "port": "--port"},
+  "readiness_regex": "Listening on\\s*:\\s*(?P<host>127\\.0\\.0\\.1):(?P<port>[0-9]+)"
+}
