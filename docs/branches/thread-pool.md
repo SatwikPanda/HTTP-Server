@@ -1,5 +1,22 @@
 # Thread-pool driver handoff (track F, milestone 23)
 
+## CI portability correction — 2026-10-26
+
+The macOS job in [integration run 40370186351](https://github.com/SatwikPanda/HTTP-Server/actions/runs/40370186351)
+built successfully but timed out in the shutdown fixture's `send_all`. Sending
+2 MiB before reading an echo can fill both socket directions: the driver waits
+for the client to read while the client waits for the driver to read.
+
+Shutdown checks now send a small HTTP request that produces a bounded 8 MiB
+response. A transparent session probe observes real would-block writes before
+requesting stop. The drain case waits for stop delivery, reads the entire response
+and verifies its body/framing and clean close; the stalled case verifies the drain
+deadline with unread output. The existing large echo/offset test remains intact.
+No driver or session behavior is mocked or changed. Local strict affected suites
+pass with Windows GCC, Clang and MSVC; Clang also passes five consecutive repeats.
+
+## Original branch handoff
+
 Branch `thread-pool`, started from branch `helpers` (track E), because the driver
 submits file/DNS work through E's `HelperExecutor` and its tests run E for real.
 Owned files: `include/concurrency/thread_pool/`, `src/concurrency/thread_pool/`,

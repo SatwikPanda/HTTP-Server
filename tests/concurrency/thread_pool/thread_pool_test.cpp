@@ -1,6 +1,8 @@
 #include "concurrency/thread_pool/thread_pool_driver.hpp"
 
 #include "fixtures/parallel_io.hpp"
+#include "fixtures/io_controls.hpp"
+#include "fixtures/session_probe.hpp"
 #include "http/http_session.hpp"
 #include "http/reference_application.hpp"
 #include "net/runtime.hpp"
@@ -38,7 +40,7 @@ void send_all(net::Socket& socket, std::string_view text, Clock::duration timeou
     while (offset < text.size()) {
         auto bytes = std::as_bytes(std::span(text.data() + offset, text.size() - offset));
         auto wrote = socket.write_some(bytes);
-        if (wrote.is_ok()) { offset += wrote.bytes_transferred; continue; }
+        if (wrote.is_ok()) { CHECK(wrote.bytes_transferred > 0); offset += wrote.bytes_transferred; continue; }
         CHECK(wrote.would_block());
         CHECK(Clock::now() < deadline);
         std::this_thread::sleep_for(1ms);
@@ -389,19 +391,37 @@ void stop_closes_queued_and_active_sockets() {
     CHECK(!late.connect(driver->local_endpoint()));
 }
 
+SessionFactory large_response_factory(SessionProbe& probe, const std::string& body) {
+    http::HttpSessionConfig session;
+    session.response_body = body;
+    session.max_output_bytes = 16 * 1024 * 1024;
+    session.retry_timeout = 10000ms;
+    return [session, &probe](core::ConnectionId id) -> core::Result<std::unique_ptr<ConnectionSession>> {
+        return std::unique_ptr<ConnectionSession>(std::make_unique<ProbedSession>(
+            std::make_unique<http::HttpSession>(session, id), probe));
+    };
+}
+
 void stop_drains_pending_output_within_budget() {
     ThreadPoolConfig config;
     config.workers = 1;
-    auto driver = start_driver(config, echo_factory(10000ms, 4 * 1024 * 1024));
+    SessionProbe probe;
+    const std::string payload(8 * 1024 * 1024, 'q');
+    auto driver = start_driver(config, large_response_factory(probe, payload));
     auto client = connect_to(driver->local_endpoint());
-    const std::string payload(2 * 1024 * 1024, 'q');
-    send_all(client, payload, 10s); // not read yet: output waits on the client
-    eventually([&] { return driver->stats().active == 1; });
-    std::this_thread::sleep_for(100ms);
+    // A small request creates pending server output without first filling both
+    // directions of an echo connection. Wait for observed backpressure.
+    send_all(client, "GET / HTTP/1.1\r\nHost: local\r\nConnection: close\r\n\r\n");
+    eventually([&] { return probe.blocked_writes.load() > 0; });
+    CHECK(probe.bytes_written > 0 && probe.bytes_written < payload.size());
     driver->request_stop(5000ms);
-    const auto echoed = receive(client, payload.size(), 10s);
+    eventually([&] { return probe.stopped.load(); });
+    bool closed = false;
+    const auto wire = receive(client, payload.size() + 8192, 10s, &closed);
     driver->join();
-    CHECK(echoed.size() == payload.size()); // drained before the deadline, then closed
+    const auto response = inspect_fixed_wire_response(wire);
+    CHECK(closed && response.valid && response.status_code == 200);
+    CHECK(response.body == payload && response.total_wire_bytes == wire.size());
     CHECK(driver->stats().forced_closes == 0);
 }
 
@@ -431,16 +451,18 @@ private:
 void stop_deadline_bounds_draining_sessions() {
     ThreadPoolConfig config;
     config.workers = 2;
-    auto driver = start_driver(config, echo_factory(10000ms, 4 * 1024 * 1024));
+    SessionProbe probe;
+    const std::string payload(8 * 1024 * 1024, 'r');
+    auto driver = start_driver(config, large_response_factory(probe, payload));
     auto client = connect_to(driver->local_endpoint());
-    const std::string payload(2 * 1024 * 1024, 'r');
-    send_all(client, payload, 10s); // the client never reads the echo
-    eventually([&] { return driver->stats().active == 1; });
-    std::this_thread::sleep_for(100ms);
+    send_all(client, "GET / HTTP/1.1\r\nHost: local\r\nConnection: close\r\n\r\n");
+    eventually([&] { return probe.blocked_writes.load() > 0; });
     auto started = Clock::now();
     driver->request_stop(200ms);
     driver->join();
-    CHECK(Clock::now() - started < 2s); // the session honoured its drain deadline
+    const auto drained_for = Clock::now() - started;
+    CHECK(drained_for >= 150ms && drained_for < 2s);
+    CHECK(probe.stopped && probe.bytes_written < payload.size());
 
     SessionFactory stubborn = [](core::ConnectionId id) -> core::Result<std::unique_ptr<ConnectionSession>> {
         return std::unique_ptr<ConnectionSession>(std::make_unique<StubbornSession>(id));
