@@ -1,0 +1,7 @@
+if(NOT TARGET cache_policy)
+    message(FATAL_ERROR "Cache policy acceptance requires cache_policy")
+endif()
+add_project_test(cache_policy_test SOURCES policy_test.cpp LINKS cache_policy LABELS milestone18)
+add_project_test(cache_freshness_test SOURCES freshness_test.cpp LINKS cache_policy LABELS milestone19)
+add_project_test(cache_revalidation_test SOURCES revalidation_test.cpp LINKS cache_policy LABELS milestone21)
+require_project_tests(cache_policy_test cache_freshness_test cache_revalidation_test)
