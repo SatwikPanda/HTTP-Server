@@ -1,12 +1,14 @@
 # L — application-assembly
 
-**Status:** integrated on main for I/J; final M qualification pending. **Branch:** `codex/application-assembly`.
+**Status:** implemented and integrated; LMN native Windows/Linux/macOS resource qualification passes. **Branch:** `application-assembly`.
 **Milestones:** 24, 27–28 and combined acceptance of 23, 25–26, 29.
 **Start:** incrementally after P0. **Finish:** A–I and K integrated.
 Use [J](J-benchmark-harness.md) for smoke workloads, then hand off to
 [M](M-correctness-gate.md)/[N](N-results.md). Follow the [shared workflow](README.md).
 
 Current evidence: [integrated application handoff](../docs/branches/application-assembly.md).
+The LMN follow-up retains every production factory/mode and adds repeated
+lifetime qualification; see [the current validation record](../docs/validation/lmn.md).
 
 ## Outcome and ownership
 
@@ -53,8 +55,9 @@ included feature lacks a prerequisite. Do not silently ship a binary omitting a
 requested mode because a target was absent.
 
 Update root usage docs from executed commands, including single/multi-config
-executable paths and MSVC developer-shell requirements. Track needed docs in Git;
-the ignored local architecture file cannot be a required build input.
+executable paths and MSVC developer-shell requirements. Track needed docs in Git.
+`PROJECT_ARCHITECTURE.md` is tracked as the original design reference; the build
+does not depend on local-only documentation.
 
 ## Complete the product matrix
 
@@ -118,6 +121,6 @@ Execute J's small scenario-family smoke runs when the harness is available.
 - [x] Combined local strict tests pass with no required pending substitutions.
 - [x] `docs/branches/application-assembly.md` records included SHAs, exact
   factories/targets, lifecycle guarantees and validation commands/results.
-- [ ] M receives CI/validation ownership after assembly freeze; N receives final
-  run/results documentation after J/L freeze. M still must establish portability.
+- [x] M receives CI/validation ownership after assembly freeze; N receives final
+  run/results documentation after J/L freeze. M's native portability gate now passes.
 - [x] No final feature wiring is left as an exercise for the person merging branches.

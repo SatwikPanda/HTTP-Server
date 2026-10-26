@@ -136,9 +136,19 @@ async def run_phase(scenario, endpoint, origin, seconds, request_limit):
                 except asyncio.QueueFull:
                     counts["errors"] += 1
                     counts["overload_dropped"] += 1
-            await queue.join()
+            # A low arrival rate may complete its last request before the end
+            # of the configured issue window. Include that idle interval in the
+            # denominator instead of inflating useful throughput (e.g. one fast
+            # response in a one-second window is one request/s, not its inverse
+            # response latency). A request-cap termination remains explicit.
+            if sequence < request_limit:
+                await asyncio.sleep(max(0, end - time.perf_counter()))
+            # Close idle persistent clients during tail drain. Waiting for the
+            # queue first can pin every server worker in an idle connection
+            # while other generator workers wait for service on queued sockets.
             for _ in tasks:
                 await queue.put(None)
+            await queue.join()
         await asyncio.gather(*tasks)
     finally:
         for task in tasks:

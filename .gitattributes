@@ -1,0 +1,8 @@
+# Preserve machine-produced evidence verbatim, including native line endings.
+docs/validation/**/*.log -text -whitespace linguist-generated=true
+docs/validation/**/*.json -text -whitespace linguist-generated=true
+docs/validation/**/*.xml -text -whitespace linguist-generated=true
+benchmarks/reports/**/*.svg -text -whitespace linguist-generated=true
+benchmarks/reports/**/*.png linguist-generated=true
+benchmarks/reports/**/*.csv -text -whitespace linguist-generated=true
+benchmarks/reports/**/*.json -text -whitespace linguist-generated=true

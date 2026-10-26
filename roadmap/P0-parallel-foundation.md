@@ -1,6 +1,6 @@
 # P0 — parallel-foundation
 
-**Status:** implemented; Windows GCC/Clang/MSVC strict 01–09/P0 gate verified. **Branch:** `codex/parallel-foundation`.
+**Status:** implemented; Windows GCC/Clang/MSVC strict 01–09/P0 gate verified. **Branch:** `parallel-foundation`.
 **Start:** verified milestone 09. **Deliver:** `PARALLEL_BASE` for A–J.
 Read the [shared workflow](README.md) and the P0 section of the
 [parallel roadmap](../implementation_roadmap2.md).

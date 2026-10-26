@@ -43,6 +43,8 @@ def main():
     parser.add_argument("--measurement", type=float)
     parser.add_argument("--repeats", type=int)
     parser.add_argument("--qualified-commit")
+    parser.add_argument("--candidate-record", help="local qualification JSON; results remain provisional")
+    parser.add_argument("--platform-record", action="append", default=[], help="M qualification JSON; required for each native OS")
     parser.add_argument("--output", default=str(ROOT / "results"))
     args = parser.parse_args()
     try:

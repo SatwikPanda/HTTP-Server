@@ -1,10 +1,13 @@
 # N — results
 
-**Status:** planned. **Branch:** `codex/results`.
+**Status:** campaign/report tooling implemented on `codex/lmn-completion`; final qualified comparison pending. **Branch:** `results`.
 **Milestones:** finish 31, then 32.
 **Start:** [L](L-application-assembly.md) + [J](J-benchmark-harness.md) for smoke
 work; accepted measurements require [M](M-correctness-gate.md)'s qualified commit.
 Follow the [shared workflow](README.md).
+
+Implementation and candidate evidence: [N handoff](../docs/branches/results.md)
+and [validation summary](../docs/validation/lmn.md).
 
 ## Outcome and ownership
 
@@ -101,7 +104,7 @@ with the implemented ones before final delivery.
   separately; raw measurements support every performance claim.
 - [ ] Results include errors, variation, machine/configuration details, plots and
   scripts to regenerate them.
-- [ ] M's platform gate remains valid for the delivered implementation commit.
+- [x] M's platform gate remains valid for the delivered implementation commit.
 - [ ] `docs/branches/results.md` links final run/config/test/result documentation
   and records excluded host-limited workloads explicitly.
 - [ ] All A–N implementation and integration work is included in the delivered

@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Win32-MSBuild"
+	tests="54"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="runnervmdaln5"
+	time="51"
+	timestamp="2026-10-26T19:49:02"
+	>
+	<testcase name="socket_ownership_test" classname="socket_ownership_test" time="0.0190686" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone01"/>
+		</properties>
+		<system-out>[RUN] test_network_runtime_initialization...
+[PASS] test_network_runtime_initialization
+[RUN] test_socket_move_semantics...
+[PASS] test_socket_move_semantics
+[RUN] test_double_close_never_closes_another_socket...
+[PASS] test_double_close_never_closes_another_socket
+[RUN] test_bind_occupied_port_fails...
+[PASS] test_bind_occupied_port_fails
+[RUN] test_accepted_socket_owns_handle_independently...
+[PASS] test_accepted_socket_owns_handle_independently
+
+ALL SOCKET OWNERSHIP TESTS PASSED!
+</system-out>
+	</testcase>
+	<testcase name="echo_test_double_test" classname="echo_test_double_test" time="0.0332497" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone02"/>
+		</properties>
+		<system-out>[RUN] test_empty_disconnect...
+[PASS] test_empty_disconnect
+[RUN] test_forced_short_writes_and_would_block...
+[PASS] test_forced_short_writes_and_would_block (short writes: 12, would_blocks: 2)
+[RUN] test_binary_bytes_all_values...
+[PASS] test_binary_bytes_all_values
+[RUN] test_fragmented_sends...
+[PASS] test_fragmented_sends
+[RUN] test_payload_larger_than_buffer...
+[PASS] test_payload_larger_than_buffer (16-byte buffer echoed 20,000 bytes)
+[RUN] test_slow_receiver_simulation...
+[PASS] test_slow_receiver_simulation (would_blocks: 171)
+
+ALL ECHO TEST DOUBLE TESTS PASSED!
+</system-out>
+	</testcase>
+	<testcase name="echo_integration_test" classname="echo_integration_test" time="1.28061" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone02"/>
+		</properties>
+		<system-out>Test EchoServer listening on: 127.0.0.1:60718
+
+[RUN] test_real_empty_disconnect...
+[PASS] test_real_empty_disconnect
+[RUN] test_real_binary_bytes...
+[PASS] test_real_binary_bytes (4096 bytes verified)
+[RUN] test_real_fragmented_sends...
+[PASS] test_real_fragmented_sends (300 1-byte sends verified)
+[RUN] test_real_payload_larger_than_buffer...
+[PASS] test_real_payload_larger_than_buffer (32,768 bytes verified)
+[RUN] test_real_slow_receiver...
+[PASS] test_real_slow_receiver (slow client read 4096 bytes safely)
+
+ALL REAL SOCKET ECHO INTEGRATION TESTS PASSED!
+</system-out>
+	</testcase>
+	<testcase name="milestone01_test" classname="milestone01_test" time="0.0149715" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone01"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone02_test" classname="milestone02_test" time="0.107822" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone02"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone03_test" classname="milestone03_test" time="7.05148" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone03"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone04_test" classname="milestone04_test" time="0.0165227" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone04"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone05_test" classname="milestone05_test" time="0.0115171" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone05"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone06_test" classname="milestone06_test" time="0.0116205" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone06"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="http_serialization_test" classname="http_serialization_test" time="0.0098254" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone05"/>
+		</properties>
+		<system-out>Starting HTTP Serialization Tests...
+[RUN] test_http_methods...
+[PASS] test_http_methods
+[RUN] test_http_status_and_reason...
+[PASS] test_http_status_and_reason
+[RUN] test_http_version...
+[PASS] test_http_version
+[RUN] test_header_validation...
+[PASS] test_header_validation
+[RUN] test_header_map_repeated_and_case_insensitive...
+[PASS] test_header_map_repeated_and_case_insensitive
+[RUN] test_http_date_formatting...
+[PASS] test_http_date_formatting
+[RUN] test_response_serialization_success...
+[PASS] test_response_serialization_success
+[RUN] test_response_serialization_rejection...
+[PASS] test_response_serialization_rejection
+All HTTP Serialization Tests PASSED!
+</system-out>
+	</testcase>
+	<testcase name="http_session_test" classname="http_session_test" time="0.104096" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone05"/>
+		</properties>
+		<system-out>Starting HTTP Session Tests...
+[RUN] test_session_normal_request...
+[PASS] test_session_normal_request
+[RUN] test_session_fragmented_reads...
+[PASS] test_session_fragmented_reads
+[RUN] test_session_forced_short_writes...
+[PASS] test_session_forced_short_writes
+[RUN] test_session_would_block_cycles...
+[PASS] test_session_would_block_cycles
+[RUN] test_session_empty_disconnect...
+[PASS] test_session_empty_disconnect
+[RUN] test_session_header_limit_exceeded...
+[PASS] test_session_header_limit_exceeded
+All HTTP Session Tests PASSED!
+</system-out>
+	</testcase>
+	<testcase name="http_integration_test" classname="http_integration_test" time="0.631523" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone05"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="http_parser_test" classname="http_parser_test" time="0.0132914" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone06"/>
+		</properties>
+		<system-out>[RUN] test_parsed_fields
+[PASS] test_parsed_fields
+[RUN] test_three_way_splits
+[PASS] test_three_way_splits
+[RUN] test_pipelined_boundaries_at_every_split
+[PASS] test_pipelined_boundaries_at_every_split
+[RUN] test_malformed_heads_map_to_errors
+[PASS] test_malformed_heads_map_to_errors
+[RUN] test_errors_are_detected_early
+[PASS] test_errors_are_detected_early
+[RUN] test_limits_are_exact
+[PASS] test_limits_are_exact
+[RUN] test_session_keeps_bytes_after_the_head
+[PASS] test_session_keeps_bytes_after_the_head
+[RUN] test_session_rejections
+[PASS] test_session_rejections
+All HTTP parser tests PASSED!
+</system-out>
+	</testcase>
+	<testcase name="milestone07_test" classname="milestone07_test" time="0.010472" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone07"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone08_test" classname="milestone08_test" time="0.0093545" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone08"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="http_response_test" classname="http_response_test" time="0.0137381" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone08"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone09_test" classname="milestone09_test" time="0.013024" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone09"/>
+		</properties>
+		<system-out>Starting Milestone 09 Acceptance Tests...
+[RUN] test_sequential_and_pipelined_keep_alive...
+[PASS] test_sequential_and_pipelined_keep_alive
+[RUN] test_pipelined_fragmented_reads...
+[PASS] test_pipelined_fragmented_reads
+[RUN] test_client_connection_close_header...
+[PASS] test_client_connection_close_header
+[RUN] test_http_1_0_persistence_semantics...
+[PASS] test_http_1_0_persistence_semantics
+[RUN] test_max_requests_per_connection...
+[PASS] test_max_requests_per_connection
+[RUN] test_deadlines_and_timeouts...
+[PASS] test_deadlines_and_timeouts
+[RUN] test_error_and_rejected_body_isolation...
+[PASS] test_error_and_rejected_body_isolation
+[RUN] test_real_socket_loopback_integration...
+[PASS] test_real_socket_loopback_integration
+All Milestone 09 Tests Passed!
+</system-out>
+	</testcase>
+	<testcase name="cli_validation_test" classname="cli_validation_test" time="0.127678" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone03"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="parallel_foundation_test" classname="parallel_foundation_test" time="0.0165805" status="run">
+		<properties>
+			<property name="cmake_labels" value="parallel_foundation"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="parallel_work_test" classname="parallel_work_test" time="2.22715" status="run">
+		<properties>
+			<property name="cmake_labels" value="parallel_foundation"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="fixture_harness_test" classname="fixture_harness_test" time="0.709093" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone30;parallel_foundation"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="path_policy_test" classname="path_policy_test" time="0.012552" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone10"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="mime_test" classname="mime_test" time="0.0087823" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone11"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="conditional_test" classname="conditional_test" time="0.0094991" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone12"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="static_target_test" classname="static_target_test" time="0.978855" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone10"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="static_response_test" classname="static_response_test" time="0.299562" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone11"/>
+		</properties>
+		<system-out>UNSUPPORTED (not counted as exercised): POSIX permission bits (Windows ACLs are not set by this test)
+UNSUPPORTED (not counted as exercised): descriptor counting; handle-leak checks were not exercised
+</system-out>
+	</testcase>
+	<testcase name="milestone13_test" classname="milestone13_test" time="0.0106286" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone13"/>
+		</properties>
+		<system-out>milestone 13 proxy preparation passed
+</system-out>
+	</testcase>
+	<testcase name="milestone14_test" classname="milestone14_test" time="0.275175" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone14"/>
+		</properties>
+		<system-out>milestone 14 proxy forwarding passed
+</system-out>
+	</testcase>
+	<testcase name="milestone15_test" classname="milestone15_test" time="0.327164" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone15"/>
+		</properties>
+		<system-out>milestone 15 proxy streaming passed
+</system-out>
+	</testcase>
+	<testcase name="milestone16_test" classname="milestone16_test" time="4.342" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone16"/>
+		</properties>
+		<system-out>milestone 16 proxy backpressure and failure handling passed
+</system-out>
+	</testcase>
+	<testcase name="cache_proxy_test" classname="cache_proxy_test" time="1.14959" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_proxy;milestone20;milestone21"/>
+		</properties>
+		<system-out>cache proxy transaction acceptance passed
+</system-out>
+	</testcase>
+	<testcase name="cache_proxy_concurrency_test" classname="cache_proxy_concurrency_test" time="0.0249907" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_proxy;milestone24"/>
+		</properties>
+		<system-out>cache proxy concurrency acceptance passed
+</system-out>
+	</testcase>
+	<testcase name="cache_storage_test" classname="cache_storage_test" time="0.0113216" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_storage;milestone17"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="cache_storage_concurrency_test" classname="cache_storage_concurrency_test" time="0.0154652" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_storage;milestone24"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="cache_policy_storage_test" classname="cache_policy_storage_test" time="0.0115043" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_policy;cache_storage;milestone21;milestone24"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="cache_policy_test" classname="cache_policy_test" time="0.0111219" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_policy;milestone18"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="cache_freshness_test" classname="cache_freshness_test" time="0.01121" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_policy;milestone19"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="cache_revalidation_test" classname="cache_revalidation_test" time="0.011382" status="run">
+		<properties>
+			<property name="cmake_labels" value="cache_policy;milestone21"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="helper_pool_test" classname="helper_pool_test" time="0.384469" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone22"/>
+		</properties>
+		<system-out>milestone 22 helper tests passed
+</system-out>
+	</testcase>
+	<testcase name="thread_pool_test" classname="thread_pool_test" time="4.07957" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone23"/>
+		</properties>
+		<system-out>milestone 23 thread-pool tests passed
+</system-out>
+	</testcase>
+	<testcase name="milestone25_test" classname="milestone25_test" time="0.661444" status="run">
+		<properties>
+			<property name="cmake_labels" value="event_loop;milestone25"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone26_test" classname="milestone26_test" time="6.29505" status="run">
+		<properties>
+			<property name="cmake_labels" value="event_loop;milestone26"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone27_test" classname="milestone27_test" time="0.42945" status="run">
+		<properties>
+			<property name="cmake_labels" value="event_loop;milestone27"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="milestone28_test" classname="milestone28_test" time="0.24989" status="run">
+		<properties>
+			<property name="cmake_labels" value="event_loop;milestone28"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="config_parser_test" classname="config_parser_test" time="0.0128316" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone29"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="metrics_and_logging_test" classname="metrics_and_logging_test" time="0.0180629" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone29"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="stop_hooks_test" classname="stop_hooks_test" time="0.0447123" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone28;milestone29"/>
+		</properties>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="system_matrix_test" classname="system_matrix_test" time="1.0443" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone30;system_matrix"/>
+		</properties>
+		<system-out>[RUN] P0 + A
+[RUN] P0 + A + E + F + L
+[RUN] P0 + A + E + G + L
+[RUN] P0 + B + E + F + L
+[RUN] P0 + B + E + G + L
+[RUN] P0 + B + C + D + K + E + F + L
+[RUN] P0 + B + C + D + K + E + G + L
+</system-out>
+	</testcase>
+	<testcase name="application_lifecycle_test" classname="application_lifecycle_test" time="0.458159" status="run">
+		<properties>
+			<property name="cmake_labels" value="milestone28;milestone30;system_matrix"/>
+		</properties>
+		<system-out>pressure driver=1 cycle=0
+pressure driver=1 cycle=1
+pressure driver=1 cycle=2
+pressure driver=2 cycle=0
+pressure driver=2 cycle=1
+pressure driver=2 cycle=2
+</system-out>
+	</testcase>
+	<testcase name="resource_soak_test" classname="resource_soak_test" time="5.27402" status="run">
+		<properties>
+			<property name="cmake_labels" value="correctness_gate;milestone24;milestone28;milestone30"/>
+		</properties>
+		<system-out>QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578258,"responses_completed":25,"process_cpu_microseconds":62500,"process_rss_bytes":8138752,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":156250,"process_rss_bytes":9457664,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":156250,"process_rss_bytes":9322496,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":2...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="results_tool_test" classname="results_tool_test" time="1.15446" status="run">
+		<properties>
+			<property name="cmake_labels" value="correctness_gate;milestone30;milestone32"/>
+		</properties>
+		<system-out>.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.037s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="benchmark_harness_test" classname="benchmark_harness_test" time="1.91738" status="run">
+		<properties>
+			<property name="cmake_labels" value="benchmark_harness;milestone31"/>
+		</properties>
+		<system-out>.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.972s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="benchmark_smoke_thread-pool" classname="benchmark_smoke_thread-pool" time="5.0591" status="run">
+		<properties>
+			<property name="cmake_labels" value="benchmark_harness;executable_matrix;milestone31"/>
+		</properties>
+		<system-out>thread-pool/hot-file
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\78ee0dd316b64d4c9e663557dc9f05ac\\result.json", "state": "complete"}
+thread-pool/varied-files
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\25291f9bb30b45edbd7af4bb9d9046a8\\result.json", "state": "complete"}
+thread-pool/head-file
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\6189e845961f4594a077f41a8b3df578\\result.json", "state": "complete"}
+thread-pool/proxy-off
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\6252f2c03fc841bea6b8edfabae79824\\result.json", "state": "complete"}
+thread-pool/proxy-cold
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\67f10b89be334060a1493d4e1cf5889c\\result.json", "state": "complete"}
+thread-pool/proxy-warm
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\330b8df842694ab9b4b320f4eedae457\\result.json", "state": "complete"}
+thread-pool/proxy-revalidation
+{"result": "D:\\a\\HTTP-Serve...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="benchmark_smoke_event-loop" classname="benchmark_smoke_event-loop" time="4.70263" status="run">
+		<properties>
+			<property name="cmake_labels" value="benchmark_harness;executable_matrix;milestone31"/>
+		</properties>
+		<system-out>event-loop/hot-file
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\02b9387241d84c0aba7a824b1d2e012c\\result.json", "state": "complete"}
+event-loop/varied-files
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\57f55a72951544158624edadc56c3b84\\result.json", "state": "complete"}
+event-loop/head-file
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\4c91d9a2529c4e4b8224b65fad6847e5\\result.json", "state": "complete"}
+event-loop/proxy-off
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\975919bc20e34ad8b7d5a4e3b5a7382a\\result.json", "state": "complete"}
+event-loop/proxy-cold
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\1e0ce5d3d2424dcba9bd0bfdb5c6d0ad\\result.json", "state": "complete"}
+event-loop/proxy-warm
+{"result": "D:\\a\\HTTP-Server\\HTTP-Server\\build\\benchmark-smoke\\d12a3677a74f4375ae9c30e4b3cb4db9\\result.json", "state": "complete"}
+event-loop/proxy-revalidation
+{"result": "D:\\a\\HTTP-Server\\HTTP...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

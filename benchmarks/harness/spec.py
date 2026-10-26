@@ -135,7 +135,7 @@ def validate_result(value):
     require(value.get("schema_version") == VERSION, "unsupported result version")
     for key in ("run_id", "repeat", "evidence", "state", "scenario", "provenance", "environment", "processes", "phases", "diagnostics"):
         require(key in value, f"missing result {key}")
-    require(value["evidence"] in {"smoke", "measurement"}, "invalid evidence kind")
+    require(value["evidence"] in {"smoke", "candidate", "measurement"}, "invalid evidence kind")
     require(value["state"] in {"complete", "failed", "interrupted"}, "invalid run state")
     require(isinstance(value['run_id'], str) and len(value['run_id']) == 32 and
             all(ch in '0123456789abcdef' for ch in value['run_id']), 'invalid run id')

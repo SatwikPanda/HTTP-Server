@@ -1,0 +1,183 @@
+Test project C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn-clang
+      Start  1: socket_ownership_test
+ 1/54 Test  #1: socket_ownership_test ............   Passed    0.04 sec
+      Start  2: echo_test_double_test
+ 2/54 Test  #2: echo_test_double_test ............   Passed    0.06 sec
+      Start  3: echo_integration_test
+ 3/54 Test  #3: echo_integration_test ............   Passed    2.04 sec
+      Start  4: milestone01_test
+ 4/54 Test  #4: milestone01_test .................   Passed    0.03 sec
+      Start  5: milestone02_test
+ 5/54 Test  #5: milestone02_test .................   Passed    0.12 sec
+      Start  6: milestone03_test
+ 6/54 Test  #6: milestone03_test .................   Passed    6.84 sec
+      Start  7: milestone04_test
+ 7/54 Test  #7: milestone04_test .................   Passed    0.05 sec
+      Start  8: milestone05_test
+ 8/54 Test  #8: milestone05_test .................   Passed    0.03 sec
+      Start  9: milestone06_test
+ 9/54 Test  #9: milestone06_test .................   Passed    0.05 sec
+      Start 10: http_serialization_test
+10/54 Test #10: http_serialization_test ..........   Passed    0.03 sec
+      Start 11: http_session_test
+11/54 Test #11: http_session_test ................   Passed    0.14 sec
+      Start 12: http_integration_test
+12/54 Test #12: http_integration_test ............   Passed    0.27 sec
+      Start 13: http_parser_test
+13/54 Test #13: http_parser_test .................   Passed    0.04 sec
+      Start 14: milestone07_test
+14/54 Test #14: milestone07_test .................   Passed    0.04 sec
+      Start 15: milestone08_test
+15/54 Test #15: milestone08_test .................   Passed    0.03 sec
+      Start 16: http_response_test
+16/54 Test #16: http_response_test ...............   Passed    0.04 sec
+      Start 17: milestone09_test
+17/54 Test #17: milestone09_test .................   Passed    0.05 sec
+      Start 18: cli_validation_test
+18/54 Test #18: cli_validation_test ..............   Passed    0.22 sec
+      Start 19: parallel_foundation_test
+19/54 Test #19: parallel_foundation_test .........   Passed    0.05 sec
+      Start 20: parallel_work_test
+20/54 Test #20: parallel_work_test ...............   Passed    2.27 sec
+      Start 21: fixture_harness_test
+21/54 Test #21: fixture_harness_test .............   Passed    0.92 sec
+      Start 22: path_policy_test
+22/54 Test #22: path_policy_test .................   Passed    0.04 sec
+      Start 23: mime_test
+23/54 Test #23: mime_test ........................   Passed    0.03 sec
+      Start 24: conditional_test
+24/54 Test #24: conditional_test .................   Passed    0.03 sec
+      Start 25: static_target_test
+25/54 Test #25: static_target_test ...............   Passed    1.17 sec
+      Start 26: static_response_test
+26/54 Test #26: static_response_test .............   Passed    0.45 sec
+      Start 27: milestone13_test
+27/54 Test #27: milestone13_test .................   Passed    0.04 sec
+      Start 28: milestone14_test
+28/54 Test #28: milestone14_test .................   Passed    0.41 sec
+      Start 29: milestone15_test
+29/54 Test #29: milestone15_test .................   Passed    0.12 sec
+      Start 30: milestone16_test
+30/54 Test #30: milestone16_test .................   Passed    4.39 sec
+      Start 31: cache_proxy_test
+31/54 Test #31: cache_proxy_test .................   Passed    1.56 sec
+      Start 32: cache_proxy_concurrency_test
+32/54 Test #32: cache_proxy_concurrency_test .....   Passed    0.04 sec
+      Start 33: cache_storage_test
+33/54 Test #33: cache_storage_test ...............   Passed    0.04 sec
+      Start 34: cache_storage_concurrency_test
+34/54 Test #34: cache_storage_concurrency_test ...   Passed    0.05 sec
+      Start 35: cache_policy_storage_test
+35/54 Test #35: cache_policy_storage_test ........   Passed    0.04 sec
+      Start 36: cache_policy_test
+36/54 Test #36: cache_policy_test ................   Passed    0.03 sec
+      Start 37: cache_freshness_test
+37/54 Test #37: cache_freshness_test .............   Passed    0.03 sec
+      Start 38: cache_revalidation_test
+38/54 Test #38: cache_revalidation_test ..........   Passed    0.04 sec
+      Start 39: helper_pool_test
+39/54 Test #39: helper_pool_test .................   Passed    0.27 sec
+      Start 40: thread_pool_test
+40/54 Test #40: thread_pool_test .................   Passed    3.91 sec
+      Start 41: milestone25_test
+41/54 Test #41: milestone25_test .................   Passed    0.40 sec
+      Start 42: milestone26_test
+42/54 Test #42: milestone26_test .................   Passed    6.23 sec
+      Start 43: milestone27_test
+43/54 Test #43: milestone27_test .................   Passed    0.31 sec
+      Start 44: milestone28_test
+44/54 Test #44: milestone28_test .................   Passed    0.11 sec
+      Start 45: config_parser_test
+45/54 Test #45: config_parser_test ...............   Passed    0.03 sec
+      Start 46: metrics_and_logging_test
+46/54 Test #46: metrics_and_logging_test .........   Passed    0.03 sec
+      Start 47: stop_hooks_test
+47/54 Test #47: stop_hooks_test ..................   Passed    0.06 sec
+      Start 48: system_matrix_test
+48/54 Test #48: system_matrix_test ...............   Passed    0.29 sec
+      Start 49: application_lifecycle_test
+49/54 Test #49: application_lifecycle_test .......   Passed    0.34 sec
+      Start 50: resource_soak_test
+50/54 Test #50: resource_soak_test ...............***Failed    3.05 sec
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":15625,"process_rss_bytes":8560640,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":125000,"process_rss_bytes":10072064,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":171875,"process_rss_bytes":10297344,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":296875,"process_rss_bytes":9793536,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":421875,"process_rss_bytes":10686464,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":421875,"process_rss_bytes":10665984,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":0,"handles":93,"threads":5,"rss_bytes":10145792}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":546875,"process_rss_bytes":10407936,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":796875,"process_rss_bytes":11476992,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":812500,"process_rss_bytes":11317248,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":875000,"process_rss_bytes":10686464,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":984375,"process_rss_bytes":11718656,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1031250,"process_rss_bytes":11755520,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":1,"handles":93,"threads":5,"rss_bytes":11259904}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1062500,"process_rss_bytes":11747328,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1156250,"process_rss_bytes":12267520,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1218750,"process_rss_bytes":11730944,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1218750,"process_rss_bytes":11259904,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1281250,"process_rss_bytes":12288000,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1375000,"process_rss_bytes":12132352,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":2,"handles":94,"threads":5,"rss_bytes":11730944}
+C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/tests/system/resource_soak_test.cpp:174: CHECK failed: sample.handles && *sample.handles <= *baseline.handles
+
+      Start 51: results_tool_test
+51/54 Test #51: results_tool_test ................   Passed    0.19 sec
+      Start 52: benchmark_harness_test
+52/54 Test #52: benchmark_harness_test ...........   Passed    1.01 sec
+      Start 53: benchmark_smoke_thread-pool
+53/54 Test #53: benchmark_smoke_thread-pool ......   Passed    5.43 sec
+      Start 54: benchmark_smoke_event-loop
+54/54 Test #54: benchmark_smoke_event-loop .......   Passed    5.17 sec
+
+98% tests passed, 1 tests failed out of 54
+
+Label Time Summary:
+benchmark_harness      =  11.62 sec*proc (3 tests)
+cache_policy           =   0.14 sec*proc (4 tests)
+cache_proxy            =   1.60 sec*proc (2 tests)
+cache_storage          =   0.13 sec*proc (3 tests)
+correctness_gate       =   3.25 sec*proc (2 tests)
+event_loop             =   7.06 sec*proc (4 tests)
+executable_matrix      =  10.61 sec*proc (2 tests)
+milestone01            =   0.07 sec*proc (2 tests)
+milestone02            =   2.22 sec*proc (3 tests)
+milestone03            =   7.06 sec*proc (2 tests)
+milestone04            =   0.05 sec*proc (1 test)
+milestone05            =   0.47 sec*proc (4 tests)
+milestone06            =   0.09 sec*proc (2 tests)
+milestone07            =   0.04 sec*proc (1 test)
+milestone08            =   0.07 sec*proc (2 tests)
+milestone09            =   0.05 sec*proc (1 test)
+milestone10            =   1.21 sec*proc (2 tests)
+milestone11            =   0.48 sec*proc (2 tests)
+milestone12            =   0.03 sec*proc (1 test)
+milestone13            =   0.04 sec*proc (1 test)
+milestone14            =   0.41 sec*proc (1 test)
+milestone15            =   0.12 sec*proc (1 test)
+milestone16            =   4.39 sec*proc (1 test)
+milestone17            =   0.04 sec*proc (1 test)
+milestone18            =   0.03 sec*proc (1 test)
+milestone19            =   0.03 sec*proc (1 test)
+milestone20            =   1.56 sec*proc (1 test)
+milestone21            =   1.64 sec*proc (3 tests)
+milestone22            =   0.27 sec*proc (1 test)
+milestone23            =   3.91 sec*proc (1 test)
+milestone24            =   3.18 sec*proc (4 tests)
+milestone25            =   0.40 sec*proc (1 test)
+milestone26            =   6.23 sec*proc (1 test)
+milestone27            =   0.31 sec*proc (1 test)
+milestone28            =   3.57 sec*proc (4 tests)
+milestone29            =   0.13 sec*proc (3 tests)
+milestone30            =   4.80 sec*proc (5 tests)
+milestone31            =  11.62 sec*proc (3 tests)
+milestone32            =   0.19 sec*proc (1 test)
+parallel_foundation    =   3.24 sec*proc (3 tests)
+system_matrix          =   0.63 sec*proc (2 tests)
+
+Total Test time (real) =  48.78 sec
+
+The following tests FAILED:
+	 50 - resource_soak_test (Failed)                       correctness_gate milestone24 milestone28 milestone30
+Errors while running CTest

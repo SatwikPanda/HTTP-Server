@@ -1,0 +1,1230 @@
+Start testing: Oct 27 00:46 India Standard Time
+----------------------------------------------------------
+1/54 Testing: socket_ownership_test
+1/54 Test: socket_ownership_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/socket_ownership_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"socket_ownership_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+[RUN] test_network_runtime_initialization...
+[PASS] test_network_runtime_initialization
+[RUN] test_socket_move_semantics...
+[PASS] test_socket_move_semantics
+[RUN] test_double_close_never_closes_another_socket...
+[PASS] test_double_close_never_closes_another_socket
+[RUN] test_bind_occupied_port_fails...
+[PASS] test_bind_occupied_port_fails
+[RUN] test_accepted_socket_owns_handle_independently...
+[PASS] test_accepted_socket_owns_handle_independently
+
+ALL SOCKET OWNERSHIP TESTS PASSED!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"socket_ownership_test" end time: Oct 27 00:46 India Standard Time
+"socket_ownership_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/54 Testing: echo_test_double_test
+2/54 Test: echo_test_double_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/echo_test_double_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"echo_test_double_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+[RUN] test_empty_disconnect...
+[PASS] test_empty_disconnect
+[RUN] test_forced_short_writes_and_would_block...
+[PASS] test_forced_short_writes_and_would_block (short writes: 12, would_blocks: 2)
+[RUN] test_binary_bytes_all_values...
+[PASS] test_binary_bytes_all_values
+[RUN] test_fragmented_sends...
+[PASS] test_fragmented_sends
+[RUN] test_payload_larger_than_buffer...
+[PASS] test_payload_larger_than_buffer (16-byte buffer echoed 20,000 bytes)
+[RUN] test_slow_receiver_simulation...
+[PASS] test_slow_receiver_simulation (would_blocks: 171)
+
+ALL ECHO TEST DOUBLE TESTS PASSED!
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"echo_test_double_test" end time: Oct 27 00:46 India Standard Time
+"echo_test_double_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/54 Testing: echo_integration_test
+3/54 Test: echo_integration_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/echo_integration_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"echo_integration_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Test EchoServer listening on: 127.0.0.1:54034
+
+[RUN] test_real_empty_disconnect...
+[PASS] test_real_empty_disconnect
+[RUN] test_real_binary_bytes...
+[PASS] test_real_binary_bytes (4096 bytes verified)
+[RUN] test_real_fragmented_sends...
+[PASS] test_real_fragmented_sends (300 1-byte sends verified)
+[RUN] test_real_payload_larger_than_buffer...
+[PASS] test_real_payload_larger_than_buffer (32,768 bytes verified)
+[RUN] test_real_slow_receiver...
+[PASS] test_real_slow_receiver (slow client read 4096 bytes safely)
+
+ALL REAL SOCKET ECHO INTEGRATION TESTS PASSED!
+<end of output>
+Test time =   2.07 sec
+----------------------------------------------------------
+Test Passed.
+"echo_integration_test" end time: Oct 27 00:46 India Standard Time
+"echo_integration_test" time elapsed: 00:00:02
+----------------------------------------------------------
+
+4/54 Testing: milestone01_test
+4/54 Test: milestone01_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone01_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone01_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"milestone01_test" end time: Oct 27 00:46 India Standard Time
+"milestone01_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/54 Testing: milestone02_test
+5/54 Test: milestone02_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone02_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone02_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"milestone02_test" end time: Oct 27 00:46 India Standard Time
+"milestone02_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/54 Testing: milestone03_test
+6/54 Test: milestone03_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone03_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone03_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   6.76 sec
+----------------------------------------------------------
+Test Passed.
+"milestone03_test" end time: Oct 27 00:46 India Standard Time
+"milestone03_test" time elapsed: 00:00:06
+----------------------------------------------------------
+
+7/54 Testing: milestone04_test
+7/54 Test: milestone04_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone04_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone04_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"milestone04_test" end time: Oct 27 00:46 India Standard Time
+"milestone04_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/54 Testing: milestone05_test
+8/54 Test: milestone05_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone05_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone05_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone05_test" end time: Oct 27 00:46 India Standard Time
+"milestone05_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/54 Testing: milestone06_test
+9/54 Test: milestone06_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone06_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone06_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone06_test" end time: Oct 27 00:46 India Standard Time
+"milestone06_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/54 Testing: http_serialization_test
+10/54 Test: http_serialization_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/http_serialization_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"http_serialization_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Starting HTTP Serialization Tests...
+[RUN] test_http_methods...
+[PASS] test_http_methods
+[RUN] test_http_status_and_reason...
+[PASS] test_http_status_and_reason
+[RUN] test_http_version...
+[PASS] test_http_version
+[RUN] test_header_validation...
+[PASS] test_header_validation
+[RUN] test_header_map_repeated_and_case_insensitive...
+[PASS] test_header_map_repeated_and_case_insensitive
+[RUN] test_http_date_formatting...
+[PASS] test_http_date_formatting
+[RUN] test_response_serialization_success...
+[PASS] test_response_serialization_success
+[RUN] test_response_serialization_rejection...
+[PASS] test_response_serialization_rejection
+All HTTP Serialization Tests PASSED!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"http_serialization_test" end time: Oct 27 00:46 India Standard Time
+"http_serialization_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/54 Testing: http_session_test
+11/54 Test: http_session_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/http_session_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"http_session_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Starting HTTP Session Tests...
+[RUN] test_session_normal_request...
+[PASS] test_session_normal_request
+[RUN] test_session_fragmented_reads...
+[PASS] test_session_fragmented_reads
+[RUN] test_session_forced_short_writes...
+[PASS] test_session_forced_short_writes
+[RUN] test_session_would_block_cycles...
+[PASS] test_session_would_block_cycles
+[RUN] test_session_empty_disconnect...
+[PASS] test_session_empty_disconnect
+[RUN] test_session_header_limit_exceeded...
+[PASS] test_session_header_limit_exceeded
+All HTTP Session Tests PASSED!
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"http_session_test" end time: Oct 27 00:46 India Standard Time
+"http_session_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/54 Testing: http_integration_test
+12/54 Test: http_integration_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/http_integration_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"http_integration_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.31 sec
+----------------------------------------------------------
+Test Passed.
+"http_integration_test" end time: Oct 27 00:46 India Standard Time
+"http_integration_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/54 Testing: http_parser_test
+13/54 Test: http_parser_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/http_parser_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"http_parser_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+[RUN] test_parsed_fields
+[PASS] test_parsed_fields
+[RUN] test_three_way_splits
+[PASS] test_three_way_splits
+[RUN] test_pipelined_boundaries_at_every_split
+[PASS] test_pipelined_boundaries_at_every_split
+[RUN] test_malformed_heads_map_to_errors
+[PASS] test_malformed_heads_map_to_errors
+[RUN] test_errors_are_detected_early
+[PASS] test_errors_are_detected_early
+[RUN] test_limits_are_exact
+[PASS] test_limits_are_exact
+[RUN] test_session_keeps_bytes_after_the_head
+[PASS] test_session_keeps_bytes_after_the_head
+[RUN] test_session_rejections
+[PASS] test_session_rejections
+All HTTP parser tests PASSED!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"http_parser_test" end time: Oct 27 00:46 India Standard Time
+"http_parser_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/54 Testing: milestone07_test
+14/54 Test: milestone07_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone07_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone07_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone07_test" end time: Oct 27 00:46 India Standard Time
+"milestone07_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/54 Testing: milestone08_test
+15/54 Test: milestone08_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone08_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone08_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone08_test" end time: Oct 27 00:46 India Standard Time
+"milestone08_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/54 Testing: http_response_test
+16/54 Test: http_response_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/http_response_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"http_response_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"http_response_test" end time: Oct 27 00:46 India Standard Time
+"http_response_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/54 Testing: milestone09_test
+17/54 Test: milestone09_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/milestone09_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"milestone09_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Starting Milestone 09 Acceptance Tests...
+[RUN] test_sequential_and_pipelined_keep_alive...
+[PASS] test_sequential_and_pipelined_keep_alive
+[RUN] test_pipelined_fragmented_reads...
+[PASS] test_pipelined_fragmented_reads
+[RUN] test_client_connection_close_header...
+[PASS] test_client_connection_close_header
+[RUN] test_http_1_0_persistence_semantics...
+[PASS] test_http_1_0_persistence_semantics
+[RUN] test_max_requests_per_connection...
+[PASS] test_max_requests_per_connection
+[RUN] test_deadlines_and_timeouts...
+[PASS] test_deadlines_and_timeouts
+[RUN] test_error_and_rejected_body_isolation...
+[PASS] test_error_and_rejected_body_isolation
+[RUN] test_real_socket_loopback_integration...
+[PASS] test_real_socket_loopback_integration
+All Milestone 09 Tests Passed!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone09_test" end time: Oct 27 00:46 India Standard Time
+"milestone09_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/54 Testing: cli_validation_test
+18/54 Test: cli_validation_test
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DSERVER=C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/httpserver.exe" "-P" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/tests/cli_validation_test.cmake"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"cli_validation_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.19 sec
+----------------------------------------------------------
+Test Passed.
+"cli_validation_test" end time: Oct 27 00:46 India Standard Time
+"cli_validation_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/54 Testing: parallel_foundation_test
+19/54 Test: parallel_foundation_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/parallel_foundation_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"parallel_foundation_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"parallel_foundation_test" end time: Oct 27 00:46 India Standard Time
+"parallel_foundation_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/54 Testing: parallel_work_test
+20/54 Test: parallel_work_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/parallel_work_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn
+"parallel_work_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Symlink creation unavailable: Function not implemented
+<end of output>
+Test time =   2.20 sec
+----------------------------------------------------------
+Test Passed.
+"parallel_work_test" end time: Oct 27 00:46 India Standard Time
+"parallel_work_test" time elapsed: 00:00:02
+----------------------------------------------------------
+
+21/54 Testing: fixture_harness_test
+21/54 Test: fixture_harness_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/fixtures/fixture_harness_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/fixtures
+"fixture_harness_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.91 sec
+----------------------------------------------------------
+Test Passed.
+"fixture_harness_test" end time: Oct 27 00:46 India Standard Time
+"fixture_harness_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/54 Testing: path_policy_test
+22/54 Test: path_policy_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server/path_policy_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server
+"path_policy_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"path_policy_test" end time: Oct 27 00:46 India Standard Time
+"path_policy_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/54 Testing: mime_test
+23/54 Test: mime_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server/mime_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server
+"mime_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mime_test" end time: Oct 27 00:46 India Standard Time
+"mime_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/54 Testing: conditional_test
+24/54 Test: conditional_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server/conditional_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server
+"conditional_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"conditional_test" end time: Oct 27 00:46 India Standard Time
+"conditional_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/54 Testing: static_target_test
+25/54 Test: static_target_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server/static_target_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server
+"static_target_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+UNSUPPORTED (not counted as exercised): symbolic links cannot be created here; link/reparse rejection was not exercised
+<end of output>
+Test time =   1.13 sec
+----------------------------------------------------------
+Test Passed.
+"static_target_test" end time: Oct 27 00:46 India Standard Time
+"static_target_test" time elapsed: 00:00:01
+----------------------------------------------------------
+
+26/54 Testing: static_response_test
+26/54 Test: static_response_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server/static_response_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/server
+"static_response_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+UNSUPPORTED (not counted as exercised): POSIX permission bits (Windows ACLs are not set by this test)
+UNSUPPORTED (not counted as exercised): descriptor counting; handle-leak checks were not exercised
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"static_response_test" end time: Oct 27 00:46 India Standard Time
+"static_response_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/54 Testing: milestone13_test
+27/54 Test: milestone13_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/milestone13_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy
+"milestone13_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 13 proxy preparation passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"milestone13_test" end time: Oct 27 00:46 India Standard Time
+"milestone13_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/54 Testing: milestone14_test
+28/54 Test: milestone14_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/milestone14_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy
+"milestone14_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 14 proxy forwarding passed
+<end of output>
+Test time =   0.36 sec
+----------------------------------------------------------
+Test Passed.
+"milestone14_test" end time: Oct 27 00:46 India Standard Time
+"milestone14_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/54 Testing: milestone15_test
+29/54 Test: milestone15_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/milestone15_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy
+"milestone15_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 15 proxy streaming passed
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"milestone15_test" end time: Oct 27 00:46 India Standard Time
+"milestone15_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/54 Testing: milestone16_test
+30/54 Test: milestone16_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/milestone16_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy
+"milestone16_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 16 proxy backpressure and failure handling passed
+<end of output>
+Test time =   4.39 sec
+----------------------------------------------------------
+Test Passed.
+"milestone16_test" end time: Oct 27 00:46 India Standard Time
+"milestone16_test" time elapsed: 00:00:04
+----------------------------------------------------------
+
+31/54 Testing: cache_proxy_test
+31/54 Test: cache_proxy_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/cached/cache_proxy_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/cached
+"cache_proxy_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+cache proxy transaction acceptance passed
+<end of output>
+Test time =   1.59 sec
+----------------------------------------------------------
+Test Passed.
+"cache_proxy_test" end time: Oct 27 00:46 India Standard Time
+"cache_proxy_test" time elapsed: 00:00:01
+----------------------------------------------------------
+
+32/54 Testing: cache_proxy_concurrency_test
+32/54 Test: cache_proxy_concurrency_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/cached/cache_proxy_concurrency_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/proxy/cached
+"cache_proxy_concurrency_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+cache proxy concurrency acceptance passed
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"cache_proxy_concurrency_test" end time: Oct 27 00:46 India Standard Time
+"cache_proxy_concurrency_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/54 Testing: cache_storage_test
+33/54 Test: cache_storage_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage/cache_storage_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage
+"cache_storage_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"cache_storage_test" end time: Oct 27 00:46 India Standard Time
+"cache_storage_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/54 Testing: cache_storage_concurrency_test
+34/54 Test: cache_storage_concurrency_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage/cache_storage_concurrency_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage
+"cache_storage_concurrency_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"cache_storage_concurrency_test" end time: Oct 27 00:46 India Standard Time
+"cache_storage_concurrency_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/54 Testing: cache_policy_storage_test
+35/54 Test: cache_policy_storage_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage/cache_policy_storage_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/storage
+"cache_policy_storage_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"cache_policy_storage_test" end time: Oct 27 00:46 India Standard Time
+"cache_policy_storage_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/54 Testing: cache_policy_test
+36/54 Test: cache_policy_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy/cache_policy_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy
+"cache_policy_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"cache_policy_test" end time: Oct 27 00:46 India Standard Time
+"cache_policy_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/54 Testing: cache_freshness_test
+37/54 Test: cache_freshness_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy/cache_freshness_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy
+"cache_freshness_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"cache_freshness_test" end time: Oct 27 00:46 India Standard Time
+"cache_freshness_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/54 Testing: cache_revalidation_test
+38/54 Test: cache_revalidation_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy/cache_revalidation_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/cache/policy
+"cache_revalidation_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"cache_revalidation_test" end time: Oct 27 00:46 India Standard Time
+"cache_revalidation_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/54 Testing: helper_pool_test
+39/54 Test: helper_pool_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/helpers/helper_pool_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/helpers
+"helper_pool_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 22 helper tests passed
+<end of output>
+Test time =   0.24 sec
+----------------------------------------------------------
+Test Passed.
+"helper_pool_test" end time: Oct 27 00:46 India Standard Time
+"helper_pool_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/54 Testing: thread_pool_test
+40/54 Test: thread_pool_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/thread_pool/thread_pool_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/thread_pool
+"thread_pool_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+milestone 23 thread-pool tests passed
+<end of output>
+Test time =   3.83 sec
+----------------------------------------------------------
+Test Passed.
+"thread_pool_test" end time: Oct 27 00:46 India Standard Time
+"thread_pool_test" time elapsed: 00:00:03
+----------------------------------------------------------
+
+41/54 Testing: milestone25_test
+41/54 Test: milestone25_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop/milestone25_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop
+"milestone25_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.39 sec
+----------------------------------------------------------
+Test Passed.
+"milestone25_test" end time: Oct 27 00:46 India Standard Time
+"milestone25_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+42/54 Testing: milestone26_test
+42/54 Test: milestone26_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop/milestone26_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop
+"milestone26_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   6.18 sec
+----------------------------------------------------------
+Test Passed.
+"milestone26_test" end time: Oct 27 00:46 India Standard Time
+"milestone26_test" time elapsed: 00:00:06
+----------------------------------------------------------
+
+43/54 Testing: milestone27_test
+43/54 Test: milestone27_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop/milestone27_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop
+"milestone27_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"milestone27_test" end time: Oct 27 00:46 India Standard Time
+"milestone27_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/54 Testing: milestone28_test
+44/54 Test: milestone28_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop/milestone28_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/concurrency/event_loop
+"milestone28_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"milestone28_test" end time: Oct 27 00:46 India Standard Time
+"milestone28_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/54 Testing: config_parser_test
+45/54 Test: config_parser_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability/config_parser_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability
+"config_parser_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+Directory symlink creation unavailable on host: Function not implemented
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"config_parser_test" end time: Oct 27 00:46 India Standard Time
+"config_parser_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/54 Testing: metrics_and_logging_test
+46/54 Test: metrics_and_logging_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability/metrics_and_logging_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability
+"metrics_and_logging_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"metrics_and_logging_test" end time: Oct 27 00:46 India Standard Time
+"metrics_and_logging_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/54 Testing: stop_hooks_test
+47/54 Test: stop_hooks_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability/stop_hooks_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/observability
+"stop_hooks_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"stop_hooks_test" end time: Oct 27 00:46 India Standard Time
+"stop_hooks_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/54 Testing: system_matrix_test
+48/54 Test: system_matrix_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system/system_matrix_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system
+"system_matrix_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+[RUN] P0 + A
+[RUN] P0 + A + E + F + L
+[RUN] P0 + A + E + G + L
+[RUN] P0 + B + E + F + L
+[RUN] P0 + B + E + G + L
+[RUN] P0 + B + C + D + K + E + F + L
+[RUN] P0 + B + C + D + K + E + G + L
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Passed.
+"system_matrix_test" end time: Oct 27 00:46 India Standard Time
+"system_matrix_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/54 Testing: application_lifecycle_test
+49/54 Test: application_lifecycle_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system/application_lifecycle_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system
+"application_lifecycle_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+pressure driver=1 cycle=0
+pressure driver=1 cycle=1
+pressure driver=1 cycle=2
+pressure driver=2 cycle=0
+pressure driver=2 cycle=1
+pressure driver=2 cycle=2
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"application_lifecycle_test" end time: Oct 27 00:46 India Standard Time
+"application_lifecycle_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+50/54 Testing: resource_soak_test
+50/54 Test: resource_soak_test
+Command: "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system/resource_soak_test.exe"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/tests/system
+"resource_soak_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":93750,"process_rss_bytes":8437760,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":156250,"process_rss_bytes":9838592,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":171875,"process_rss_bytes":9543680,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":187500,"process_rss_bytes":9240576,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":265625,"process_rss_bytes":10178560,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":4,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":265625,"process_rss_bytes":9879552,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":0,"handles":88,"threads":5,"rss_bytes":9388032}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":328125,"process_rss_bytes":9494528,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":390625,"process_rss_bytes":10473472,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":390625,"process_rss_bytes":10260480,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":421875,"process_rss_bytes":9646080,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":484375,"process_rss_bytes":10567680,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":500000,"process_rss_bytes":10436608,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":1,"handles":88,"threads":5,"rss_bytes":9814016}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":546875,"process_rss_bytes":9961472,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":625000,"process_rss_bytes":10899456,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":625000,"process_rss_bytes":11739136,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":656250,"process_rss_bytes":11329536,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":2,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":718750,"process_rss_bytes":12169216,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":4,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":718750,"process_rss_bytes":11960320,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":2,"handles":88,"threads":5,"rss_bytes":11587584}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":765625,"process_rss_bytes":11829248,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":890625,"process_rss_bytes":12513280,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":937500,"process_rss_bytes":12709888,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":968750,"process_rss_bytes":12214272,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1078125,"process_rss_bytes":13074432,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":4,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1078125,"process_rss_bytes":12890112,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":3,"handles":88,"threads":5,"rss_bytes":12333056}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1218750,"process_rss_bytes":12390400,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1281250,"process_rss_bytes":13430784,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1328125,"process_rss_bytes":13189120,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1375000,"process_rss_bytes":12505088,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1437500,"process_rss_bytes":13373440,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1437500,"process_rss_bytes":13123584,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":4,"handles":88,"threads":5,"rss_bytes":12591104}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1468750,"process_rss_bytes":13148160,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1578125,"process_rss_bytes":13606912,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1640625,"process_rss_bytes":13393920,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1640625,"process_rss_bytes":13307904,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":4,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1703125,"process_rss_bytes":13742080,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1750000,"process_rss_bytes":13250560,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":5,"handles":88,"threads":5,"rss_bytes":12713984}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1843750,"process_rss_bytes":12820480,"accepted":25,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":1921875,"process_rss_bytes":13774848,"accepted":24,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":4}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":1984375,"process_rss_bytes":13320192,"accepted":32,"active":0,"peak_active":4,"queued_accepts":0,"peak_queued_accepts":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1578306,"responses_completed":25,"process_cpu_microseconds":1984375,"process_rss_bytes":12668928,"accepted":25,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":3,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":0}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":789288,"responses_completed":24,"process_cpu_microseconds":2046875,"process_rss_bytes":13520896,"accepted":24,"active":0,"peak_active":4,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":3}
+QUIESCENT {"schema_version":1,"scope":"process_lifetime","wire_bytes_completed":1021060,"responses_completed":32,"process_cpu_microseconds":2046875,"process_rss_bytes":13430784,"accepted":32,"active":0,"peak_active":5,"queued_completions":0,"peak_queued_completions":1,"rejected":0,"queued_jobs":0,"running_jobs":0,"helper_rejected":0,"active_proxy_transactions":0,"peak_proxy_transactions":1,"cache_hits":25,"cache_misses":5,"cache_revalidations":1,"cache_304":0,"cache_entries":2,"cache_resident_bytes":72312,"cache_total_bytes":72920,"cache_evictions":3,"cache_candidate_bytes":0,"cache_retained_bytes":0,"cache_readers":0}
+RESOURCE {"cycle":6,"handles":88,"threads":5,"rss_bytes":12869632}
+HANDLE_TYPE =25
+HANDLE_TYPE ALPC Port=1
+HANDLE_TYPE Directory=2
+HANDLE_TYPE Event=19
+HANDLE_TYPE File=14
+HANDLE_TYPE IRTimer=4
+HANDLE_TYPE IoCompletion=3
+HANDLE_TYPE Key=6
+HANDLE_TYPE Mutant=1
+HANDLE_TYPE SchedulerSharedData=1
+HANDLE_TYPE Semaphore=2
+HANDLE_TYPE Thread=2
+HANDLE_TYPE TpWorkerFactory=2
+HANDLE_TYPE WaitCompletionPacket=6
+<end of output>
+Test time =   1.95 sec
+----------------------------------------------------------
+Test Passed.
+"resource_soak_test" end time: Oct 27 00:46 India Standard Time
+"resource_soak_test" time elapsed: 00:00:01
+----------------------------------------------------------
+
+51/54 Testing: results_tool_test
+51/54 Test: results_tool_test
+Command: "C:/Python314/python.exe" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/benchmarks/tests/test_results.py"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/benchmarks
+"results_tool_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.019s
+
+OK
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"results_tool_test" end time: Oct 27 00:46 India Standard Time
+"results_tool_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+52/54 Testing: benchmark_harness_test
+52/54 Test: benchmark_harness_test
+Command: "C:/Python314/python.exe" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/benchmarks/tests/test_harness.py"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/benchmarks
+"benchmark_harness_test" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.869s
+
+OK
+<end of output>
+Test time =   1.11 sec
+----------------------------------------------------------
+Test Passed.
+"benchmark_harness_test" end time: Oct 27 00:46 India Standard Time
+"benchmark_harness_test" time elapsed: 00:00:01
+----------------------------------------------------------
+
+53/54 Testing: benchmark_smoke_thread-pool
+53/54 Test: benchmark_smoke_thread-pool
+Command: "C:/Python314/python.exe" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/benchmarks/tests/smoke_matrix.py" "--binary" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/httpserver.exe" "--build-dir" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn" "--driver" "thread-pool"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/benchmarks
+"benchmark_smoke_thread-pool" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+thread-pool/hot-file
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\b29c56d6640d4dddb9a81b2157bcecbc\\result.json", "state": "complete"}
+thread-pool/varied-files
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\fe93935d8f6041ccb5af2b5605421d99\\result.json", "state": "complete"}
+thread-pool/head-file
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\e3a65c3963ef4e19b4ed12eb0708e78a\\result.json", "state": "complete"}
+thread-pool/proxy-off
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\4933d30801ae4db8a1b6d41c3aa5e71b\\result.json", "state": "complete"}
+thread-pool/proxy-cold
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\686d04e2a9ea4aff96584ee519848e71\\result.json", "state": "complete"}
+thread-pool/proxy-warm
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\21bcbea33f8e49bbb2cb5a7ea61ac905\\result.json", "state": "complete"}
+thread-pool/proxy-revalidation
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\2a7aaaf839d447eda1df8dbed50405f7\\result.json", "state": "complete"}
+thread-pool/proxy-mixed
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\cc14b8daaf60499ba08dd4b9a06389de\\result.json", "state": "complete"}
+thread-pool/delayed-origin
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\6f7bd9205fd04101b8b16111f1f91092\\result.json", "state": "complete"}
+thread-pool/slow-origin
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\68969752226545d5bab90d84501d734f\\result.json", "state": "complete"}
+thread-pool/slow-client
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\94df51cecc844ff59577c5dae6a4c95a\\result.json", "state": "complete"}
+<end of output>
+Test time =   5.17 sec
+----------------------------------------------------------
+Test Passed.
+"benchmark_smoke_thread-pool" end time: Oct 27 00:46 India Standard Time
+"benchmark_smoke_thread-pool" time elapsed: 00:00:05
+----------------------------------------------------------
+
+54/54 Testing: benchmark_smoke_event-loop
+54/54 Test: benchmark_smoke_event-loop
+Command: "C:/Python314/python.exe" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/benchmarks/tests/smoke_matrix.py" "--binary" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/httpserver.exe" "--build-dir" "C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn" "--driver" "event-loop"
+Directory: C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn/benchmarks
+"benchmark_smoke_event-loop" start time: Oct 27 00:46 India Standard Time
+Output:
+----------------------------------------------------------
+event-loop/hot-file
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\ce6a18e09a884255b02c8851b8d2ac95\\result.json", "state": "complete"}
+event-loop/varied-files
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\1246fc79136f49898fe03d5c3e8bd31e\\result.json", "state": "complete"}
+event-loop/head-file
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\4d1947b0bc1349ebac3f16dc3480ddd5\\result.json", "state": "complete"}
+event-loop/proxy-off
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\1062316b36fe4ea999437795e60d3eb4\\result.json", "state": "complete"}
+event-loop/proxy-cold
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\57417ee75d4c4bea8f091a20cf1a67dc\\result.json", "state": "complete"}
+event-loop/proxy-warm
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\616afa42fb9d48cb9bc3b3e68ef88e59\\result.json", "state": "complete"}
+event-loop/proxy-revalidation
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\daea071f4c954172badbf8400333a411\\result.json", "state": "complete"}
+event-loop/proxy-mixed
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\fbaa0f5e03c54278a66a706b2dc86f3c\\result.json", "state": "complete"}
+event-loop/delayed-origin
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\c22efaeb387149ec92359a88d049c03b\\result.json", "state": "complete"}
+event-loop/slow-origin
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\627200f7e1c14247a92c58bd09b9d000\\result.json", "state": "complete"}
+event-loop/slow-client
+{"result": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\lmn\\benchmark-smoke\\7af29e0dbeca478f86a6f8702b565a1e\\result.json", "state": "complete"}
+<end of output>
+Test time =   5.15 sec
+----------------------------------------------------------
+Test Passed.
+"benchmark_smoke_event-loop" end time: Oct 27 00:47 India Standard Time
+"benchmark_smoke_event-loop" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 27 00:47 India Standard Time
+
+benchmark_harness =  11.43 sec*proc
+
+cache_policy =   0.05 sec*proc
+
+cache_proxy =   1.61 sec*proc
+
+cache_storage =   0.04 sec*proc
+
+correctness_gate =   2.11 sec*proc
+
+event_loop =   6.93 sec*proc
+
+executable_matrix =  10.32 sec*proc
+
+milestone01 =   0.03 sec*proc
+
+milestone02 =   2.21 sec*proc
+
+milestone03 =   6.94 sec*proc
+
+milestone04 =   0.02 sec*proc
+
+milestone05 =   0.46 sec*proc
+
+milestone06 =   0.02 sec*proc
+
+milestone07 =   0.01 sec*proc
+
+milestone08 =   0.03 sec*proc
+
+milestone09 =   0.01 sec*proc
+
+milestone10 =   1.15 sec*proc
+
+milestone11 =   0.46 sec*proc
+
+milestone12 =   0.01 sec*proc
+
+milestone13 =   0.01 sec*proc
+
+milestone14 =   0.36 sec*proc
+
+milestone15 =   0.15 sec*proc
+
+milestone16 =   4.39 sec*proc
+
+milestone17 =   0.01 sec*proc
+
+milestone18 =   0.01 sec*proc
+
+milestone19 =   0.01 sec*proc
+
+milestone20 =   1.59 sec*proc
+
+milestone21 =   1.61 sec*proc
+
+milestone22 =   0.24 sec*proc
+
+milestone23 =   3.83 sec*proc
+
+milestone24 =   2.00 sec*proc
+
+milestone25 =   0.39 sec*proc
+
+milestone26 =   6.18 sec*proc
+
+milestone27 =   0.29 sec*proc
+
+milestone28 =   2.36 sec*proc
+
+milestone29 =   0.07 sec*proc
+
+milestone30 =   3.60 sec*proc
+
+milestone31 =  11.43 sec*proc
+
+milestone32 =   0.16 sec*proc
+
+parallel_foundation =   3.11 sec*proc
+
+system_matrix =   0.59 sec*proc
+

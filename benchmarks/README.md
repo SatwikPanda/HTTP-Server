@@ -22,13 +22,13 @@ python benchmarks/benchmark.py validate-result --result benchmarks/results/RUN_I
 
 For Linux/macOS omit `.exe`; for Visual Studio use `build/release/Release/httpserver.exe`. The default profile is `profiles/assembled.json`, whose options match the executable's H parser. `profiles/demo.json` supports the earlier demo-only executable. Unsupported selectors/options fail before measurement. `--build` builds the executable first, including when it does not exist yet.
 
-After M has qualified a clean committed tree, a selected full measurement is:
+After M has qualified a clean committed tree on all three native platforms, a selected full measurement is:
 
 ```powershell
-python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario hot-file --driver thread-pool --workers 4 --concurrency 10 --object-bytes 65536 --warmup 10 --measurement 60 --repeats 5 --qualified-commit FULL_M_VERIFIED_COMMIT_SHA
+python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario hot-file --driver thread-pool --workers 4 --concurrency 10 --object-bytes 65536 --warmup 10 --measurement 60 --repeats 5 --qualified-commit FULL_M_VERIFIED_COMMIT_SHA --platform-record windows.json --platform-record linux.json --platform-record macos.json
 ```
 
-The qualification flag is an operator attestation, not automatic CI certification. Full runs require at least five repeats, a clean tree, matching commit and identifiable Release/compiler configuration. No final performance measurements are supplied by this change.
+The qualification flag is an operator attestation, supplemented by matching source and native test records from `tools/qualify.py`. Full runs require at least five repeats, a clean tree, matching commit, three passing native records and the actual local Release binary hash. For an uncommitted local candidate, pass `--candidate-record build/release/qualification.json` instead; its results are explicitly provisional and cannot be promoted by the report tool. See [N's guide](../docs/branches/results.md) for campaign and plotting commands and [executed evidence](../docs/validation/lmn.md).
 
 ## Workload format and matrix
 
@@ -54,7 +54,7 @@ Every run writes `OUTPUT/UUID/result.json` once. Version-1 records contain:
 
 | Field | Meaning |
 | --- | --- |
-| `run_id`, `repeat`, `evidence`, `state` | Identity, ordinal, smoke/measurement and complete/failed/interrupted |
+| `run_id`, `repeat`, `evidence`, `state` | Identity, ordinal, smoke/candidate/measurement and complete/failed/interrupted |
 | `scenario`, `profile`, `preparation` | Fully resolved workload, exact option mapping and verified cache preparation |
 | `provenance` | Commit/tree/dirty state, tracked diff hash, binary hash/path, CMake compiler/build metadata, command invocation |
 | `environment`, `processes`, `origin` | OS/CPU/RAM/limits when available, owned PIDs/commands/endpoints, bounded logs and placement |

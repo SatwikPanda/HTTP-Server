@@ -7,6 +7,7 @@ import os
 import tempfile
 import time
 import uuid
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -120,8 +121,9 @@ async def repeat(scenario, profile, args, provenance_data, destination, ordinal)
     output = destination / identifier
     output.mkdir(parents=True, exist_ok=False)
     record = dict(schema_version=VERSION, run_id=identifier, repeat=ordinal,
-                  evidence="smoke" if args.smoke else "measurement", state="failed",
+                  evidence="smoke" if args.smoke else ("candidate" if args.candidate_record else "measurement"), state="failed",
                   started_utc=datetime.now(timezone.utc).isoformat(), scenario=scenario,
+                  timing={"warmup_seconds": args.warmup, "measurement_seconds": args.measurement},
                   provenance=provenance_data, environment=environment(), processes=[], phases={}, diagnostics=[],
                   profile=profile, preparation={}, server_metrics={"available": False,
                       "reason": "no periodic server snapshot observed during this short run"},
@@ -257,8 +259,29 @@ async def run(spec, profile, args, repo):
     source["qualification_commit_attestation"] = args.qualified_commit
     source["invocation"] = args.invocation
     if not args.smoke:
+        sys.path.insert(0, str(repo / "tools"))
+        from qualify import verify_record, source_identity
         require(args.repeats >= 5, "measurements require at least five repeats")
-        require(args.qualified_commit == source["commit"] and not source["dirty"], "measurement requires clean tree and explicit M-qualified commit attestation")
+        current = source_identity(repo)
+        source["candidate_source_sha256"] = current["sha256"]
+        if args.candidate_record:
+            qualification = json.loads(Path(args.candidate_record).read_text(encoding="utf-8"))
+            verify_record(qualification, args.binary, repo)
+            source["qualification"] = dict(scope="local candidate only; final M platform gate pending",
+                record_sha256=hashlib.sha256(Path(args.candidate_record).read_bytes()).hexdigest())
+        else:
+            require(args.qualified_commit == source["commit"] and not source["dirty"], "measurement requires clean tree and explicit M-qualified commit attestation")
+            records = [json.loads(Path(p).read_text(encoding="utf-8")) for p in args.platform_record]
+            require({r.get("platform") for r in records} == {"Windows", "Linux", "Darwin"}, "M needs Windows, Linux and Darwin qualification records")
+            for r in records:
+                require(r.get("state") == "passed" and r.get("source", {}).get("sha256") == current["sha256"] and
+                        r.get("configuration") == "Release" and r.get("sanitizer") == "none", "platform qualification mismatch")
+                require(r.get("tests") and all(t.get("passed") for t in r["tests"]), "platform record has missing or failed tests")
+            matching = [r for r in records if r.get("binary", {}).get("sha256") == source["binary_sha256"]]
+            require(len(matching) == 1, "one local qualification record must identify this binary")
+            local = matching[0]
+            verify_record(local, args.binary, repo)
+            source["qualification"] = dict(scope="three native platform gates", records=args.platform_record)
         cache = source["cmake"]
         require(cache.get("CMAKE_BUILD_TYPE") == "Release" or
                 ("Release" in cache.get("CMAKE_CONFIGURATION_TYPES", "").split(";") and args.binary.parent.name == "Release"), "cannot establish Release build")
@@ -267,8 +290,8 @@ async def run(spec, profile, args, repo):
     failed = False
     for ordinal in range(1, args.repeats + 1):
         path, state = await repeat(scenario, profile, args, source, destination, ordinal)
-        print(json.dumps(dict(result=str(path), state=state, evidence="smoke" if args.smoke else "measurement")), flush=True)
+        print(json.dumps(dict(result=str(path), state=state)), flush=True)
         failed |= state != "complete"
-        if failed:
-            break
+    if not args.smoke:
+        require(source_identity(repo)["sha256"] == source["candidate_source_sha256"], "source changed during repeats; results invalid")
     return 1 if failed else 0

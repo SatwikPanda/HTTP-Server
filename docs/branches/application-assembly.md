@@ -1,5 +1,11 @@
 # Application integration record — 2026-10-26
 
+LMN follow-up (2026-10-27): `codex/lmn-completion` starts at `e24077f`, retains
+all production mode/factory wiring, and adds M resource/diagnostic qualification
+and N campaign/report tooling. No further feature assembly is needed to select
+any required mode. See [the validation summary](../validation/lmn.md) for new
+checks and the distinction between implementation and final platform acceptance.
+
 CI follow-up: [the portability record](ci-portability.md) identifies the fixture
 fixes and verified Windows/Linux/macOS results after this initial integration snapshot.
 

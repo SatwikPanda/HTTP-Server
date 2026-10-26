@@ -2,7 +2,7 @@
 
 ## 1. Project overview
 
-This project will implement an HTTP/1.1 static file server and a forward caching proxy in **C++20**, using TCP sockets directly. **CMake** will configure the build and select platform implementations; **Ninja** will execute the generated build rules.
+This project implements an HTTP/1.1 static file server and a forward caching proxy in **C++20**, using TCP sockets directly. **CMake** will configure the build and select platform implementations; **Ninja** will execute the generated build rules.
 
 The project has three learning goals:
 
@@ -10,7 +10,7 @@ The project has three learning goals:
 2. Understand proxy caching by implementing freshness checks, conditional requests, and an LRU eviction policy.
 3. Measure how a thread pool and an event loop behave under increasing client concurrency.
 
-**Document status:** proposed architecture and implementation roadmap. The repository currently contains a C++20 CMake executable, a placeholder `src/main.cpp`, and an initial `include/net/socket.hpp` interface. The modules, APIs, command-line options, and tests below are planned; they are not claims of completed functionality.
+**Document status (2026-10-27):** original architecture/design reference, preserved alongside the integrated implementation. A–K and L application assembly are implemented. M qualification and N candidate reporting are documented in `docs/validation/lmn.md`. Signature sketches and CLI examples below describe the original design; use the tracked `README.md` and `docs/configuration.md` for actual factories, targets and executable options. Final native-platform qualification and performance acceptance require the evidence in the M/N handoffs.
 
 ### Technology and scope
 

@@ -30,7 +30,8 @@ http::HttpSession make_session(const http::HttpSessionConfig& config) { return h
 void bodies_are_byte_exact_with_metadata() {
     Tree tree;
     const std::string text = "plain text\nwith lines\r\nand a final newline\n";
-    const std::string binary = pattern_bytes(100 * 1024, 7) + std::string("\0\r\n\r\nHTTP/1.1 200 OK\r\n\r\n", 26);
+    constexpr char binary_tail[] = "\0\r\n\r\nHTTP/1.1 200 OK\r\n\r\n";
+    const std::string binary = pattern_bytes(100 * 1024, 7) + std::string(binary_tail, sizeof(binary_tail) - 1);
     std::string all_bytes(256, '\0');
     for (int i = 0; i < 256; ++i) all_bytes[static_cast<std::size_t>(i)] = static_cast<char>(i);
     const std::string large = pattern_bytes(3 * 1024 * 1024 + 17, 3);

@@ -1,0 +1,282 @@
+{
+  "run_id": 40389322316,
+  "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316",
+  "head_sha": "22e55921ea82570413d181d64a3749cb42738c07",
+  "source_sha256": "f899ad329217e2c334d1d828087005759a78d140a62b1152bbbc70e446ad0623",
+  "jobs": [
+    {
+      "id": 121805857009,
+      "name": "sanitizers",
+      "conclusion": "success",
+      "html_url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316/job/121805857009",
+      "started_at": "2026-10-26T19:43:49Z",
+      "completed_at": "2026-10-26T19:48:11Z"
+    },
+    {
+      "id": 121805857272,
+      "name": "build (windows-latest)",
+      "conclusion": "success",
+      "html_url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316/job/121805857272",
+      "started_at": "2026-10-26T19:43:49Z",
+      "completed_at": "2026-10-26T19:49:59Z"
+    },
+    {
+      "id": 121805857312,
+      "name": "build (macos-latest)",
+      "conclusion": "success",
+      "html_url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316/job/121805857312",
+      "started_at": "2026-10-26T19:43:50Z",
+      "completed_at": "2026-10-26T19:48:03Z"
+    },
+    {
+      "id": 121805857626,
+      "name": "build (ubuntu-latest)",
+      "conclusion": "success",
+      "html_url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316/job/121805857626",
+      "started_at": "2026-10-26T19:43:49Z",
+      "completed_at": "2026-10-26T19:47:00Z"
+    }
+  ],
+  "records": [
+    {
+      "artifact_id": 12682183730,
+      "artifact": "qualification-Linux",
+      "qualification": "qualification-linux.json",
+      "platform": "Linux",
+      "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "sanitizer": "none",
+      "tests": 54,
+      "compiler": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+        "CMAKE_CXX_COMPILER_ID": "GNU",
+        "CMAKE_CXX_COMPILER_VERSION": "13.3.0"
+      },
+      "ctest_time": "Total Test time (real) =  11.20 sec",
+      "resources": [
+        {
+          "cycle": 0,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 8507392
+        },
+        {
+          "cycle": 1,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 10354688
+        },
+        {
+          "cycle": 2,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 10760192
+        },
+        {
+          "cycle": 3,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 11067392
+        },
+        {
+          "cycle": 4,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 11280384
+        },
+        {
+          "cycle": 5,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 11423744
+        },
+        {
+          "cycle": 6,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 11411456
+        }
+      ],
+      "ipv6_unavailable": []
+    },
+    {
+      "artifact_id": 12682039360,
+      "artifact": "qualification-Windows",
+      "qualification": "qualification-windows.json",
+      "platform": "Windows",
+      "os": "Windows-2025Server-10.0.26100-SP0",
+      "sanitizer": "none",
+      "tests": 54,
+      "compiler": {
+        "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe",
+        "CMAKE_CXX_COMPILER_ID": "MSVC",
+        "CMAKE_CXX_COMPILER_VERSION": "19.51.36260.0"
+      },
+      "ctest_time": "Total Test time (real) =  51.78 sec",
+      "resources": [
+        {
+          "cycle": 0,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 8908800
+        },
+        {
+          "cycle": 1,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 9830400
+        },
+        {
+          "cycle": 2,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 9793536
+        },
+        {
+          "cycle": 3,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 10215424
+        },
+        {
+          "cycle": 4,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 10125312
+        },
+        {
+          "cycle": 5,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 10444800
+        },
+        {
+          "cycle": 6,
+          "handles": 84,
+          "threads": 5,
+          "rss_bytes": 10330112
+        }
+      ],
+      "ipv6_unavailable": []
+    },
+    {
+      "artifact_id": 12682039005,
+      "artifact": "qualification-macOS",
+      "qualification": "qualification-macos.json",
+      "platform": "Darwin",
+      "os": "macOS-26.6.2-arm64-arm-64bit",
+      "sanitizer": "none",
+      "tests": 54,
+      "compiler": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+        "CMAKE_CXX_COMPILER_ID": "AppleClang",
+        "CMAKE_CXX_COMPILER_VERSION": "21.0.0.21000101"
+      },
+      "ctest_time": "Total Test time (real) =  18.93 sec",
+      "resources": [
+        {
+          "cycle": 0,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 6438912
+        },
+        {
+          "cycle": 1,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 6864896
+        },
+        {
+          "cycle": 2,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 7045120
+        },
+        {
+          "cycle": 3,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 7159808
+        },
+        {
+          "cycle": 4,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 7241728
+        },
+        {
+          "cycle": 5,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 7241728
+        },
+        {
+          "cycle": 6,
+          "handles": 3,
+          "threads": 1,
+          "rss_bytes": 7258112
+        }
+      ],
+      "ipv6_unavailable": []
+    },
+    {
+      "artifact_id": 12680854876,
+      "artifact": "qualification-asan-ubsan",
+      "qualification": "qualification-asan-ubsan.json",
+      "platform": "Linux",
+      "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "sanitizer": "address-undefined",
+      "tests": 54,
+      "compiler": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+        "CMAKE_CXX_COMPILER_ID": "GNU",
+        "CMAKE_CXX_COMPILER_VERSION": "13.3.0"
+      },
+      "ctest_time": "Total Test time (real) =  16.13 sec",
+      "resources": [
+        {
+          "cycle": 0,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 148267008
+        },
+        {
+          "cycle": 1,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 212316160
+        },
+        {
+          "cycle": 2,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 275795968
+        },
+        {
+          "cycle": 3,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 338853888
+        },
+        {
+          "cycle": 4,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 402493440
+        },
+        {
+          "cycle": 5,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 426868736
+        },
+        {
+          "cycle": 6,
+          "handles": 5,
+          "threads": 1,
+          "rss_bytes": 436768768
+        }
+      ],
+      "ipv6_unavailable": []
+    }
+  ]
+}

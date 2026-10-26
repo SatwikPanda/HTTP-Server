@@ -93,7 +93,7 @@ The main control thread emits a bounded `METRICS` JSON line each second and at g
 
 ## Tests and benchmarks
 
-The integrated inventory contains 49 native/script acceptance suites and three optional benchmark CTests (52 total with `BUILD_BENCHMARKS=ON`). Release builds retain assertions. Strict mode treats pending exit code 77 as failure. The inventory is checked at CMake configuration, and CI runs every registered suite on Windows, Linux and macOS.
+The integrated inventory contains 50 native/script acceptance suites and four optional Python CTests (54 total with `BUILD_BENCHMARKS=ON`). Release builds retain assertions. Strict mode treats pending exit code 77 as failure. The inventory is checked at CMake configuration, and CI is configured to run every registered suite on Windows, Linux and macOS.
 
 Track I exercises real static, uncached-proxy and cached-proxy applications through both drivers, plus the static reference path. It checks independent wire output, pipeline ordering, framing, forwarding, cache hits/revalidation, concurrent readers, blocked-origin cancellation, overload recovery and startup rollback. Feature suites provide additional detailed policy, memory-accounting, deadline and driver checks.
 
@@ -104,7 +104,14 @@ ctest --test-dir build/release -C Release -L milestone31 --no-tests=error --outp
 python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario proxy-warm --driver event-loop --smoke
 ```
 
-See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for verified platforms, commands and limitations. Final cross-platform qualification and publishable performance measurements remain the M/N work.
+M adds repeated resource cleanup checks, optional sanitizer instrumentation and source/binary-bound validation records. N adds alternating repeated campaigns, raw-result tables and standalone plots. See the [M guide](docs/branches/correctness-gate.md), [N guide](docs/branches/results.md), and [executed LMN validation](docs/validation/lmn.md). Local candidate measurements are explicitly provisional until matching native platform evidence exists.
+
+```powershell
+python tools/qualify.py --build-dir build/release --binary build/release/httpserver.exe --output build/release/qualification.json
+python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario proxy-warm --driver event-loop --warmup 1 --measurement 5 --repeats 5 --candidate-record build/release/qualification.json
+```
+
+See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for commands. The [LMN CI record](docs/validation/lmn-ci/README.md) verifies all 54 suites on Windows, Linux and macOS, plus Linux ASan/UBSan with leak detection. Race diagnostics and final performance comparisons remain unverified.
 
 ## Repository guide
 

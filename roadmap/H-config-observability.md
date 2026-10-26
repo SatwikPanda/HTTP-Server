@@ -1,6 +1,6 @@
 # H — config-observability
 
-**Status:** planned. **Branch:** `codex/config-observability`.
+**Status:** implemented and integrated; see the application/CI handoffs. **Branch:** `config-observability`.
 **Milestones:** 29 and portable stop hooks for 28.
 **Start:** [P0](P0-parallel-foundation.md). Full startup/metrics acceptance occurs
 in [L](L-application-assembly.md). Follow the [shared workflow](README.md).

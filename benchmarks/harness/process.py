@@ -175,6 +175,12 @@ def environment():
     except (AttributeError, OSError, ValueError):
         pass
     try:
+        import psutil
+        if memory is None:
+            memory = psutil.virtual_memory().total
+    except ImportError:
+        pass
+    try:
         import resource
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
         connection_limit = {"file_descriptors_soft": soft, "file_descriptors_hard": hard}
