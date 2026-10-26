@@ -24,5 +24,45 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Verify completed milestones (pending suites cannot pass)
-        run: ctest --test-dir build -C Release --no-tests=error --output-on-failure
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Record strict native qualification
+        shell: bash
+        run: |
+          binary=build/httpserver
+          if [[ "$RUNNER_OS" == "Windows" ]]; then binary=build/Release/httpserver.exe; fi
+          python tools/qualify.py --build-dir build --binary "$binary" --output build/qualification.json
+
+      - name: Retain qualification and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-${{ runner.os }}
+          path: |
+            build/qualification.*
+            build/Testing/Temporary/LastTest.log
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure AddressSanitizer and UndefinedBehaviorSanitizer
+        run: cmake -S . -B build/asan -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DBUILD_BENCHMARKS=ON -DREQUIRE_ALL_MILESTONES=ON -DHTTP_SANITIZER=address-undefined
+      - name: Instrumented strict gate
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: python tools/qualify.py --build-dir build/asan --binary build/asan/httpserver --output build/asan/qualification.json --jobs 2
+      - name: Retain diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-asan-ubsan
+          path: |
+            build/asan/qualification.*
+            build/asan/Testing/Temporary/LastTest.log

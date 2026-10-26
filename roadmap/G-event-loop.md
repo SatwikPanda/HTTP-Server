@@ -1,6 +1,6 @@
 # G — event-loop
 
-**Status:** planned. **Branch:** `codex/event-loop`.
+**Status:** implemented and integrated; final LMN candidate qualification is separate. **Branch:** `event-loop`.
 **Milestones:** 25–26 and driver portions of 27–28.
 **Start:** [P0](P0-parallel-foundation.md). Full acceptance requires
 [E](E-helpers.md), A/B/K and [L](L-application-assembly.md).

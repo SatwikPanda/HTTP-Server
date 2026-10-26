@@ -2,6 +2,7 @@ import asyncio
 import sys
 import unittest
 import copy
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +90,39 @@ class Network(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['counts']['attempted'], result['counts']['successful'] + result['counts']['errors'])
         self.assertLessEqual(result['peak_queued_requests'], 1)
         self.assertLessEqual(result['peak_active_requests'], 1)
+
+    async def test_sparse_open_arrival_keeps_full_measurement_window(self):
+        scenario = dict(self.scenario, application='server', concurrency=1, arrival='open',
+                        rate=1, queue_limit=1, reuse=True)
+        result = await run_phase(scenario, self.origin.endpoint, None, .05, 100)
+        self.assertEqual(result['counts']['successful'], 1)
+        self.assertGreaterEqual(result['duration_seconds'], .05)
+        self.assertLessEqual(result['successful_requests_per_second'], 20)
+
+    async def test_open_tail_closes_idle_connections_before_waiting_for_busy_clients(self):
+        # I/O double models a one-worker peer whose idle persistent connection
+        # occupies its only worker. This reproduces the generator's drain cycle
+        # without replacing any production HTTP/cache/driver acceptance.
+        slot = asyncio.Semaphore(1)
+        class LimitedPeerClient:
+            def __init__(self, *args):
+                self.owned = False
+                self.request_wire = self.response_wire = 0
+            async def request(self, *args):
+                if not self.owned:
+                    await slot.acquire()
+                    self.owned = True
+                return 1
+            async def close(self):
+                if self.owned:
+                    self.owned = False
+                    slot.release()
+        scenario = dict(self.scenario, application='server', concurrency=3, arrival='open',
+                        rate=100, queue_limit=3, reuse=True)
+        with patch('harness.measure.Client', LimitedPeerClient):
+            result = await asyncio.wait_for(run_phase(scenario, self.origin.endpoint, None, .03, 100), .5)
+        self.assertEqual(result['counts']['successful'], 3)
+        self.assertEqual(result['counts']['errors'], 0)
 
     async def test_raw_schema_rejects_corrupt_counts_and_histograms(self):
         scenario = dict(self.scenario, application='server', concurrency=1, arrival='closed',

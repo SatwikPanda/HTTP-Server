@@ -1,9 +1,12 @@
 # M — correctness-gate
 
-**Status:** planned. **Branch:** `codex/correctness-gate`. **Milestone:** 30.
+**Status:** implemented on `codex/lmn-completion`; new native platform qualification pending. **Branch:** `correctness-gate`. **Milestone:** 30.
 **Start:** assembled [L](L-application-assembly.md) and
 [I](I-test-harness.md)'s complete runtime inventory.
 Follow the [shared workflow](README.md).
+
+Implementation and execution evidence: [M handoff](../docs/branches/correctness-gate.md)
+and [validation summary](../docs/validation/lmn.md).
 
 ## Outcome and ownership
 

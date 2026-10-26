@@ -1,0 +1,209 @@
+Test project C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/lmn-asan
+      Start  1: socket_ownership_test
+ 1/54 Test  #1: socket_ownership_test ............   Passed    0.03 sec
+      Start  2: echo_test_double_test
+ 2/54 Test  #2: echo_test_double_test ............   Passed    0.06 sec
+      Start  3: echo_integration_test
+ 3/54 Test  #3: echo_integration_test ............   Passed    1.25 sec
+      Start  4: milestone01_test
+ 4/54 Test  #4: milestone01_test .................   Passed    0.03 sec
+      Start  5: milestone02_test
+ 5/54 Test  #5: milestone02_test .................   Passed    0.10 sec
+      Start  6: milestone03_test
+ 6/54 Test  #6: milestone03_test .................   Passed    6.77 sec
+      Start  7: milestone04_test
+ 7/54 Test  #7: milestone04_test .................   Passed    0.04 sec
+      Start  8: milestone05_test
+ 8/54 Test  #8: milestone05_test .................   Passed    0.03 sec
+      Start  9: milestone06_test
+ 9/54 Test  #9: milestone06_test .................   Passed    0.03 sec
+      Start 10: http_serialization_test
+10/54 Test #10: http_serialization_test ..........   Passed    0.03 sec
+      Start 11: http_session_test
+11/54 Test #11: http_session_test ................   Passed    0.08 sec
+      Start 12: http_integration_test
+12/54 Test #12: http_integration_test ............   Passed    0.18 sec
+      Start 13: http_parser_test
+13/54 Test #13: http_parser_test .................   Passed    0.12 sec
+      Start 14: milestone07_test
+14/54 Test #14: milestone07_test .................   Passed    0.05 sec
+      Start 15: milestone08_test
+15/54 Test #15: milestone08_test .................   Passed    0.05 sec
+      Start 16: http_response_test
+16/54 Test #16: http_response_test ...............   Passed    0.13 sec
+      Start 17: milestone09_test
+17/54 Test #17: milestone09_test .................   Passed    0.06 sec
+      Start 18: cli_validation_test
+18/54 Test #18: cli_validation_test ..............   Passed    0.49 sec
+      Start 19: parallel_foundation_test
+19/54 Test #19: parallel_foundation_test .........   Passed    0.05 sec
+      Start 20: parallel_work_test
+20/54 Test #20: parallel_work_test ...............   Passed    2.19 sec
+      Start 21: fixture_harness_test
+21/54 Test #21: fixture_harness_test .............   Passed    0.45 sec
+      Start 22: path_policy_test
+22/54 Test #22: path_policy_test .................   Passed    0.06 sec
+      Start 23: mime_test
+23/54 Test #23: mime_test ........................   Passed    0.05 sec
+      Start 24: conditional_test
+24/54 Test #24: conditional_test .................   Passed    0.05 sec
+      Start 25: static_target_test
+25/54 Test #25: static_target_test ...............   Passed    0.55 sec
+      Start 26: static_response_test
+26/54 Test #26: static_response_test .............***Failed    0.34 sec
+=================================================================
+==65756==ERROR: AddressSanitizer: global-buffer-overflow on address 0x7ff6a29fdf99 at pc 0x7ffc00c26517 bp 0x0058b24fdad0 sp 0x0058b24fd260
+READ of size 26 at 0x7ff6a29fdf99 thread T0
+    #0 0x7ffc00c26516 in __asan_memcpy D:\a\_work\1\s\src\vctools\asan\llvm\compiler-rt\lib\asan\asan_interceptors_memintrinsics.cpp:64
+    #1 0x7ff6a28ec2c0 in std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::_Reallocate_for<class `public: class std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>> & __cdecl std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::assign(char const *const, unsigned __int64)'::`2'::<lambda_1>, char const *>(unsigned __int64, class `public: class std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>> & __cdecl std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::assign(char const *const, unsigned __int64)'::`2'::<lambda_1>, char const *) C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\include\xstring:4491
+    #2 0x7ff6a291529d in std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::assign(char const *const, unsigned __int64) C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\include\xstring:3220
+    #3 0x7ff6a2915ee5 in std::basic_string<char,std::char_traits<char>,std::allocator<char> >::{ctor} C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\include\xstring:2469
+    #4 0x7ff6a2915ee5 in `anonymous namespace'::bodies_are_byte_exact_with_metadata C:\Users\PANDA\Desktop\personal-projects\satwik\httpserver\tests\server\static_response_test.cpp:33
+    #5 0x7ff6a29308a4 in main C:\Users\PANDA\Desktop\personal-projects\satwik\httpserver\tests\server\static_response_test.cpp:363
+    #6 0x7ff6a29eb0db in invoke_main D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:78
+    #7 0x7ff6a29eb0db in __scrt_common_main_seh D:\a\_work\1\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288
+    #8 0x7ffcac58dda6  (C:\WINDOWS\System32\KERNEL32.DLL+0x18002dda6)
+    #9 0x7ffcac8fee4b  (C:\WINDOWS\SYSTEM32\ntdll.dll+0x18007ee4b)
+
+0x7ff6a29fdf99 is located 0 bytes after global variable '<C++ string literal>' defined in 'static_response_test.cpp:33:74' (0x7ff6a29fdf80) of size 25
+SUMMARY: AddressSanitizer: global-buffer-overflow C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\include\xstring:4491 in std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::_Reallocate_for<class `public: class std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>> & __cdecl std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::assign(char const *const, unsigned __int64)'::`2'::<lambda_1>, char const *>(unsigned __int64, class `public: class std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>> & __cdecl std::basic_string<char, struct std::char_traits<char>, class std::allocator<char>>::assign(char const *const, unsigned __int64)'::`2'::<lambda_1>, char const *)
+Shadow bytes around the buggy address:
+  0x7ff6a29fdd00: 00 00 00 00 00 00 00 00 00 00 00 03 f9 f9 f9 f9
+  0x7ff6a29fdd80: f9 f9 f9 f9 f9 f9 f9 f9 05 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fde00: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x7ff6a29fde80: 01 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fdf00: 00 00 00 00 00 04 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+=>0x7ff6a29fdf80: 00 00 00[01]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fe000: 00 02 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fe080: 00 01 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fe100: 00 01 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fe180: 00 02 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x7ff6a29fe200: 00 01 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==65756==ABORTING
+
+      Start 27: milestone13_test
+27/54 Test #27: milestone13_test .................   Passed    0.06 sec
+      Start 28: milestone14_test
+28/54 Test #28: milestone14_test .................   Passed    0.24 sec
+      Start 29: milestone15_test
+29/54 Test #29: milestone15_test .................   Passed    0.19 sec
+      Start 30: milestone16_test
+30/54 Test #30: milestone16_test .................   Passed    4.40 sec
+      Start 31: cache_proxy_test
+31/54 Test #31: cache_proxy_test .................   Passed    0.95 sec
+      Start 32: cache_proxy_concurrency_test
+32/54 Test #32: cache_proxy_concurrency_test .....   Passed    0.15 sec
+      Start 33: cache_storage_test
+33/54 Test #33: cache_storage_test ...............   Passed    0.07 sec
+      Start 34: cache_storage_concurrency_test
+34/54 Test #34: cache_storage_concurrency_test ...   Passed    0.07 sec
+      Start 35: cache_policy_storage_test
+35/54 Test #35: cache_policy_storage_test ........   Passed    0.06 sec
+      Start 36: cache_policy_test
+36/54 Test #36: cache_policy_test ................   Passed    0.06 sec
+      Start 37: cache_freshness_test
+37/54 Test #37: cache_freshness_test .............   Passed    0.06 sec
+      Start 38: cache_revalidation_test
+38/54 Test #38: cache_revalidation_test ..........   Passed    0.07 sec
+      Start 39: helper_pool_test
+39/54 Test #39: helper_pool_test .................   Passed    0.31 sec
+      Start 40: thread_pool_test
+40/54 Test #40: thread_pool_test .................   Passed    3.74 sec
+      Start 41: milestone25_test
+41/54 Test #41: milestone25_test .................   Passed    0.31 sec
+      Start 42: milestone26_test
+42/54 Test #42: milestone26_test .................   Passed    6.19 sec
+      Start 43: milestone27_test
+43/54 Test #43: milestone27_test .................   Passed    0.32 sec
+      Start 44: milestone28_test
+44/54 Test #44: milestone28_test .................   Passed    0.17 sec
+      Start 45: config_parser_test
+45/54 Test #45: config_parser_test ...............   Passed    0.07 sec
+      Start 46: metrics_and_logging_test
+46/54 Test #46: metrics_and_logging_test .........   Passed    0.12 sec
+      Start 47: stop_hooks_test
+47/54 Test #47: stop_hooks_test ..................   Passed    0.10 sec
+      Start 48: system_matrix_test
+48/54 Test #48: system_matrix_test ...............   Passed    0.29 sec
+      Start 49: application_lifecycle_test
+49/54 Test #49: application_lifecycle_test .......   Passed    0.24 sec
+      Start 50: resource_soak_test
+50/54 Test #50: resource_soak_test ...............   Passed    2.24 sec
+      Start 51: results_tool_test
+51/54 Test #51: results_tool_test ................   Passed    0.28 sec
+      Start 52: benchmark_harness_test
+52/54 Test #52: benchmark_harness_test ...........   Passed    1.11 sec
+      Start 53: benchmark_smoke_thread-pool
+53/54 Test #53: benchmark_smoke_thread-pool ......   Passed    6.80 sec
+      Start 54: benchmark_smoke_event-loop
+54/54 Test #54: benchmark_smoke_event-loop .......   Passed    6.82 sec
+
+98% tests passed, 1 tests failed out of 54
+
+Label Time Summary:
+benchmark_harness      =  14.72 sec*proc (3 tests)
+cache_policy           =   0.24 sec*proc (4 tests)
+cache_proxy            =   1.10 sec*proc (2 tests)
+cache_storage          =   0.20 sec*proc (3 tests)
+correctness_gate       =   2.52 sec*proc (2 tests)
+event_loop             =   6.99 sec*proc (4 tests)
+executable_matrix      =  13.62 sec*proc (2 tests)
+milestone01            =   0.06 sec*proc (2 tests)
+milestone02            =   1.40 sec*proc (3 tests)
+milestone03            =   7.26 sec*proc (2 tests)
+milestone04            =   0.04 sec*proc (1 test)
+milestone05            =   0.31 sec*proc (4 tests)
+milestone06            =   0.15 sec*proc (2 tests)
+milestone07            =   0.05 sec*proc (1 test)
+milestone08            =   0.18 sec*proc (2 tests)
+milestone09            =   0.06 sec*proc (1 test)
+milestone10            =   0.60 sec*proc (2 tests)
+milestone11            =   0.39 sec*proc (2 tests)
+milestone12            =   0.05 sec*proc (1 test)
+milestone13            =   0.06 sec*proc (1 test)
+milestone14            =   0.24 sec*proc (1 test)
+milestone15            =   0.19 sec*proc (1 test)
+milestone16            =   4.40 sec*proc (1 test)
+milestone17            =   0.07 sec*proc (1 test)
+milestone18            =   0.06 sec*proc (1 test)
+milestone19            =   0.06 sec*proc (1 test)
+milestone20            =   0.95 sec*proc (1 test)
+milestone21            =   1.07 sec*proc (3 tests)
+milestone22            =   0.31 sec*proc (1 test)
+milestone23            =   3.74 sec*proc (1 test)
+milestone24            =   2.52 sec*proc (4 tests)
+milestone25            =   0.31 sec*proc (1 test)
+milestone26            =   6.19 sec*proc (1 test)
+milestone27            =   0.32 sec*proc (1 test)
+milestone28            =   2.74 sec*proc (4 tests)
+milestone29            =   0.29 sec*proc (3 tests)
+milestone30            =   3.49 sec*proc (5 tests)
+milestone31            =  14.72 sec*proc (3 tests)
+milestone32            =   0.28 sec*proc (1 test)
+parallel_foundation    =   2.69 sec*proc (3 tests)
+system_matrix          =   0.52 sec*proc (2 tests)
+
+Total Test time (real) =  48.80 sec
+
+The following tests FAILED:
+	 26 - static_response_test (Failed)                     milestone11
+Errors while running CTest

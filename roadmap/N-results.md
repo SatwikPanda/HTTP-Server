@@ -1,10 +1,13 @@
 # N — results
 
-**Status:** planned. **Branch:** `codex/results`.
+**Status:** campaign/report tooling implemented on `codex/lmn-completion`; final qualified comparison pending. **Branch:** `results`.
 **Milestones:** finish 31, then 32.
 **Start:** [L](L-application-assembly.md) + [J](J-benchmark-harness.md) for smoke
 work; accepted measurements require [M](M-correctness-gate.md)'s qualified commit.
 Follow the [shared workflow](README.md).
+
+Implementation and candidate evidence: [N handoff](../docs/branches/results.md)
+and [validation summary](../docs/validation/lmn.md).
 
 ## Outcome and ownership
 

@@ -1,0 +1,19 @@
+{
+  "cpu": [
+    {
+      "Name": "AMD Ryzen 7 7700X 8-Core Processor             ",
+      "NumberOfCores": 8,
+      "NumberOfLogicalProcessors": 16,
+      "MaxClockSpeed": 4501
+    }
+  ],
+  "memory_bytes": 33397133312,
+  "power_plan": "Power Scheme GUID: 22074a13-d04b-4fe1-b77b-61c8b945cf49  (Ultimate Performance)",
+  "sanitizer_runtime": {
+    "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\clang_rt.asan_dynamic-x86_64.dll",
+    "sha256": "3aa742521e8cbd23252f0545aa51d5a15624a3e4430fbe2f81567afaeb3fc59b",
+    "file_version": null,
+    "note": "Installed MSVC 14.44 runtime placed first on PATH for instrumented MSVC 19.29 build; DLL has no file-version resource."
+  },
+  "note": "Shared Windows desktop host; server, generator and origin colocated. No power or TCP settings changed."
+}

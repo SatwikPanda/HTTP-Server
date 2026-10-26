@@ -52,6 +52,7 @@ struct SystemScenarioSpec {
     core::DriverMode driver{core::DriverMode::single};
     bool cache_enabled{false};
     std::filesystem::path document_root{};
+    std::size_t cache_entries{1024};
     std::size_t max_output_bytes{65536};
     std::size_t max_requests_per_connection{100};
 };
@@ -85,6 +86,7 @@ public:
         config.application = spec.application;
         config.driver = spec.driver;
         config.cache.enabled = spec.cache_enabled;
+        config.cache.max_entries = spec.cache_entries;
         if (!spec.document_root.empty()) config.document_root = spec.document_root;
         config.buffers.output = spec.max_output_bytes;
         config.buffers.high_water = spec.max_output_bytes * 3 / 4;

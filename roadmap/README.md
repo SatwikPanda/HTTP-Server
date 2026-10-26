@@ -6,15 +6,18 @@ each owner should implement, integrate and verify its portion of the project.
 A–I and K are integrated into main. J and the application composition needed for
 its smoke runs are implemented. I now runs the complete real mode/driver matrix.
 See the [integration record](../docs/branches/application-assembly.md) for exact
-commits and Windows results. M/N qualification and performance reporting remain
-pending; older guide sections are implementation plans unless their status says otherwise.
+commits and earlier platform results. M/N validation, campaign and reporting
+tooling is implemented on `codex/lmn-completion`; the
+[LMN evidence](../docs/validation/lmn.md) separates local verification from final
+native-platform and performance acceptance. Older guide sections are plans unless
+their status says otherwise.
 
 ## Start here
 
 1. Read [AGENTS.md](../AGENTS.md), [the original roadmap](../IMPLEMENTATION_ROADMAP.md),
    [test instructions](../tests/README.md), and [CMakeLists.txt](../CMakeLists.txt).
-   Read `PROJECT_ARCHITECTURE.md` if present. It may be absent from another
-   checkout until tracked; these guides retain the relevant design.
+   Read the tracked `PROJECT_ARCHITECTURE.md` as the original design reference;
+   current implementation and validation records identify completed contracts.
 2. Use the verified milestone 09 base and P0 implementation recorded in the
    [handoff](../docs/branches/parallel-foundation.md).
 3. The C/D `PARALLEL_BASE` is `4547b48687d70b4d2d54370f01b6dfa946b80181`,
@@ -30,21 +33,21 @@ pending; older guide sections are implementation plans unless their status says 
 
 | Track and guide | Branch | Scope | Development prerequisite |
 | --- | --- | --- | --- |
-| [P0 — parallel-foundation](P0-parallel-foundation.md) | `codex/parallel-foundation` | Shared executable contracts | Milestone 09 |
-| [A — static](A-static.md) | `codex/static` | Milestones 10–12 | P0 |
-| [B — proxy](B-proxy.md) | `codex/proxy` | Milestones 13–16 | P0 |
-| [C — cache-storage](C-cache-storage.md) | `codex/cache-storage` | 17, storage part of 24 | P0 |
-| [D — cache-policy](D-cache-policy.md) | `codex/cache-policy` | 18–19, pure decisions for 21 | P0 |
-| [E — helpers](E-helpers.md) | `codex/helpers` | 22 | P0 |
-| [F — thread-pool](F-thread-pool.md) | `codex/thread-pool` | 23, driver portions of 27–28 | P0 |
-| [G — event-loop](G-event-loop.md) | `codex/event-loop` | 25–26, driver portions of 27–28 | P0 |
-| [H — config-observability](H-config-observability.md) | `codex/config-observability` | 29, stop hooks for 28 | P0 |
+| [P0 — parallel-foundation](P0-parallel-foundation.md) | `parallel-foundation` | Shared executable contracts | Milestone 09 |
+| [A — static](A-static.md) | `static` | Milestones 10–12 | P0 |
+| [B — proxy](B-proxy.md) | `proxy` | Milestones 13–16 | P0 |
+| [C — cache-storage](C-cache-storage.md) | `cache-storage` | 17, storage part of 24 | P0 |
+| [D — cache-policy](D-cache-policy.md) | `cache-policy` | 18–19, pure decisions for 21 | P0 |
+| [E — helpers](E-helpers.md) | `helpers` | 22 | P0 |
+| [F — thread-pool](F-thread-pool.md) | `thread-pool` | 23, driver portions of 27–28 | P0 |
+| [G — event-loop](G-event-loop.md) | `event-loop` | 25–26, driver portions of 27–28 | P0 |
+| [H — config-observability](H-config-observability.md) | `config-observability` | 29, stop hooks for 28 | P0 |
 | [I — test-harness](I-test-harness.md) | `config-observability-test-harness` (merged) | Fixtures and matrix preparation for 30 | P0 |
 | [J — benchmark-harness](J-benchmark-harness.md) | `benchmark-harness` (merged) | Workload/tooling preparation for 31 | P0 |
 | [K — cache-proxy](K-cache-proxy.md) | `cache-proxy` (implemented; local Windows verified) | 20–21, integration part of 24 | B + C + D |
-| [L — application-assembly](L-application-assembly.md) | `codex/application-assembly` | 24, 27–28 and combined application acceptance | Incrementally after P0; finish after A–I + K |
-| [M — correctness-gate](M-correctness-gate.md) | `codex/correctness-gate` | 30 | L + I |
-| [N — results](N-results.md) | `codex/results` | Finish 31 and implement 32 | L + J for smoke runs; M for measurements |
+| [L — application-assembly](L-application-assembly.md) | `application-assembly` | 24, 27–28 and combined application acceptance | Incrementally after P0; finish after A–I + K |
+| [M — correctness-gate](M-correctness-gate.md) | `correctness-gate` | 30 | L + I |
+| [N — results](N-results.md) | `results` | Finish 31 and implement 32 | L + J for smoke runs; M for measurements |
 
 Development dependencies and final acceptance dependencies differ. F/G can be
 built against P0 interfaces, but their milestone acceptance requires E and real

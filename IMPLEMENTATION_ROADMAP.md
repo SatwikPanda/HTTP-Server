@@ -18,6 +18,22 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## LMN candidate — 2026-10-27
+
+`codex/lmn-completion` starts from integrated main `e24077f`, preserving the A–K
+history and L application wiring. The complete strict inventory now has 54 suites.
+M adds source/binary-bound qualification, repeated resource-soak acceptance and
+target-scoped sanitizers. N adds repeated campaigns, retained failures/exclusions,
+pooled-histogram statistics and regenerable PNG/SVG reports. ASan found and fixed
+an out-of-bounds literal read in an existing static-file test fixture.
+
+Current execution evidence and limitations are in [docs/validation/lmn.md](docs/validation/lmn.md),
+with [M](docs/branches/correctness-gate.md) and [N](docs/branches/results.md) handoffs.
+Milestones 01–29 and P0 have production suites; 31 has every-family smoke tests.
+Milestone 30's final exact-candidate native platform gate and 32's qualified
+performance comparison remain open until their required evidence exists. A
+`milestone32` label on reporting-tool tests does not claim that comparison passed.
+
 ## Integrated main — 2026-10-26
 
 A–I and K are merged; J and the application composition needed by I/J are

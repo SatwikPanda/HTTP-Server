@@ -1,0 +1,14 @@
+{
+  "lmn-windows-open-fixed-raw.zip": {
+    "bytes": 3465410,
+    "sha256": "b28589efc953392fb260130032f562329ee0bf7b667d2d6a66e57cfe732e787f"
+  },
+  "lmn-windows-open-raw.zip": {
+    "bytes": 187517,
+    "sha256": "f12c9484a35878b570ef3b6525b98821de14600d6717df76fde3f10bcf213fd5"
+  },
+  "measured-source.zip": {
+    "bytes": 424356,
+    "sha256": "43e4f8c38181d033119f6f7d00b482fb3e87cb2da246e741b0318a32015e16f0"
+  }
+}

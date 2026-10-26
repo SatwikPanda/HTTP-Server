@@ -1,6 +1,6 @@
 # A — static
 
-**Status:** planned. **Branch:** `codex/static`. **Milestones:** 10–12.
+**Status:** implemented and integrated; see the application/CI handoffs. **Branch:** `static`. **Milestones:** 10–12.
 **Start:** [P0](P0-parallel-foundation.md). **Full driver acceptance:** [L](L-application-assembly.md)
 with [E](E-helpers.md), [F](F-thread-pool.md) and [G](G-event-loop.md).
 Follow the [shared workflow](README.md).

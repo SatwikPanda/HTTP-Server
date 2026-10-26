@@ -1,5 +1,26 @@
 # Milestone acceptance tests
 
+## LMN candidate gate — 2026-10-27
+
+The complete inventory is now 54 suites with benchmarks enabled. The additional
+resource soak runs all six production application/driver combinations and checks
+native handle/thread baselines, cache replacement/eviction and zero outstanding
+ownership after shutdown. The results-tool suite checks evidence completeness,
+histogram merging, failure retention and report reproduction. An ASan-discovered
+out-of-bounds read in the static-response fixture is corrected.
+
+Use `python tools/qualify.py --build-dir build/release --binary build/release/httpserver.exe --output build/release/qualification.json`
+after configuring Release, `BUILD_TESTING=ON`, `BUILD_BENCHMARKS=ON`, and
+`REQUIRE_ALL_MILESTONES=ON`. On POSIX omit `.exe`; for Visual Studio put `Release/`
+before the executable name. The tool builds, checks the inventory and runs CTest.
+Each output filename must be new. Tests use real local sockets; run gates
+sequentially on Windows to avoid consuming the host's ephemeral-port range.
+
+See the [M guide](../docs/branches/correctness-gate.md) for sanitizer builds,
+resource-soak limits and exact-source evidence, and the
+[validation summary](../docs/validation/lmn.md) for actual outcomes. Historical
+52-suite native CI below remains separate from new candidate qualification.
+
 ## Integrated main gate — 2026-10-26
 
 The executable now assembles all production applications and drivers. Configure
