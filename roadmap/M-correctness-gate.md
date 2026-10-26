@@ -1,6 +1,6 @@
 # M — correctness-gate
 
-**Status:** implemented on `codex/lmn-completion`; new native platform qualification pending. **Branch:** `correctness-gate`. **Milestone:** 30.
+**Status:** implemented; 54-suite native Windows/Linux/macOS qualification and Linux ASan/UBSan verified at `22e5592`. Race diagnostics remain untested. **Branch:** `correctness-gate`. **Milestone:** 30.
 **Start:** assembled [L](L-application-assembly.md) and
 [I](I-test-harness.md)'s complete runtime inventory.
 Follow the [shared workflow](README.md).
@@ -94,11 +94,11 @@ commands, selected/expected counts, failures/skips, IPv6/diagnostic availability
 resource observations and remaining limitations. Link CI artifacts when real runs
 exist; do not infer CI success from a configuration file being present.
 
-- [ ] Strict required suites pass on Windows, Linux and macOS for every production
+- [x] Strict required suites pass on Windows, Linux and macOS for every production
   mode/driver combination, with zero required pending feature suites.
-- [ ] Documented build/run commands work from a clean checkout without ignored
+- [x] Documented build/run commands work from a clean checkout without ignored
   local files or undeclared runtime dependencies.
-- [ ] Resource soak and supported diagnostics have recorded outcomes; unresolved
+- [x] Resource soak and supported diagnostics have recorded outcomes; unresolved
   correctness failures block qualification.
-- [ ] `docs/branches/correctness-gate.md` identifies the exact qualified commit and
+- [x] `docs/branches/correctness-gate.md` identifies the exact qualified commit and
   evidence for [N](N-results.md). An unavailable required platform keeps M open.

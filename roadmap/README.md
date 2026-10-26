@@ -8,8 +8,8 @@ its smoke runs are implemented. I now runs the complete real mode/driver matrix.
 See the [integration record](../docs/branches/application-assembly.md) for exact
 commits and earlier platform results. M/N validation, campaign and reporting
 tooling is implemented on `codex/lmn-completion`; the
-[LMN evidence](../docs/validation/lmn.md) separates local verification from final
-native-platform and performance acceptance. Older guide sections are plans unless
+[LMN evidence](../docs/validation/lmn.md) records passing native platform gates
+and separates them from provisional performance results. Older guide sections are plans unless
 their status says otherwise.
 
 ## Start here

@@ -2,9 +2,11 @@
 
 Branch: `codex/lmn-completion`, based on `e24077f`. The production A–L assembly
 and prerequisite history are described in [application-assembly.md](application-assembly.md).
-This delivery is an uncommitted candidate. Native Windows evidence is recorded
-separately below; new Linux/macOS runs remain required for final M acceptance.
-Historical [52-suite CI](ci-portability.md) is not evidence for the new tests.
+The implementation commit `22e55921ea82570413d181d64a3749cb42738c07` passes all
+54 suites on native Windows, Linux and macOS, plus Linux ASan/UBSan with leak
+detection. Exact matching source records and job links are in the
+[CI handoff](../validation/lmn-ci/README.md). Historical
+[52-suite CI](ci-portability.md) remains separate from this new qualification.
 
 ## Executable gate
 
@@ -32,7 +34,8 @@ generated results are excluded from the code fingerprint.
 
 The updated CI retains native qualification records and failure logs as artifacts.
 It also runs the full Linux AddressSanitizer/UndefinedBehaviorSanitizer gate.
-This configuration is implemented; its new remote results have not been run here.
+All four jobs passed in [run 40389322316](https://github.com/SatwikPanda/HTTP-Server/actions/runs/40389322316).
+No CI-specific code correction or skipped suite was needed.
 
 ## Resource and diagnostic coverage
 
@@ -73,10 +76,10 @@ cmake -S . -B build/tsan -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON 
 
 Run the same qualification command against that directory. Unsupported options
 fail configuration instead of silently producing an uninstrumented executable.
-MSVC sanitizer DLLs must be available on PATH. ThreadSanitizer and POSIX
-sanitizers are untested locally; WSL is not installed and no macOS executor is
-available. ASan is not a race detector and MSVC ASan does not establish leak
-sanitizer coverage.
+MSVC sanitizer DLLs must be available on PATH. ThreadSanitizer is untested.
+POSIX ASan/UBSan and leak detection passed in hosted Linux CI; native macOS
+acceptance passed in its own hosted job. ASan is not a race detector and MSVC
+ASan does not establish leak sanitizer coverage.
 
 ## Defects and initial failures retained
 

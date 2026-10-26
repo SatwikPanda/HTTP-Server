@@ -1,6 +1,6 @@
 # L — application-assembly
 
-**Status:** implemented and integrated; LMN resource qualification added, final M platform gate pending. **Branch:** `application-assembly`.
+**Status:** implemented and integrated; LMN native Windows/Linux/macOS resource qualification passes. **Branch:** `application-assembly`.
 **Milestones:** 24, 27–28 and combined acceptance of 23, 25–26, 29.
 **Start:** incrementally after P0. **Finish:** A–I and K integrated.
 Use [J](J-benchmark-harness.md) for smoke workloads, then hand off to
@@ -122,5 +122,5 @@ Execute J's small scenario-family smoke runs when the harness is available.
 - [x] `docs/branches/application-assembly.md` records included SHAs, exact
   factories/targets, lifecycle guarantees and validation commands/results.
 - [x] M receives CI/validation ownership after assembly freeze; N receives final
-  run/results documentation after J/L freeze. M still must establish portability.
+  run/results documentation after J/L freeze. M's native portability gate now passes.
 - [x] No final feature wiring is left as an exercise for the person merging branches.

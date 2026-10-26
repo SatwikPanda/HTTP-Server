@@ -30,9 +30,11 @@ an out-of-bounds literal read in an existing static-file test fixture.
 Current execution evidence and limitations are in [docs/validation/lmn.md](docs/validation/lmn.md),
 with [M](docs/branches/correctness-gate.md) and [N](docs/branches/results.md) handoffs.
 Milestones 01–29 and P0 have production suites; 31 has every-family smoke tests.
-Milestone 30's final exact-candidate native platform gate and 32's qualified
-performance comparison remain open until their required evidence exists. A
-`milestone32` label on reporting-tool tests does not claim that comparison passed.
+Milestone 30's exact-source native Windows/Linux/macOS gate now passes all 54
+suites, as does Linux ASan/UBSan with leak detection; see the
+[CI evidence](docs/validation/lmn-ci/README.md). Race diagnostics and milestone
+32's qualified performance comparison remain unverified. A `milestone32` label
+on reporting-tool tests does not claim that comparison passed.
 
 ## Integrated main — 2026-10-26
 

@@ -1,8 +1,11 @@
 # LMN candidate validation — 2026-10-27
 
-Base commit: `e24077f`, branch `codex/lmn-completion`. Work is uncommitted; no
-commit, push or publication was performed. The base commit alone does not identify
-these changes. There are two explicitly separate source fingerprints:
+Base commit: `e24077f`, branch `codex/lmn-completion`. The implementation was
+committed as `22e55921ea82570413d181d64a3749cb42738c07` and published in
+[PR #3](https://github.com/SatwikPanda/HTTP-Server/pull/3). Its native Windows,
+Linux and macOS gates and Linux ASan/UBSan gate each pass all 54 suites; see the
+[CI record](lmn-ci/README.md). The earlier local evidence below was collected
+before committing. There are two explicitly separate source fingerprints:
 
 - Measured source: `b3013e991e6e2ebb65ade817274615654c671f3d4669ae965eeb84841f29c468`.
   The three `delivery` qualification records and all corrected individual trials
@@ -95,7 +98,8 @@ source fingerprint.
   to benchmark Python code; the final full gates also reran the six-cycle soak.
 - RSS growth is an observation, not proof of bounded long-duration memory or of
   a leak. Windows ASan does not provide POSIX leak/race diagnostic coverage.
-  Longer duration and POSIX diagnostic outcomes remain open.
+  Subsequent Linux CI passed ASan/UBSan with leak detection enabled. Longer
+  duration and race-diagnostic coverage remain open.
 - The original ASan [initialization failure](lmn-windows/qualification-asan.ctest.log)
   and [fixture buffer-overread report](lmn-windows/qualification-asan-modern-runtime.ctest.log)
   are retained. The fixture now derives the binary-tail length with `sizeof`.
@@ -192,12 +196,13 @@ diff whitespace, and `AGENTS.md`/`CLAUDE.md` equality checks also passed.
 
 ## Remaining acceptance
 
-Fresh native Linux/macOS gates, the new remote CI matrix, POSIX ASan/UBSan and
-supported race diagnostics have not run. WSL is not installed and no local macOS
-executor is available. The updated workflow retains exact-source native and
-Linux sanitizer evidence when run; its presence is not evidence of a pass.
+The native release qualification is now verified by matching Windows/Linux/macOS
+records. Linux ASan/UBSan with leak detection also passes. The clean CI checkouts
+build and run every required suite without local ignored dependencies. No CI
+failure required a code fix. Race tooling has not run and no race-diagnostic
+success is claimed. WSL/local macOS availability is no longer a blocker to native
+platform acceptance because the hosted native jobs supplied that evidence.
 
-M remains open until the required native-platform records qualify the delivered
-candidate. N's final comparison requires that qualified candidate, a clean
-committed tree, longer measurement windows and explicitly reported host limits.
-Current code and local results are reviewable without inventing those outcomes.
+N's final performance comparison still requires new measurements of the qualified
+committed candidate with longer windows and explicitly reported host limits.
+The earlier short candidate dataset is not promoted by the later CI success.

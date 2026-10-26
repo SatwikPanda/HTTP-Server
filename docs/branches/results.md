@@ -2,8 +2,9 @@
 
 Branch: `codex/lmn-completion`, based on `e24077f`. The completed A–L executable
 is used directly. The result tooling and native Windows candidate runs are
-separate from final M acceptance: no result here claims qualification on an
-unexecuted platform.
+separate from M's later native qualification. Windows/Linux/macOS and Linux
+ASan/UBSan now pass the 54-suite gate; the short candidate measurements remain
+tied to their older source/binary identity and are not promoted retroactively.
 
 ## Implementation
 
@@ -85,4 +86,5 @@ extrapolated to a separate generator or other OS.
 
 Executed campaign details, raw artifacts, exclusions and observations are linked
 from the [validation summary](../validation/lmn.md). Final N acceptance remains
-open until the complete candidate is qualified by M and measured accordingly.
+open until the now-qualified committed candidate is measured with suitable
+windows. See [the native CI evidence](../validation/lmn-ci/README.md).

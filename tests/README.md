@@ -2,6 +2,12 @@
 
 ## LMN candidate gate — 2026-10-27
 
+Commit `22e5592` passes all 54 suites on native Windows, Linux and macOS, and
+under Linux ASan/UBSan with leak detection. Every required test ran with zero
+failures/skips. The [CI evidence](../docs/validation/lmn-ci/README.md) includes
+matching source records, compiler versions, JUnit and job links. No CI-specific
+fix was required; race diagnostics remain untested.
+
 The complete inventory is now 54 suites with benchmarks enabled. The additional
 resource soak runs all six production application/driver combinations and checks
 native handle/thread baselines, cache replacement/eviction and zero outstanding

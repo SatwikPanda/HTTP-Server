@@ -111,7 +111,7 @@ python tools/qualify.py --build-dir build/release --binary build/release/httpser
 python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario proxy-warm --driver event-loop --warmup 1 --measurement 5 --repeats 5 --candidate-record build/release/qualification.json
 ```
 
-See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for commands and earlier platform evidence. New Linux/macOS and race-diagnostic execution remain open; no prior CI result certifies an uncommitted candidate.
+See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for commands. The [LMN CI record](docs/validation/lmn-ci/README.md) verifies all 54 suites on Windows, Linux and macOS, plus Linux ASan/UBSan with leak detection. Race diagnostics and final performance comparisons remain unverified.
 
 ## Repository guide
 

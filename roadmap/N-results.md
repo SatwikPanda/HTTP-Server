@@ -104,7 +104,7 @@ with the implemented ones before final delivery.
   separately; raw measurements support every performance claim.
 - [ ] Results include errors, variation, machine/configuration details, plots and
   scripts to regenerate them.
-- [ ] M's platform gate remains valid for the delivered implementation commit.
+- [x] M's platform gate remains valid for the delivered implementation commit.
 - [ ] `docs/branches/results.md` links final run/config/test/result documentation
   and records excluded host-limited workloads explicitly.
 - [ ] All A–N implementation and integration work is included in the delivered
