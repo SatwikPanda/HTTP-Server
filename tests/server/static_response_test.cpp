@@ -359,6 +359,7 @@ void persistent_loopback_connection() {
 } // namespace
 
 int main() {
+    auto runtime = test::take(net::initialize_network());
     bodies_are_byte_exact_with_metadata();
     small_windows_and_slow_readers_stay_bounded();
     reads_follow_downstream_demand();
