@@ -1,5 +1,20 @@
 # Event-loop driver handoff (`G — event-loop`, milestones 25–28)
 
+## CI portability correction — 2026-10-26
+
+Linux and macOS built successfully in [integration run 40370186351](https://github.com/SatwikPanda/HTTP-Server/actions/runs/40370186351)
+but failed the slow-reader timeout assertion. Its 512 KiB response could fit
+entirely in kernel socket buffers, leaving no blocked output to time out; the
+comment claiming a small configured receive buffer did not match the fixture.
+
+The fixture now streams a bounded 16 MiB file and observes real would-block writes
+through a transparent wrapper around `HttpSession`. It requires partial progress,
+unwritten bytes, the session's timeout error, a driver timeout and session cleanup.
+Only the output deadline is short; request/helper setup uses its normal allowance.
+No production behavior or acceptance assertion is replaced with a simulation.
+Both affected suites pass locally with Windows GCC, Clang and MSVC, including
+five consecutive Clang repeats. Original branch evidence follows below.
+
 ## Base identity and dependencies
 
 - **Branch:** `event-loop`

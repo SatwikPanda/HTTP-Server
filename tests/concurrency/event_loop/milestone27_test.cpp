@@ -1,4 +1,5 @@
 #include "event_loop_harness.hpp"
+#include "fixtures/session_probe.hpp"
 
 namespace {
 using namespace std::chrono_literals;
@@ -181,37 +182,44 @@ void helper_queue_saturation_and_recovery() {
 
 void slow_reader_output_progress_timeout() {
     test::TemporaryDirectory dir;
-    const std::string big(512 * 1024, 'Z');
+    // A 512 KiB response can fit entirely in POSIX socket buffers. Use a bounded
+    // larger stream and verify actual would-block I/O before asserting timeout.
+    const std::string big(16 * 1024 * 1024, 'Z');
     const auto path = dir.write("big.bin", big);
     auto file_factory = http::make_file_reference_factory(path);
     auto helpers = std::make_shared<AsyncTestWorkExecutor>(2, 64);
+    test::SessionProbe probe;
 
     http::HttpSessionConfig hcfg;
     hcfg.application = file_factory;
     hcfg.max_output_bytes = 4096;
     hcfg.output_progress_timeout = 120ms;
-    hcfg.retry_timeout = 120ms;
+    hcfg.retry_timeout = 5000ms; // Only stalled output should reach the short deadline.
 
     EventLoopConfig cfg;
     cfg.endpoint = net::Endpoint::ipv4_loopback(0);
     auto driver = test::take(make_event_loop_driver(
         cfg,
-        [hcfg](core::ConnectionId id) -> core::Result<std::unique_ptr<ConnectionSession>> {
-            return std::unique_ptr<ConnectionSession>(std::make_unique<http::HttpSession>(hcfg, id));
+        [hcfg, &probe](core::ConnectionId id) -> core::Result<std::unique_ptr<ConnectionSession>> {
+            return std::unique_ptr<ConnectionSession>(std::make_unique<test::ProbedSession>(
+                std::make_unique<http::HttpSession>(hcfg, id), probe));
         },
         helpers
     ));
     CHECK(driver->start());
     const auto ep = driver->local_endpoint();
 
-    // Set tiny receive buffer on client and never read, stalling server writes
+    // Never read: the real socket eventually reports would-block to HttpSession.
     LoopbackClient stalled_client(ep);
     stalled_client.write_all("GET /big.bin HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     const auto deadline = test::Clock::now() + 3s;
-    while (driver->stats().timeouts_fired == 0 && test::Clock::now() < deadline) {
+    while (!probe.timed_out && test::Clock::now() < deadline) {
         std::this_thread::sleep_for(15ms);
     }
+    CHECK(probe.blocked_writes > 0);
+    CHECK(probe.bytes_written > 0 && probe.bytes_written < big.size());
+    CHECK(probe.timed_out);
     CHECK(driver->stats().timeouts_fired >= 1);
     while (driver->stats().active_sessions != 0 && test::Clock::now() < deadline) {
         std::this_thread::sleep_for(10ms);
