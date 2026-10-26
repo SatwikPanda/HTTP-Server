@@ -1,6 +1,6 @@
 # E — helpers
 
-**Status:** planned. **Branch:** `codex/helpers`. **Milestone:** 22.
+**Status:** implemented on branch `helpers`; Linux verified, Windows/macOS pending. **Milestone:** 22.
 **Start:** [P0](P0-parallel-foundation.md). Production consumers are
 [F](F-thread-pool.md), [G](G-event-loop.md) and the reference driver assembled by
 [L](L-application-assembly.md). Follow the [shared workflow](README.md).
