@@ -286,7 +286,7 @@ public:
             driving_ = true;
             running_.store(true, std::memory_order_release);
         }
-        auto res = execute_iteration();
+        auto res = execute_iteration(true);
         {
             std::lock_guard lock(lifecycle_mutex_);
             driving_ = false;
@@ -421,7 +421,7 @@ private:
     }
 
     // Returns true if the loop should continue, false when stopped and drained.
-    core::Result<bool> execute_iteration() {
+    core::Result<bool> execute_iteration(bool single_step = false) {
         const auto now = config_.clock->now();
         {
             std::lock_guard lock(stats_mutex_);
@@ -446,7 +446,9 @@ private:
         // Check deadlines again if stop or turn work finished everything
         const auto after_work = config_.clock->now();
         check_stop_transition(after_work);
-        check_deadlines(after_work);
+        if (!more_completions && !more_accepts && !more_runnable && ready_queue_.empty()) {
+            check_deadlines(after_work);
+        }
 
         if (stopping_ && sessions_.empty()) {
             return false;
@@ -466,7 +468,10 @@ private:
             has_pending_completions = !completion_port_->queue.empty();
         }
         const bool immediate_work = has_pending_completions || more_accepts || more_runnable || !ready_queue_.empty();
-        const auto poll_deadline = immediate_work ? after_work : compute_nearest_deadline(after_work);
+        auto poll_deadline = immediate_work ? after_work : compute_nearest_deadline(after_work);
+        if (single_step) {
+            poll_deadline = std::min(poll_deadline, after_work + std::chrono::milliseconds{10});
+        }
 
         // 6. Poll for readiness
         {
@@ -957,12 +962,12 @@ private:
             }
 
             if (const auto* read = entry.current_action.as_read()) {
-                entry.action_dispatched = true;
-                entry.downstream_ready_read = false;
                 const std::size_t max_bytes = std::min(read->max_bytes, byte_budget - bytes_used);
                 if (max_bytes == 0) {
                     break;
                 }
+                entry.action_dispatched = true;
+                entry.downstream_ready_read = false;
                 if (read_buffer_.size() < max_bytes) {
                     read_buffer_.resize(max_bytes);
                 }
@@ -995,10 +1000,10 @@ private:
             }
 
             if (const auto* write = entry.current_action.as_write()) {
-                entry.action_dispatched = true;
-                entry.downstream_ready_write = false;
                 const auto data = write->data;
                 if (data.empty()) {
+                    entry.action_dispatched = true;
+                    entry.downstream_ready_write = false;
                     ++events_used;
                     deliver_event(entry, WriteCompleteEvent{0, write->id});
                     continue;
@@ -1007,6 +1012,8 @@ private:
                 if (max_bytes == 0) {
                     break;
                 }
+                entry.action_dispatched = true;
+                entry.downstream_ready_write = false;
                 const auto res = entry.client_socket.write_some(data.subspan(0, max_bytes));
                 ++events_used;
                 if (res.is_ok()) {
@@ -1082,8 +1089,13 @@ private:
             const bool wants_write = (static_cast<unsigned>(wait->interest) & static_cast<unsigned>(net::Interest::write)) != 0;
             return (wants_read && entry.downstream_ready_read) || (wants_write && entry.downstream_ready_write);
         }
-        if (entry.current_action.is_read() || entry.current_action.is_write()) {
-            return true;
+        if (entry.current_action.is_read()) {
+            return !entry.action_dispatched || entry.downstream_ready_read;
+        }
+        if (entry.current_action.is_write()) {
+            // A freshly prepared write segment (!action_dispatched) or a partial write
+            // that capped at the per-turn byte budget (downstream_ready_write) can progress.
+            return !entry.action_dispatched || entry.downstream_ready_write;
         }
         if (entry.current_action.as_work()) {
             return !entry.action_dispatched;
