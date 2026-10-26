@@ -1,5 +1,32 @@
 # Test-harness handoff (track I, shared fixtures and matrix preparation for milestone 30)
 
+## Integrated implementation — 2026-10-26
+
+The earlier branch preparation record below is historical. `main` now links the
+production application runtime, runs all seven matrix combinations, and has no
+pending substitutions. All prior fixture entry points remain available.
+
+`system_matrix_test` runs static GET/HEAD/conditions/containment/pipeline ordering,
+proxy framing/fields/errors/truncation, cache-only/hit/Age/304/changed-body behavior,
+concurrent readers, a replacement barrier while hits continue, and cancellation
+with a blocked origin through both F/G. `application_lifecycle_test` separately
+checks bounded overload, recovery, repeated startup/stop and failed startup rollback.
+The independent wire oracle rejects ambiguous/overflowing lengths and checks full
+chunk trailers. Diagnostics are bounded; observed fixture client counts are not
+used as production queue/connection metrics.
+
+`test_inventory.hpp` lists all 49 native/script runtime suites. CMake validates
+that each was actually registered, so a compiled target alone is insufficient.
+J adds three optional CTests when `BUILD_BENCHMARKS=ON`. `run_matrix.cmake` requires
+strict mode and selects all milestone labels. CI runs all registered suites.
+
+Windows GCC/Clang/MSVC pass the complete 52-test gate. Platform details are
+recorded in [application-assembly.md](application-assembly.md). M still owns final
+Linux/macOS/CI qualification; passing Windows alone is not full milestone 30
+portability acceptance.
+
+## Historical branch preparation
+
 ## Base and prerequisites
 
 - `PARALLEL_BASE`: `c86509b` (`main`, containing P0 `parallel-foundation` and merged track A `static-service`), plus track H (`7857d31`) on this branch.

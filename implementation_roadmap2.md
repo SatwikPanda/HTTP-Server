@@ -12,11 +12,10 @@ The milestone numbers **10–32 retain their meanings** from
 their strictly sequential execution order with the dependencies below; it does
 not remove their requirements or acceptance checks. **P0** is an additional
 shared integration step between milestone 09 and parallel feature development.
-P0, C and D are implemented and locally verified on Windows; other tracks remain
-planned. C/D are delivered together on `cache-storage-policy`; see the
-[storage](docs/branches/cache-storage.md) and [policy](docs/branches/cache-policy.md)
-handoffs for evidence and remaining integration/platform acceptance. See the
-[P0 handoff](docs/branches/parallel-foundation.md) for current evidence.
+A–I and K are merged into main. J and the application composition are implemented;
+I/J run against real production modes. See the [integration record](docs/branches/application-assembly.md)
+for included commits and actual Windows verification. M still owns combined
+cross-platform qualification; N owns final performance runs/results.
 
 Detailed implementation guides for P0 and every A–N track are in
 [roadmap/README.md](roadmap/README.md). Use this document for dependency order and

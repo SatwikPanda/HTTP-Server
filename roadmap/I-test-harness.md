@@ -1,10 +1,12 @@
 # I — test-harness
 
-**Status:** planned. **Branch:** `codex/test-harness`.
+**Status:** implemented; real integrated Windows matrix verified. **Branch:** `config-observability-test-harness`.
 **Milestone:** shared fixture/matrix preparation for 30.
 **Start:** [P0](P0-parallel-foundation.md). Real combined execution uses
 [L](L-application-assembly.md); [M](M-correctness-gate.md) records platform acceptance.
 Follow the [shared workflow](README.md).
+
+Current evidence: [integrated application handoff](../docs/branches/application-assembly.md).
 
 ## Outcome and ownership
 
@@ -108,9 +110,9 @@ record fixture verification and pending system cases separately. Full milestone
 
 ## Done and handoff
 
-- [ ] P0's fixture APIs are preserved or centrally migrated with affected owners.
-- [ ] Real system scenarios share assertions across drivers and have bounded
+- [x] P0's fixture APIs are preserved or centrally migrated with affected owners.
+- [x] Real system scenarios share assertions across drivers and have bounded
   setup, waits and teardown.
-- [ ] Required-suite inventory exposes missing implementations and coverage gaps.
-- [ ] `docs/branches/test-harness.md` gives fixture usage, test registration,
+- [x] Required-suite inventory exposes missing implementations and coverage gaps.
+- [x] `docs/branches/test-harness.md` gives fixture usage, test registration,
   production dependencies and actual checks for L/M.

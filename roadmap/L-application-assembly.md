@@ -1,10 +1,12 @@
 # L — application-assembly
 
-**Status:** planned. **Branch:** `codex/application-assembly`.
+**Status:** integrated on main for I/J; final M qualification pending. **Branch:** `codex/application-assembly`.
 **Milestones:** 24, 27–28 and combined acceptance of 23, 25–26, 29.
 **Start:** incrementally after P0. **Finish:** A–I and K integrated.
 Use [J](J-benchmark-harness.md) for smoke workloads, then hand off to
 [M](M-correctness-gate.md)/[N](N-results.md). Follow the [shared workflow](README.md).
+
+Current evidence: [integrated application handoff](../docs/branches/application-assembly.md).
 
 ## Outcome and ownership
 
@@ -112,10 +114,10 @@ Run the base/P0 gate and all present feature suites, including `milestone24`,
 acceptance. Inspect I's inventory so absent tests are not mistaken for passes.
 Execute J's small scenario-family smoke runs when the harness is available.
 
-- [ ] Real executable selects every required mode and uses production modules.
-- [ ] Combined local strict tests pass with no required pending substitutions.
-- [ ] `docs/branches/application-assembly.md` records included SHAs, exact
+- [x] Real executable selects every required mode and uses production modules.
+- [x] Combined local strict tests pass with no required pending substitutions.
+- [x] `docs/branches/application-assembly.md` records included SHAs, exact
   factories/targets, lifecycle guarantees and validation commands/results.
 - [ ] M receives CI/validation ownership after assembly freeze; N receives final
   run/results documentation after J/L freeze. M still must establish portability.
-- [ ] No final feature wiring is left as an exercise for the person merging branches.
+- [x] No final feature wiring is left as an exercise for the person merging branches.

@@ -18,6 +18,17 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Integrated main — 2026-10-26
+
+A–I and K are merged; J and the application composition needed by I/J are
+implemented. The executable selects static/uncached-proxy/cached-proxy modes on
+both production drivers. I runs seven real combinations with no placeholders;
+J smokes every scenario family on both drivers. The strict Windows GCC/Clang/MSVC gate
+passes 52 tests. See [the integration record](docs/branches/application-assembly.md)
+for compiler results, commits and limitations. M's combined Linux/macOS/CI
+qualification and N's final performance results remain pending. Earlier records
+below describe their historical branch snapshots.
+
 ## Verification record — 2026-10-26 (Track K)
 
 - Branch `cache-proxy` combines B `96ad613` and C/D `55c5333` on P0.

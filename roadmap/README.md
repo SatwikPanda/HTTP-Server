@@ -3,12 +3,11 @@
 These guides expand [the parallel roadmap](../implementation_roadmap2.md).
 They preserve the original milestone 10–32 requirements while explaining how
 each owner should implement, integrate and verify its portion of the project.
-P0, C and D are implemented and locally verified on Windows; other tracks remain
-planned. C/D share `cache-storage-policy`; see their
-[storage](../docs/branches/cache-storage.md) and [policy](../docs/branches/cache-policy.md)
-handoffs for scope and remaining platform/integration acceptance. See the
-[contract reference](../docs/parallel_contracts.md) and
-[P0 handoff](../docs/branches/parallel-foundation.md) for exact APIs and evidence.
+A–I and K are integrated into main. J and the application composition needed for
+its smoke runs are implemented. I now runs the complete real mode/driver matrix.
+See the [integration record](../docs/branches/application-assembly.md) for exact
+commits and Windows results. M/N qualification and performance reporting remain
+pending; older guide sections are implementation plans unless their status says otherwise.
 
 ## Start here
 
@@ -40,8 +39,8 @@ handoffs for scope and remaining platform/integration acceptance. See the
 | [F — thread-pool](F-thread-pool.md) | `codex/thread-pool` | 23, driver portions of 27–28 | P0 |
 | [G — event-loop](G-event-loop.md) | `codex/event-loop` | 25–26, driver portions of 27–28 | P0 |
 | [H — config-observability](H-config-observability.md) | `codex/config-observability` | 29, stop hooks for 28 | P0 |
-| [I — test-harness](I-test-harness.md) | `codex/test-harness` | Fixtures and matrix preparation for 30 | P0 |
-| [J — benchmark-harness](J-benchmark-harness.md) | `codex/benchmark-harness` | Workload/tooling preparation for 31 | P0 |
+| [I — test-harness](I-test-harness.md) | `config-observability-test-harness` (merged) | Fixtures and matrix preparation for 30 | P0 |
+| [J — benchmark-harness](J-benchmark-harness.md) | `benchmark-harness` (merged) | Workload/tooling preparation for 31 | P0 |
 | [K — cache-proxy](K-cache-proxy.md) | `cache-proxy` (implemented; local Windows verified) | 20–21, integration part of 24 | B + C + D |
 | [L — application-assembly](L-application-assembly.md) | `codex/application-assembly` | 24, 27–28 and combined application acceptance | Incrementally after P0; finish after A–I + K |
 | [M — correctness-gate](M-correctness-gate.md) | `codex/correctness-gate` | 30 | L + I |

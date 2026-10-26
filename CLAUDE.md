@@ -32,7 +32,9 @@ Read any applicable directory-specific instructions before editing those files.
   current. P0 is implemented and its strict 01–09/P0 gate passes locally on
   Windows GCC, Clang and MSVC; Linux/macOS evidence for P0 is pending. Read
   `docs/parallel_contracts.md` and `docs/branches/parallel-foundation.md` before
-  extending parallel tracks. The executable runs a persistent fixed-response HTTP demo.
+  extending parallel tracks. The executable now assembles demo, static-file, uncached-proxy and cached-proxy modes.
+  Read `docs/branches/application-assembly.md` for integrated I/J coverage and
+  current compiler/platform evidence.
 
 ## Working pattern
 

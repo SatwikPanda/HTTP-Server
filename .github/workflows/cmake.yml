@@ -19,10 +19,10 @@ jobs:
         uses: actions/checkout@v5
       
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DREQUIRE_ALL_MILESTONES=ON
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DBUILD_BENCHMARKS=ON -DREQUIRE_ALL_MILESTONES=ON
 
       - name: Build
         run: cmake --build build --config Release
 
       - name: Verify completed milestones (pending suites cannot pass)
-        run: ctest --test-dir build -C Release -L "milestone0[123456789]|parallel_foundation|milestone1[3-6]|cache_storage|cache_policy|cache_proxy" --no-tests=error --output-on-failure
+        run: ctest --test-dir build -C Release --no-tests=error --output-on-failure

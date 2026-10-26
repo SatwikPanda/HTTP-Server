@@ -1,11 +1,13 @@
 # J — benchmark-harness
 
-**Status:** planned. **Branch:** `codex/benchmark-harness`.
+**Status:** implemented; real scenario-family smoke verified. **Branch:** `benchmark-harness`.
 **Milestone:** workload/tooling preparation for 31.
 **Start:** [P0](P0-parallel-foundation.md). Smoke runs need
 [L](L-application-assembly.md); accepted measurements need
 [M](M-correctness-gate.md) and are produced by [N](N-results.md).
 Follow the [shared workflow](README.md).
+
+Current evidence: [integrated application handoff](../docs/branches/application-assembly.md).
 
 ## Outcome and ownership
 
@@ -105,8 +107,8 @@ timeout appropriate to smoke mode. Full performance runs are explicit scripts,
 not an hours-long default correctness test. Before L, script/schema preparation
 does not establish runnable benchmark acceptance.
 
-- [ ] Document one command for smoke, one for a selected scenario/repeats, and the
+- [x] Document one command for smoke, one for a selected scenario/repeats, and the
   exact environment/setup prerequisites in `benchmarks/`.
-- [ ] `docs/branches/benchmark-harness.md` records actual smoke coverage and
+- [x] `docs/branches/benchmark-harness.md` records actual smoke coverage and
   limitations; N takes output/report ownership after the harness freezes.
-- [ ] No performance comparison is claimed from generated sample or smoke data.
+- [x] No performance comparison is claimed from generated sample or smoke data.
