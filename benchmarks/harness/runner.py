@@ -291,6 +291,10 @@ async def run(spec, profile, args, repo):
     for ordinal in range(1, args.repeats + 1):
         path, state = await repeat(scenario, profile, args, source, destination, ordinal)
         print(json.dumps(dict(result=str(path), state=state)), flush=True)
+        if state != "complete":
+            # CTest captures this output even when its temporary result directory
+            # is unavailable. Include counts and bounded child stderr (sanitizers).
+            print(path.read_text(encoding="utf-8"), file=sys.stderr, flush=True)
         failed |= state != "complete"
     if not args.smoke:
         require(source_identity(repo)["sha256"] == source["candidate_source_sha256"], "source changed during repeats; results invalid")

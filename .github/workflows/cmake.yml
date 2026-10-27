@@ -43,6 +43,7 @@ jobs:
           path: |
             build/qualification.*
             build/Testing/Temporary/LastTest.log
+            build/benchmark-smoke/**/result.json
 
   sanitizers:
     runs-on: ubuntu-latest
@@ -66,3 +67,4 @@ jobs:
           path: |
             build/asan/qualification.*
             build/asan/Testing/Temporary/LastTest.log
+            build/asan/benchmark-smoke/**/result.json
