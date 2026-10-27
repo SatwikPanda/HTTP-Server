@@ -1,0 +1,1983 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1600" height="542" onload="init(evt)" viewBox="0 0 1600 542" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1600.0" height="542.0" fill="url(#background)"  />
+<text id="title" x="800.00" y="24" >baseline-profiles-cache-warm-event-loop-c16-r1</text>
+<text id="subtitle" x="800.00" y="48" >Sampled thread wall time including waits (not CPU events)</text>
+<text id="details" x="10.00" y="525" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1490.00" y="24" >Search</text>
+<text id="ignorecase" x="1574.00" y="24" >ic</text>
+<text id="matched" x="1490.00" y="525" > </text>
+<g id="frames">
+<g >
+<title>ntdll!RtlFreeHeap (22,002 thread microseconds, 0.22%)</title><rect x="290.0" y="157" width="3.5" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="293.04" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (11,006 thread microseconds, 0.11%)</title><rect x="238.8" y="205" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="241.81" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (44,013 thread microseconds, 0.44%)</title><rect x="116.7" y="77" width="7.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="119.75" y="87.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,759 thread microseconds, 0.11%)</title><rect x="240.5" y="173" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="243.55" y="183.5" ></text>
+</g>
+<g >
+<title>KERNEL32!GetCurrentThreadId (22,321 thread microseconds, 0.22%)</title><rect x="22.2" y="301" width="3.5" height="15.0" fill="rgb(219,67,16)" rx="2" ry="2" />
+<text  x="25.18" y="311.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::finish_response (466,309 thread microseconds, 4.66%)</title><rect x="451.2" y="253" width="73.7" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="454.23" y="263.5" >httpserv..</text>
+</g>
+<g >
+<title>httpserver!std::to_string (11,058 thread microseconds, 0.11%)</title><rect x="111.6" y="157" width="1.7" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="114.60" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Ref_count_obj2&lt;concurrency::Cancellation&gt;::`scalar deleting destructor' (11,001 thread microseconds, 0.11%)</title><rect x="262.5" y="237" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="265.50" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::on_event (3,639,461 thread microseconds, 36.38%)</title><rect x="27.4" y="333" width="574.8" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="30.44" y="343.5" >httpserver!http::HttpSession::on_event</text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (11,002 thread microseconds, 0.11%)</title><rect x="171.9" y="141" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="174.91" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,560 thread microseconds, 0.11%)</title><rect x="237.1" y="157" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="240.14" y="167.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (11,001 thread microseconds, 0.11%)</title><rect x="219.8" y="141" width="1.8" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="222.83" y="151.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (11,206 thread microseconds, 0.11%)</title><rect x="99.5" y="157" width="1.8" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="102.52" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,001 thread microseconds, 0.11%)</title><rect x="109.9" y="77" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="112.86" y="87.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,510 thread microseconds, 0.11%)</title><rect x="259.1" y="221" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="262.10" y="231.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="205" width="3.5" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="245.25" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::update_session_peaks (33,325 thread microseconds, 0.33%)</title><rect x="22.2" y="333" width="5.2" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="25.18" y="343.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,560 thread microseconds, 0.11%)</title><rect x="237.1" y="189" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="240.14" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (64,070 thread microseconds, 0.64%)</title><rect x="245.7" y="189" width="10.1" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="248.65" y="199.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Mtx_lock (22,321 thread microseconds, 0.22%)</title><rect x="22.2" y="317" width="3.5" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="25.18" y="327.5" ></text>
+</g>
+<g >
+<title>ntdll!LdrFindEntryForAddress (139,705 thread microseconds, 1.40%)</title><rect x="429.2" y="157" width="22.0" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="432.17" y="167.5" >n..</text>
+</g>
+<g >
+<title>httpserver!proxy::connection_tokens (11,128 thread microseconds, 0.11%)</title><rect x="226.7" y="173" width="1.8" height="15.0" fill="rgb(238,152,36)" rx="2" ry="2" />
+<text  x="229.72" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::next_action (22,050 thread microseconds, 0.22%)</title><rect x="300.3" y="253" width="3.5" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="303.30" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlGetSuiteMask (97,224 thread microseconds, 0.97%)</title><rect x="430.8" y="141" width="15.4" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="433.82" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::_Reallocate_grow_by&lt;`std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::append'::`2'::&lt;lambda_1&gt;,char const *,unsigned __int64&gt; (75,592 thread microseconds, 0.76%)</title><rect x="58.4" y="157" width="11.9" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="61.37" y="167.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7C419] (10,509 thread microseconds, 0.11%)</title><rect x="1572.8" y="317" width="1.6" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="1575.78" y="327.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_value (10,575 thread microseconds, 0.11%)</title><rect x="255.8" y="221" width="1.6" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="258.77" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::set (21,566 thread microseconds, 0.22%)</title><rect x="237.1" y="237" width="3.4" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="240.14" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (32,229 thread microseconds, 0.32%)</title><rect x="284.9" y="173" width="5.1" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="287.95" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::~vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt; (21,535 thread microseconds, 0.22%)</title><rect x="230.2" y="237" width="3.4" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="233.21" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,999 thread microseconds, 0.11%)</title><rect x="281.5" y="189" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="284.48" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Ref_count_obj2&lt;std::vector&lt;enum std::byte,std::allocator&lt;enum std::byte&gt; &gt; const &gt;::`scalar deleting destructor' (43,632 thread microseconds, 0.44%)</title><rect x="590.2" y="269" width="6.9" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="593.21" y="279.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,055 thread microseconds, 0.11%)</title><rect x="41.0" y="141" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="43.99" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::version_text (22,003 thread microseconds, 0.22%)</title><rect x="218.1" y="189" width="3.5" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
+<text  x="221.09" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,567 thread microseconds, 0.11%)</title><rect x="223.2" y="109" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="226.23" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!http::header_name_equals (10,999 thread microseconds, 0.11%)</title><rect x="180.4" y="173" width="1.7" height="15.0" fill="rgb(217,58,14)" rx="2" ry="2" />
+<text  x="183.36" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (32,229 thread microseconds, 0.32%)</title><rect x="284.9" y="109" width="5.1" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="287.95" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (53,887 thread microseconds, 0.54%)</title><rect x="60.1" y="141" width="8.5" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="63.12" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::advance_session_turn (9,873,529 thread microseconds, 98.68%)</title><rect x="18.7" y="365" width="1559.2" height="15.0" fill="rgb(208,17,4)" rx="2" ry="2" />
+<text  x="21.70" y="375.5" >httpserver!concurrency::event_loop::EventLoopDriver::Impl::advance_session_turn</text>
+</g>
+<g >
+<title>httpserver!core::Error::~Error (21,679 thread microseconds, 0.22%)</title><rect x="610.8" y="349" width="3.4" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="613.77" y="359.5" ></text>
+</g>
+<g >
+<title>ntdll!NtAllocateVirtualMemory (21,493 thread microseconds, 0.21%)</title><rect x="446.2" y="125" width="3.4" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="449.17" y="135.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!_NLG_Return2 (719,029 thread microseconds, 7.19%)</title><rect x="303.8" y="221" width="113.5" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="306.79" y="231.5" >VCRUNTIME140!_..</text>
+</g>
+<g >
+<title>ucrtbase!__lc_locale_name_func (42,561 thread microseconds, 0.43%)</title><rect x="249.0" y="173" width="6.8" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="252.05" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::advance_transaction (1,911,893 thread microseconds, 19.11%)</title><rect x="295.2" y="285" width="301.9" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<text  x="298.17" y="295.5" >httpserver!http::HttpSession::advance_tr..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,002 thread microseconds, 0.11%)</title><rect x="132.4" y="125" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="135.42" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_value (21,068 thread microseconds, 0.21%)</title><rect x="151.3" y="141" width="3.4" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="154.33" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::process_parsed_input (1,663,876 thread microseconds, 16.63%)</title><rect x="30.8" y="285" width="262.7" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="33.76" y="295.5" >httpserver!http::HttpSession::proce..</text>
+</g>
+<g >
+<title>httpserver!std::_Uninitialized_move&lt;http::HeaderField *,std::allocator&lt;http::HeaderField&gt; &gt; (11,540 thread microseconds, 0.12%)</title><rect x="224.9" y="141" width="1.8" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="227.90" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (21,535 thread microseconds, 0.22%)</title><rect x="230.2" y="189" width="3.4" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="233.21" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="157" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="80.19" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!http::detail::parse_field_line (65,234 thread microseconds, 0.65%)</title><rect x="283.2" y="221" width="10.3" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="286.21" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (53,887 thread microseconds, 0.54%)</title><rect x="60.1" y="77" width="8.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="63.12" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::record_bytes_written (32,729 thread microseconds, 0.33%)</title><rect x="605.6" y="349" width="5.2" height="15.0" fill="rgb(229,113,27)" rx="2" ry="2" />
+<text  x="608.60" y="359.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,560 thread microseconds, 0.11%)</title><rect x="237.1" y="141" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="240.14" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,802 thread microseconds, 0.11%)</title><rect x="216.4" y="141" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="219.39" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,610 thread microseconds, 0.11%)</title><rect x="588.5" y="221" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="591.53" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlQueryPerformanceCounter (10,655 thread microseconds, 0.11%)</title><rect x="600.5" y="253" width="1.7" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="603.49" y="263.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (54,276 thread microseconds, 0.54%)</title><rect x="37.6" y="205" width="8.6" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="40.64" y="215.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (455,571 thread microseconds, 4.55%)</title><rect x="452.9" y="205" width="72.0" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="455.93" y="215.5" >ucrtbase..</text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::deliver_event (3,683,499 thread microseconds, 36.82%)</title><rect x="22.2" y="349" width="581.7" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="25.18" y="359.5" >httpserver!concurrency::event_loop::EventLoopDriver::Impl::deliver_event</text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::advance_transaction (1,229,943 thread microseconds, 12.29%)</title><rect x="34.2" y="253" width="194.3" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<text  x="37.24" y="263.5" >httpserver!http::HttpSess..</text>
+</g>
+<g >
+<title>httpserver!http::RequestParser::reset (10,738 thread microseconds, 0.11%)</title><rect x="451.2" y="237" width="1.7" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="454.23" y="247.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memchr (337,489 thread microseconds, 3.37%)</title><rect x="528.3" y="237" width="53.3" height="15.0" fill="rgb(250,211,50)" rx="2" ry="2" />
+<text  x="531.34" y="247.5" >VCRUN..</text>
+</g>
+<g >
+<title>httpserver!net::Socket::write_some (5,593,291 thread microseconds, 55.90%)</title><rect x="691.2" y="349" width="883.2" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="694.15" y="359.5" >httpserver!net::Socket::write_some</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (21,992 thread microseconds, 0.22%)</title><rect x="1579.6" y="317" width="3.5" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="1582.65" y="327.5" ></text>
+</g>
+<g >
+<title>httpserver!std::shared_ptr&lt;concurrency::helpers::HelperPool&gt;::operator= (11,001 thread microseconds, 0.11%)</title><rect x="262.5" y="253" width="1.7" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="265.50" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (32,229 thread microseconds, 0.32%)</title><rect x="284.9" y="125" width="5.1" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="287.95" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;net::ReadyEvent,std::allocator&lt;net::ReadyEvent&gt; &gt;::_Emplace_reallocate&lt;net::ReadyEvent&gt; (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="365" width="3.4" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="1587.86" y="375.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (54,553 thread microseconds, 0.55%)</title><rect x="207.8" y="77" width="8.6" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="210.77" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!`http::HttpSession::advance_transaction'::`2'::&lt;lambda_1&gt;::operator()&lt;http::ResponseHead&gt; (228,379 thread microseconds, 2.28%)</title><rect x="36.0" y="237" width="36.0" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="38.98" y="247.5" >htt..</text>
+</g>
+<g >
+<title>httpserver!http::parse_target (32,521 thread microseconds, 0.33%)</title><rect x="141.0" y="157" width="5.1" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="143.97" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,999 thread microseconds, 0.11%)</title><rect x="524.9" y="189" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="527.87" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!__security_check_cookie (10,510 thread microseconds, 0.11%)</title><rect x="177.0" y="173" width="1.7" height="15.0" fill="rgb(242,171,40)" rx="2" ry="2" />
+<text  x="180.04" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::start (979,568 thread microseconds, 9.79%)</title><rect x="73.8" y="221" width="154.7" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="76.78" y="231.5" >httpserver!proxy::`..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,999 thread microseconds, 0.11%)</title><rect x="524.9" y="205" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="527.87" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,001 thread microseconds, 0.11%)</title><rect x="109.9" y="93" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="112.86" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="141" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="282.74" y="151.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Xtime_get_ticks (11,592 thread microseconds, 0.12%)</title><rect x="235.3" y="221" width="1.8" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<text  x="238.31" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::set (54,276 thread microseconds, 0.54%)</title><rect x="37.6" y="221" width="8.6" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="40.64" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!http::RequestParser::consume (185,383 thread microseconds, 1.85%)</title><rect x="264.2" y="253" width="29.3" height="15.0" fill="rgb(234,133,31)" rx="2" ry="2" />
+<text  x="267.24" y="263.5" >ht..</text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::assign (11,001 thread microseconds, 0.11%)</title><rect x="219.8" y="157" width="1.8" height="15.0" fill="rgb(236,143,34)" rx="2" ry="2" />
+<text  x="222.83" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (11,001 thread microseconds, 0.11%)</title><rect x="173.6" y="157" width="1.8" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="176.64" y="167.5" ></text>
+</g>
+<g >
+<title>mswsock!Tcpip4_WSHStringToAddress (43,998 thread microseconds, 0.44%)</title><rect x="1577.9" y="349" width="7.0" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="1580.91" y="359.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::add (54,231 thread microseconds, 0.54%)</title><rect x="284.9" y="205" width="8.6" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="287.95" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (53,887 thread microseconds, 0.54%)</title><rect x="60.1" y="93" width="8.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="63.12" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!http::`anonymous namespace'::serialize_head (108,456 thread microseconds, 1.08%)</title><rect x="201.0" y="173" width="17.1" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
+<text  x="203.97" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSteadyClock::now (10,655 thread microseconds, 0.11%)</title><rect x="600.5" y="285" width="1.7" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
+<text  x="603.49" y="295.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::version_text (11,058 thread microseconds, 0.11%)</title><rect x="111.6" y="173" width="1.7" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
+<text  x="114.60" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::get (11,028 thread microseconds, 0.11%)</title><rect x="82.4" y="157" width="1.7" height="15.0" fill="rgb(236,147,35)" rx="2" ry="2" />
+<text  x="85.36" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (22,010 thread microseconds, 0.22%)</title><rect x="130.7" y="157" width="3.5" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="133.68" y="167.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Query_perf_counter (10,655 thread microseconds, 0.11%)</title><rect x="600.5" y="269" width="1.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="603.49" y="279.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,610 thread microseconds, 0.11%)</title><rect x="588.5" y="253" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="591.53" y="263.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::end_to_end_fields (98,815 thread microseconds, 0.99%)</title><rect x="113.3" y="173" width="15.6" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="116.34" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::serialize_response_head (141,587 thread microseconds, 1.42%)</title><rect x="47.9" y="205" width="22.4" height="15.0" fill="rgb(224,89,21)" rx="2" ry="2" />
+<text  x="50.95" y="215.5" >h..</text>
+</g>
+<g >
+<title>httpserver!cache::policy::parse_cache_control (87,097 thread microseconds, 0.87%)</title><rect x="91.0" y="173" width="13.7" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<text  x="93.96" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::span&lt;enum std::byte const ,-1&gt;::subspan (11,005 thread microseconds, 0.11%)</title><rect x="1574.4" y="349" width="1.8" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="1577.44" y="359.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (43,632 thread microseconds, 0.44%)</title><rect x="581.6" y="221" width="6.9" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="584.64" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!__security_check_cookie (10,504 thread microseconds, 0.10%)</title><rect x="29.1" y="317" width="1.7" height="15.0" fill="rgb(242,171,40)" rx="2" ry="2" />
+<text  x="32.10" y="327.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (139,705 thread microseconds, 1.40%)</title><rect x="429.2" y="189" width="22.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="432.17" y="199.5" >n..</text>
+</g>
+<g >
+<title>httpserver!http::parse_target (43,055 thread microseconds, 0.43%)</title><rect x="177.0" y="189" width="6.8" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="180.04" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!http::RequestParser::accept_byte (162,805 thread microseconds, 1.63%)</title><rect x="267.8" y="237" width="25.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="270.80" y="247.5" >h..</text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (10,587 thread microseconds, 0.11%)</title><rect x="137.6" y="141" width="1.6" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="140.56" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (54,572 thread microseconds, 0.55%)</title><rect x="115.1" y="125" width="8.6" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="118.08" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSteadyClock::now (10,742 thread microseconds, 0.11%)</title><rect x="78.9" y="205" width="1.7" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
+<text  x="81.93" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::response_allowed (21,068 thread microseconds, 0.21%)</title><rect x="151.3" y="173" width="3.4" height="15.0" fill="rgb(235,141,33)" rx="2" ry="2" />
+<text  x="154.33" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderField::~HeaderField (10,718 thread microseconds, 0.11%)</title><rect x="39.3" y="189" width="1.7" height="15.0" fill="rgb(205,2,0)" rx="2" ry="2" />
+<text  x="42.30" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!NtAllocateVirtualMemory (96,950 thread microseconds, 0.97%)</title><rect x="452.9" y="125" width="15.3" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="455.93" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="301" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1591.33" y="311.5" ></text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (455,028 thread microseconds, 4.55%)</title><rect x="619.3" y="301" width="71.9" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="622.30" y="311.5" >ntdll!Nt..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (139,705 thread microseconds, 1.40%)</title><rect x="429.2" y="173" width="22.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="432.17" y="183.5" >n..</text>
+</g>
+<g >
+<title>httpserver!core::RealSteadyClock::now (11,005 thread microseconds, 0.11%)</title><rect x="46.2" y="205" width="1.7" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
+<text  x="49.21" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Assign_range&lt;http::HeaderField *&gt; (22,010 thread microseconds, 0.22%)</title><rect x="130.7" y="189" width="3.5" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<text  x="133.68" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!NtAllocateVirtualMemory (21,548 thread microseconds, 0.22%)</title><rect x="585.1" y="141" width="3.4" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="588.13" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::add (32,614 thread microseconds, 0.33%)</title><rect x="221.6" y="173" width="5.1" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="224.57" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (53,887 thread microseconds, 0.54%)</title><rect x="60.1" y="109" width="8.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="63.12" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::parse_cache_control (75,699 thread microseconds, 0.76%)</title><rect x="154.7" y="173" width="11.9" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<text  x="157.66" y="183.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (43,632 thread microseconds, 0.44%)</title><rect x="590.2" y="253" width="6.9" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="593.21" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,999 thread microseconds, 0.11%)</title><rect x="1586.6" y="253" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1589.60" y="263.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7C414] (5,538,605 thread microseconds, 55.36%)</title><rect x="698.1" y="317" width="874.7" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="701.13" y="327.5" >mswsock![00007FFCA8C7C414]</text>
+</g>
+<g >
+<title>httpserver!http::make_fixed_response (161,379 thread microseconds, 1.61%)</title><rect x="233.6" y="253" width="25.5" height="15.0" fill="rgb(239,157,37)" rx="2" ry="2" />
+<text  x="236.61" y="263.5" >h..</text>
+</g>
+<g >
+<title>ucrtbase!memcpy (32,057 thread microseconds, 0.32%)</title><rect x="249.0" y="141" width="5.1" height="15.0" fill="rgb(208,17,4)" rx="2" ry="2" />
+<text  x="252.05" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::~vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt; (11,001 thread microseconds, 0.11%)</title><rect x="128.9" y="173" width="1.8" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="131.95" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpVersion::to_string (22,164 thread microseconds, 0.22%)</title><rect x="47.9" y="173" width="3.5" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="50.95" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::process_runnable_sessions (9,895,527 thread microseconds, 98.90%)</title><rect x="15.2" y="381" width="1562.7" height="15.0" fill="rgb(254,226,54)" rx="2" ry="2" />
+<text  x="18.23" y="391.5" >httpserver!concurrency::event_loop::EventLoopDriver::Impl::process_runnable_sessions</text>
+</g>
+<g >
+<title>MSVCP140!Query_perf_counter (22,050 thread microseconds, 0.22%)</title><rect x="300.3" y="221" width="3.5" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="303.30" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (43,632 thread microseconds, 0.44%)</title><rect x="590.2" y="237" width="6.9" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="593.21" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::enqueue_ready (10,994 thread microseconds, 0.11%)</title><rect x="603.9" y="349" width="1.7" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="606.87" y="359.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!_NLG_Return2 (11,033 thread microseconds, 0.11%)</title><rect x="47.9" y="157" width="1.8" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="50.95" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!http::`anonymous namespace'::content_length (87,059 thread microseconds, 0.87%)</title><rect x="187.2" y="173" width="13.8" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="190.22" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::prepare_downstream_head (142,437 thread microseconds, 1.42%)</title><rect x="108.2" y="189" width="22.5" height="15.0" fill="rgb(210,25,6)" rx="2" ry="2" />
+<text  x="111.19" y="199.5" >h..</text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::get_all (11,128 thread microseconds, 0.11%)</title><rect x="226.7" y="157" width="1.8" height="15.0" fill="rgb(251,213,50)" rx="2" ry="2" />
+<text  x="229.72" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="173" width="1.8" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="282.74" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::set (10,759 thread microseconds, 0.11%)</title><rect x="240.5" y="221" width="1.7" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="243.55" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,510 thread microseconds, 0.11%)</title><rect x="259.1" y="237" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="262.10" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (21,566 thread microseconds, 0.22%)</title><rect x="237.1" y="221" width="3.4" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="240.14" y="231.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C78743] (11,003 thread microseconds, 0.11%)</title><rect x="1583.1" y="333" width="1.8" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="1586.12" y="343.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,654 thread microseconds, 0.11%)</title><rect x="68.6" y="141" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="71.63" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::header_name_equals (10,511 thread microseconds, 0.11%)</title><rect x="165.0" y="157" width="1.6" height="15.0" fill="rgb(217,58,14)" rx="2" ry="2" />
+<text  x="167.95" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="157" width="1.8" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="282.74" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,759 thread microseconds, 0.11%)</title><rect x="240.5" y="189" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="243.55" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,508 thread microseconds, 0.11%)</title><rect x="257.4" y="221" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="260.44" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!`http::HttpSession::on_event'::`2'::&lt;lambda_1&gt;::operator()&lt;concurrency::ReadDataEvent&gt; (1,663,876 thread microseconds, 16.63%)</title><rect x="30.8" y="301" width="262.7" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="33.76" y="311.5" >httpserver!`http::HttpSession::on_e..</text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::on_event (403,124 thread microseconds, 4.03%)</title><rect x="524.9" y="269" width="63.6" height="15.0" fill="rgb(245,186,44)" rx="2" ry="2" />
+<text  x="527.87" y="279.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!http::Response::~Response (11,004 thread microseconds, 0.11%)</title><rect x="106.5" y="189" width="1.7" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="109.45" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::next_action (10,655 thread microseconds, 0.11%)</title><rect x="600.5" y="301" width="1.7" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="603.49" y="311.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (455,571 thread microseconds, 4.55%)</title><rect x="452.9" y="173" width="72.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="455.93" y="183.5" >ntdll!Rt..</text>
+</g>
+<g >
+<title>ucrtbase!free_base (22,002 thread microseconds, 0.22%)</title><rect x="290.0" y="173" width="3.5" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="293.04" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,802 thread microseconds, 0.11%)</title><rect x="216.4" y="125" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="219.39" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (75,564 thread microseconds, 0.76%)</title><rect x="204.5" y="93" width="11.9" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="207.45" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::response_allowed (10,999 thread microseconds, 0.11%)</title><rect x="89.2" y="173" width="1.8" height="15.0" fill="rgb(235,141,33)" rx="2" ry="2" />
+<text  x="92.22" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Variant_raw_visit1&lt;2&gt;::_Visit&lt;std::_Variant_assign_visitor&lt;std::monostate,concurrency::ReadAction,concurrency::WriteAction,concurrency::WaitAction,concurrency::CloseAction,concurrency::WorkAction&gt;,std::_Variant_storage_&lt;0,std::monostate,concurrency::ReadAction,concurrency::WriteAction,concurrency::WaitAction,concurrency::CloseAction,concurrency::WorkAction&gt; &gt; (10,713 thread microseconds, 0.11%)</title><rect x="602.2" y="333" width="1.7" height="15.0" fill="rgb(237,151,36)" rx="2" ry="2" />
+<text  x="605.18" y="343.5" ></text>
+</g>
+<g >
+<title>httpserver!http::ResponseWriter::begin (152,593 thread microseconds, 1.53%)</title><rect x="47.9" y="221" width="24.1" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="50.95" y="231.5" >h..</text>
+</g>
+<g >
+<title>httpserver!`http::parse_http_date'::`2'::&lt;lambda_2&gt;::operator() (11,057 thread microseconds, 0.11%)</title><rect x="139.2" y="141" width="1.8" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="142.23" y="151.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7A6F6] (11,003 thread microseconds, 0.11%)</title><rect x="1583.1" y="317" width="1.8" height="15.0" fill="rgb(233,129,30)" rx="2" ry="2" />
+<text  x="1586.12" y="327.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,567 thread microseconds, 0.11%)</title><rect x="223.2" y="77" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="226.23" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!core::Error::~Error (10,501 thread microseconds, 0.10%)</title><rect x="298.6" y="253" width="1.7" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="301.65" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlUserThreadStart (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="477" width="1580.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="13.00" y="487.5" >ntdll!RtlUserThreadStart</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="189" width="3.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="245.25" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (32,229 thread microseconds, 0.32%)</title><rect x="284.9" y="157" width="5.1" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="287.95" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!DbgPrint (358,621 thread microseconds, 3.58%)</title><rect x="468.2" y="141" width="56.7" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="471.24" y="151.5" >ntdll..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,002 thread microseconds, 0.11%)</title><rect x="171.9" y="125" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="174.91" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,002 thread microseconds, 0.11%)</title><rect x="132.4" y="109" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="135.42" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSystemClock::now (11,005 thread microseconds, 0.11%)</title><rect x="104.7" y="189" width="1.8" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="107.72" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::variant&lt;concurrency::ReadDataEvent,concurrency::ReadEofEvent,concurrency::WriteCompleteEvent,concurrency::ReadyEvent,concurrency::WouldBlockEvent,concurrency::TimeoutEvent,concurrency::StopEvent,concurrency::ErrorEvent,concurrency::WorkEvent&gt;::~variant&lt;concurrency::ReadDataEvent,concurrency::ReadEofEvent,concurrency::WriteCompleteEvent,concurrency::ReadyEvent,concurrency::WouldBlockEvent,concurrency::TimeoutEvent,concurrency::StopEvent,concurrency::ErrorEve (11,002 thread microseconds, 0.11%)</title><rect x="1576.2" y="349" width="1.7" height="15.0" fill="rgb(207,10,2)" rx="2" ry="2" />
+<text  x="1579.17" y="359.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::is_closed (10,737 thread microseconds, 0.11%)</title><rect x="614.2" y="349" width="1.7" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="617.20" y="359.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="317" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1591.33" y="327.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,738 thread microseconds, 0.11%)</title><rect x="451.2" y="189" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="454.23" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="317" width="3.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1587.86" y="327.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (139,705 thread microseconds, 1.40%)</title><rect x="429.2" y="205" width="22.0" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="432.17" y="215.5" >u..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,567 thread microseconds, 0.11%)</title><rect x="223.2" y="93" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="226.23" y="103.5" ></text>
+</g>
+<g >
+<title>ucrtbase!wcsrchr (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="445" width="1580.0" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
+<text  x="13.00" y="455.5" >ucrtbase!wcsrchr</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,999 thread microseconds, 0.11%)</title><rect x="524.9" y="221" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="527.87" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (32,229 thread microseconds, 0.32%)</title><rect x="284.9" y="141" width="5.1" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="287.95" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,610 thread microseconds, 0.11%)</title><rect x="588.5" y="237" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="591.53" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSteadyClock::now (11,010 thread microseconds, 0.11%)</title><rect x="598.8" y="269" width="1.7" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
+<text  x="601.76" y="279.5" ></text>
+</g>
+<g >
+<title>WS2_32!WSAPoll (43,998 thread microseconds, 0.44%)</title><rect x="1577.9" y="365" width="7.0" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="1580.91" y="375.5" ></text>
+</g>
+<g >
+<title>httpserver!http::header_name_equals (11,001 thread microseconds, 0.11%)</title><rect x="125.5" y="157" width="1.7" height="15.0" fill="rgb(217,58,14)" rx="2" ry="2" />
+<text  x="128.47" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,992 thread microseconds, 0.11%)</title><rect x="80.6" y="173" width="1.8" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="83.63" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlTryEnterCriticalSection (11,000 thread microseconds, 0.11%)</title><rect x="231.9" y="173" width="1.7" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="234.88" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::request_allowed (33,070 thread microseconds, 0.33%)</title><rect x="146.1" y="173" width="5.2" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="149.11" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="349" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1591.33" y="359.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::CacheTransaction (11,042 thread microseconds, 0.11%)</title><rect x="260.8" y="237" width="1.7" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="263.76" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (11,235 thread microseconds, 0.11%)</title><rect x="123.7" y="109" width="1.8" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="126.70" y="119.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (22,010 thread microseconds, 0.22%)</title><rect x="130.7" y="141" width="3.5" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="133.68" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (75,564 thread microseconds, 0.76%)</title><rect x="204.5" y="125" width="11.9" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="207.45" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::add (65,807 thread microseconds, 0.66%)</title><rect x="115.1" y="157" width="10.4" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="118.08" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::CachePolicy::evaluate (141,537 thread microseconds, 1.41%)</title><rect x="82.4" y="189" width="22.3" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="85.36" y="199.5" >h..</text>
+</g>
+<g >
+<title>httpserver!std::_Ref_count_obj2&lt;std::vector&lt;enum std::byte,std::allocator&lt;enum std::byte&gt; &gt; const &gt;::_Destroy (10,610 thread microseconds, 0.11%)</title><rect x="588.5" y="269" width="1.7" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="591.53" y="279.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (139,705 thread microseconds, 1.40%)</title><rect x="429.2" y="221" width="22.0" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="432.17" y="231.5" >h..</text>
+</g>
+<g >
+<title>httpserver!operator new (10,560 thread microseconds, 0.11%)</title><rect x="237.1" y="205" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="240.14" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSystemClock::now (11,592 thread microseconds, 0.12%)</title><rect x="235.3" y="237" width="1.8" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="238.31" y="247.5" ></text>
+</g>
+<g >
+<title>ucrtbase!__lc_locale_name_func (32,057 thread microseconds, 0.32%)</title><rect x="249.0" y="157" width="5.1" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="252.05" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheFactory::create (21,552 thread microseconds, 0.22%)</title><rect x="259.1" y="253" width="3.4" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="262.10" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,510 thread microseconds, 0.11%)</title><rect x="259.1" y="173" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="262.10" y="183.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Mtx_lock (10,994 thread microseconds, 0.11%)</title><rect x="603.9" y="317" width="1.7" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="606.87" y="327.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;std::basic_string_view&lt;char,std::char_traits&lt;char&gt; &gt;,std::allocator&lt;std::basic_string_view&lt;char,std::char_traits&lt;char&gt; &gt; &gt; &gt;::_Emplace_reallocate&lt;std::basic_string_view&lt;char,std::char_traits&lt;char&gt; &gt; &gt; (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="189" width="1.8" height="15.0" fill="rgb(239,156,37)" rx="2" ry="2" />
+<text  x="282.74" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (21,563 thread microseconds, 0.22%)</title><rect x="108.2" y="141" width="3.4" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="111.19" y="151.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetSystemTimePreciseAsFileTime (11,592 thread microseconds, 0.12%)</title><rect x="235.3" y="205" width="1.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="238.31" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::assign (933,674 thread microseconds, 9.33%)</title><rect x="303.8" y="237" width="147.4" height="15.0" fill="rgb(236,143,34)" rx="2" ry="2" />
+<text  x="306.79" y="247.5" >httpserver!std::ba..</text>
+</g>
+<g >
+<title>KERNELBASE!GetSystemTimePreciseAsFileTime (11,005 thread microseconds, 0.11%)</title><rect x="104.7" y="157" width="1.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="107.72" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,738 thread microseconds, 0.11%)</title><rect x="451.2" y="205" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="454.23" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_name (10,999 thread microseconds, 0.11%)</title><rect x="89.2" y="141" width="1.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="92.22" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::format_http_date (85,631 thread microseconds, 0.86%)</title><rect x="242.2" y="237" width="13.6" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="245.25" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlQueryPerformanceCounter (22,050 thread microseconds, 0.22%)</title><rect x="300.3" y="205" width="3.5" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="303.30" y="215.5" ></text>
+</g>
+<g >
+<title>WS2_32!send (5,593,291 thread microseconds, 55.90%)</title><rect x="691.2" y="333" width="883.2" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="694.15" y="343.5" >WS2_32!send</text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::assign (11,131 thread microseconds, 0.11%)</title><rect x="49.7" y="141" width="1.7" height="15.0" fill="rgb(236,143,34)" rx="2" ry="2" />
+<text  x="52.69" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::Response::set_body (10,759 thread microseconds, 0.11%)</title><rect x="240.5" y="237" width="1.7" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="243.55" y="247.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (43,626 thread microseconds, 0.44%)</title><rect x="158.1" y="157" width="6.9" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="161.06" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlGetProcessPreferredUILanguages (358,621 thread microseconds, 3.58%)</title><rect x="468.2" y="125" width="56.7" height="15.0" fill="rgb(218,61,14)" rx="2" ry="2" />
+<text  x="471.24" y="135.5" >ntdll..</text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (11,001 thread microseconds, 0.11%)</title><rect x="173.6" y="141" width="1.8" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="176.64" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::add (21,563 thread microseconds, 0.22%)</title><rect x="108.2" y="173" width="3.4" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="111.19" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_iteration (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="397" width="1580.0" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="13.00" y="407.5" >httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_iteration</text>
+</g>
+<g >
+<title>httpserver!http::parse_target (10,806 thread microseconds, 0.11%)</title><rect x="84.1" y="157" width="1.7" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="87.11" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::run_loop (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="413" width="1580.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="13.00" y="423.5" >httpserver!concurrency::event_loop::EventLoopDriver::Impl::run_loop</text>
+</g>
+<g >
+<title>ntdll!RtlAcquireSRWLockExclusive (32,729 thread microseconds, 0.33%)</title><rect x="605.6" y="317" width="5.2" height="15.0" fill="rgb(243,177,42)" rx="2" ry="2" />
+<text  x="608.60" y="327.5" ></text>
+</g>
+<g >
+<title>ucrtbase!o_memset (11,003 thread microseconds, 0.11%)</title><rect x="1577.9" y="317" width="1.7" height="15.0" fill="rgb(228,106,25)" rx="2" ry="2" />
+<text  x="1580.91" y="327.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::prepare_outbound (391,732 thread microseconds, 3.92%)</title><rect x="166.6" y="205" width="61.9" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<text  x="169.61" y="215.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!http::`anonymous namespace'::content_length (43,831 thread microseconds, 0.44%)</title><rect x="51.4" y="173" width="7.0" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="54.45" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (11,004 thread microseconds, 0.11%)</title><rect x="106.5" y="125" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="109.45" y="135.5" ></text>
+</g>
+<g >
+<title>ucrtbase!lock_locales (10,504 thread microseconds, 0.10%)</title><rect x="254.1" y="157" width="1.7" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
+<text  x="257.11" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,999 thread microseconds, 0.11%)</title><rect x="524.9" y="253" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="527.87" y="263.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt; (11,009 thread microseconds, 0.11%)</title><rect x="127.2" y="157" width="1.7" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="130.21" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;pollfd,std::allocator&lt;pollfd&gt; &gt;::_Emplace_reallocate&lt;pollfd&gt; (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="365" width="1.7" height="15.0" fill="rgb(243,177,42)" rx="2" ry="2" />
+<text  x="1591.33" y="375.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,999 thread microseconds, 0.11%)</title><rect x="524.9" y="237" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="527.87" y="247.5" ></text>
+</g>
+<g >
+<title>WS2_32!WahReferenceContextByHandle (11,003 thread microseconds, 0.11%)</title><rect x="1583.1" y="301" width="1.8" height="15.0" fill="rgb(224,89,21)" rx="2" ry="2" />
+<text  x="1586.12" y="311.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="285" width="3.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1587.86" y="295.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::freshness (43,147 thread microseconds, 0.43%)</title><rect x="134.2" y="173" width="6.8" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="137.16" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::storage::LruStorage::lookup (22,053 thread microseconds, 0.22%)</title><rect x="75.4" y="205" width="3.5" height="15.0" fill="rgb(236,144,34)" rx="2" ry="2" />
+<text  x="78.45" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (5,517,090 thread microseconds, 55.14%)</title><rect x="701.5" y="301" width="871.3" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="704.53" y="311.5" >ntdll!NtDeviceIoControlFile</text>
+</g>
+<g >
+<title>VCRUNTIME140!_NLG_Return2 (11,089 thread microseconds, 0.11%)</title><rect x="202.7" y="141" width="1.8" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="205.70" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::bounded (10,999 thread microseconds, 0.11%)</title><rect x="89.2" y="157" width="1.8" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="92.22" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_value (11,002 thread microseconds, 0.11%)</title><rect x="149.6" y="141" width="1.7" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="152.59" y="151.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Query_perf_counter (11,010 thread microseconds, 0.11%)</title><rect x="598.8" y="253" width="1.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="601.76" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,654 thread microseconds, 0.11%)</title><rect x="68.6" y="125" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="71.63" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_name (10,504 thread microseconds, 0.10%)</title><rect x="175.4" y="189" width="1.6" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="178.38" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::bounded (21,068 thread microseconds, 0.21%)</title><rect x="151.3" y="157" width="3.4" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="154.33" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::OutboundRequest::~OutboundRequest (10,992 thread microseconds, 0.11%)</title><rect x="80.6" y="205" width="1.8" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="83.63" y="215.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,999 thread microseconds, 0.11%)</title><rect x="281.5" y="205" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="284.48" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpVersion::to_string (21,391 thread microseconds, 0.21%)</title><rect x="183.8" y="173" width="3.4" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="186.84" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlReleaseSRWLockExclusive (10,998 thread microseconds, 0.11%)</title><rect x="20.4" y="333" width="1.8" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="23.44" y="343.5" ></text>
+</g>
+<g >
+<title>httpserver!`http::HttpSession::advance_transaction'::`2'::&lt;lambda_1&gt;::operator()&lt;http::ResponseBody&gt; (977,218 thread microseconds, 9.77%)</title><rect x="296.9" y="269" width="154.3" height="15.0" fill="rgb(224,89,21)" rx="2" ry="2" />
+<text  x="299.91" y="279.5" >httpserver!`http::H..</text>
+</g>
+<g >
+<title>ntdll!RtlTryEnterCriticalSection (10,536 thread microseconds, 0.11%)</title><rect x="449.6" y="141" width="1.6" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="452.57" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (54,231 thread microseconds, 0.54%)</title><rect x="284.9" y="189" width="8.6" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="287.95" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="109" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="80.19" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_value (21,996 thread microseconds, 0.22%)</title><rect x="197.5" y="157" width="3.5" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="200.49" y="167.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Mtx_lock (32,729 thread microseconds, 0.33%)</title><rect x="605.6" y="333" width="5.2" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="608.60" y="343.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlGetSuiteMask (96,950 thread microseconds, 0.97%)</title><rect x="452.9" y="157" width="15.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="455.93" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,567 thread microseconds, 0.11%)</title><rect x="223.2" y="125" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="226.23" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlSetProcessPreferredUILanguages (358,621 thread microseconds, 3.58%)</title><rect x="468.2" y="157" width="56.7" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="471.24" y="167.5" >ntdll..</text>
+</g>
+<g >
+<title>MSVCP140!Mtx_unlock (10,998 thread microseconds, 0.11%)</title><rect x="20.4" y="349" width="1.8" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="23.44" y="359.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="349" width="3.4" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1587.86" y="359.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (11,055 thread microseconds, 0.11%)</title><rect x="41.0" y="189" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="43.99" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (43,632 thread microseconds, 0.44%)</title><rect x="581.6" y="237" width="6.9" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="584.64" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!http::validate_http_session_config (10,575 thread microseconds, 0.11%)</title><rect x="255.8" y="237" width="1.6" height="15.0" fill="rgb(248,202,48)" rx="2" ry="2" />
+<text  x="258.77" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!http::parse_authority (21,519 thread microseconds, 0.22%)</title><rect x="142.7" y="141" width="3.4" height="15.0" fill="rgb(218,60,14)" rx="2" ry="2" />
+<text  x="145.71" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (44,013 thread microseconds, 0.44%)</title><rect x="116.7" y="93" width="7.0" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="119.75" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!http::parse_http_date (43,147 thread microseconds, 0.43%)</title><rect x="134.2" y="157" width="6.8" height="15.0" fill="rgb(252,217,52)" rx="2" ry="2" />
+<text  x="137.16" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!http::`anonymous namespace'::serialize_head (75,592 thread microseconds, 0.76%)</title><rect x="58.4" y="173" width="11.9" height="15.0" fill="rgb(243,175,41)" rx="2" ry="2" />
+<text  x="61.37" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="141" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="80.19" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (11,055 thread microseconds, 0.11%)</title><rect x="41.0" y="173" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="43.99" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::add (33,007 thread microseconds, 0.33%)</title><rect x="170.2" y="189" width="5.2" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="173.17" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (11,001 thread microseconds, 0.11%)</title><rect x="262.5" y="221" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="265.50" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!`http::HttpSession::advance_transaction'::`2'::&lt;lambda_1&gt;::operator()&lt;http::ResponseFinished&gt; (466,309 thread microseconds, 4.66%)</title><rect x="451.2" y="269" width="73.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="454.23" y="279.5" >httpserv..</text>
+</g>
+<g >
+<title>httpserver!http::Response::~Response (32,536 thread microseconds, 0.33%)</title><rect x="228.5" y="253" width="5.1" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="231.48" y="263.5" ></text>
+</g>
+<g >
+<title>httpserver!http::ResponseWriter::body (933,674 thread microseconds, 9.33%)</title><rect x="303.8" y="253" width="147.4" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="306.79" y="263.5" >httpserver!http::R..</text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (21,563 thread microseconds, 0.22%)</title><rect x="108.2" y="125" width="3.4" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="111.19" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,510 thread microseconds, 0.11%)</title><rect x="259.1" y="205" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="262.10" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::shared_ptr&lt;cache::Entry const &gt;::_Setpd&lt;cache::Entry const *,cache::storage::`anonymous namespace'::PinDelete&gt; (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="189" width="1.7" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="80.19" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,510 thread microseconds, 0.11%)</title><rect x="259.1" y="189" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="262.10" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Visit_impl&lt;10,concurrency::Action,std::_Meta_list&lt;std::integer_sequence&lt;unsigned __int64,0&gt;,std::integer_sequence&lt;unsigned __int64,1&gt;,std::integer_sequence&lt;unsigned __int64,2&gt;,std::integer_sequence&lt;unsigned __int64,3&gt;,std::integer_sequence&lt;unsigned __int64,4&gt;,std::integer_sequence&lt;unsigned __int64,5&gt;,std::integer_sequence&lt;unsigned __int64,6&gt;,std::integer_sequence&lt;unsigned __int64,7&gt;,std::integer_sequence&lt;unsigned __int64,8&gt;,std::integer_sequence&lt;unsigned _ (3,618,446 thread microseconds, 36.17%)</title><rect x="30.8" y="317" width="571.4" height="15.0" fill="rgb(241,166,39)" rx="2" ry="2" />
+<text  x="33.76" y="327.5" >httpserver!std::_Visit_impl&lt;10,concurrency::Action,std::_Meta_list&lt;std::intege..</text>
+</g>
+<g >
+<title>ntdll!RtlSetProcessPreferredUILanguages (21,548 thread microseconds, 0.22%)</title><rect x="585.1" y="157" width="3.4" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="588.13" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::read_some (476,586 thread microseconds, 4.76%)</title><rect x="615.9" y="349" width="75.3" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="618.89" y="359.5" >httpserv..</text>
+</g>
+<g >
+<title>httpserver!std::_Uninitialized_move&lt;http::HeaderField *,std::allocator&lt;http::HeaderField&gt; &gt; (21,994 thread microseconds, 0.22%)</title><rect x="42.7" y="189" width="3.5" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="45.74" y="199.5" ></text>
+</g>
+<g >
+<title>KERNEL32!BaseThreadInitThunk (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="461" width="1580.0" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="13.00" y="471.5" >KERNEL32!BaseThreadInitThunk</text>
+</g>
+<g >
+<title>httpserver!cache::policy::CachePolicy::evaluate (205,505 thread microseconds, 2.05%)</title><rect x="134.2" y="189" width="32.4" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="137.16" y="199.5" >ht..</text>
+</g>
+<g >
+<title>httpserver!operator new (11,002 thread microseconds, 0.11%)</title><rect x="171.9" y="157" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="174.91" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (43,632 thread microseconds, 0.44%)</title><rect x="581.6" y="189" width="6.9" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="584.64" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!snprintf (64,070 thread microseconds, 0.64%)</title><rect x="245.7" y="221" width="10.1" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="248.65" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,999 thread microseconds, 0.11%)</title><rect x="1586.6" y="269" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1589.60" y="279.5" ></text>
+</g>
+<g >
+<title>httpserver!http::`anonymous namespace'::response_head (141,587 thread microseconds, 1.42%)</title><rect x="47.9" y="189" width="22.4" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="50.95" y="199.5" >h..</text>
+</g>
+<g >
+<title>httpserver!net::Poller::wait (76,546 thread microseconds, 0.77%)</title><rect x="1577.9" y="381" width="12.1" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
+<text  x="1580.91" y="391.5" ></text>
+</g>
+<g >
+<title>httpserver!http::header_name_equals (21,686 thread microseconds, 0.22%)</title><rect x="101.3" y="157" width="3.4" height="15.0" fill="rgb(217,58,14)" rx="2" ry="2" />
+<text  x="104.29" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::_Reallocate_grow_by&lt;`std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::append'::`2'::&lt;lambda_1&gt;,char const *,unsigned __int64&gt; (97,455 thread microseconds, 0.97%)</title><rect x="202.7" y="157" width="15.4" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="205.70" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (75,564 thread microseconds, 0.76%)</title><rect x="204.5" y="109" width="11.9" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="207.45" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (33,012 thread microseconds, 0.33%)</title><rect x="118.5" y="61" width="5.2" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="121.48" y="71.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memcpy (11,051 thread microseconds, 0.11%)</title><rect x="58.4" y="141" width="1.7" height="15.0" fill="rgb(254,225,53)" rx="2" ry="2" />
+<text  x="61.37" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!_stdio_common_vsprintf (64,070 thread microseconds, 0.64%)</title><rect x="245.7" y="205" width="10.1" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="248.65" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::to_string (11,131 thread microseconds, 0.11%)</title><rect x="49.7" y="157" width="1.7" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="52.69" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="125" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="282.74" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!core::RealSteadyClock::now (22,050 thread microseconds, 0.22%)</title><rect x="300.3" y="237" width="3.5" height="15.0" fill="rgb(206,4,1)" rx="2" ry="2" />
+<text  x="303.30" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,992 thread microseconds, 0.11%)</title><rect x="80.6" y="157" width="1.8" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="83.63" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Destroy (21,535 thread microseconds, 0.22%)</title><rect x="230.2" y="221" width="3.4" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="233.21" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::~vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt; (11,006 thread microseconds, 0.11%)</title><rect x="70.3" y="205" width="1.7" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="73.31" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,560 thread microseconds, 0.11%)</title><rect x="237.1" y="173" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="240.14" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlSetProcessPreferredUILanguages (21,493 thread microseconds, 0.21%)</title><rect x="446.2" y="141" width="3.4" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="449.17" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="125" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="80.19" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::on_event (990,568 thread microseconds, 9.90%)</title><rect x="72.0" y="237" width="156.5" height="15.0" fill="rgb(245,186,44)" rx="2" ry="2" />
+<text  x="75.05" y="247.5" >httpserver!proxy::`a..</text>
+</g>
+<g >
+<title>ntdll!RtlQueryPerformanceCounter (11,010 thread microseconds, 0.11%)</title><rect x="598.8" y="237" width="1.7" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="601.76" y="247.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Xtime_get_ticks (11,005 thread microseconds, 0.11%)</title><rect x="104.7" y="173" width="1.8" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<text  x="107.72" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (65,807 thread microseconds, 0.66%)</title><rect x="115.1" y="141" width="10.4" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="118.08" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlUpcaseUnicodeString (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="141" width="3.5" height="15.0" fill="rgb(219,65,15)" rx="2" ry="2" />
+<text  x="245.25" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (53,887 thread microseconds, 0.54%)</title><rect x="60.1" y="125" width="8.5" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="63.12" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::get_all (43,064 thread microseconds, 0.43%)</title><rect x="274.7" y="205" width="6.8" height="15.0" fill="rgb(251,213,50)" rx="2" ry="2" />
+<text  x="277.67" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::~vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt; (10,992 thread microseconds, 0.11%)</title><rect x="80.6" y="189" width="1.8" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="83.63" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!core::Result&lt;std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt; &gt;::Result&lt;std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt; &gt; (11,001 thread microseconds, 0.11%)</title><rect x="201.0" y="157" width="1.7" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="203.97" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (75,564 thread microseconds, 0.76%)</title><rect x="204.5" y="141" width="11.9" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="207.45" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="301" width="3.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1587.86" y="311.5" ></text>
+</g>
+<g >
+<title>httpserver!std::shared_ptr&lt;cache::Entry const &gt;::reset (11,004 thread microseconds, 0.11%)</title><rect x="526.6" y="253" width="1.7" height="15.0" fill="rgb(239,160,38)" rx="2" ry="2" />
+<text  x="529.61" y="263.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (44,013 thread microseconds, 0.44%)</title><rect x="116.7" y="109" width="7.0" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="119.75" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::check_deadlines (22,094 thread microseconds, 0.22%)</title><rect x="11.7" y="381" width="3.5" height="15.0" fill="rgb(228,107,25)" rx="2" ry="2" />
+<text  x="14.74" y="391.5" ></text>
+</g>
+<g >
+<title>httpserver!http::is_valid_header_name (11,015 thread microseconds, 0.11%)</title><rect x="195.8" y="157" width="1.7" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="198.75" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,567 thread microseconds, 0.11%)</title><rect x="223.2" y="141" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="226.23" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::request_allowed (21,607 thread microseconds, 0.22%)</title><rect x="85.8" y="173" width="3.4" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="88.81" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlSetProcessPreferredUILanguages (96,950 thread microseconds, 0.97%)</title><rect x="452.9" y="141" width="15.3" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="455.93" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Variant_base&lt;std::monostate,concurrency::ReadAction,concurrency::WriteAction,concurrency::WaitAction,concurrency::CloseAction,concurrency::WorkAction&gt;::_Destroy (10,713 thread microseconds, 0.11%)</title><rect x="602.2" y="317" width="1.7" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="605.18" y="327.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (22,107 thread microseconds, 0.22%)</title><rect x="223.2" y="157" width="3.5" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="226.23" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::cached_head (327,993 thread microseconds, 3.28%)</title><rect x="82.4" y="205" width="51.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="85.36" y="215.5" >https..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,002 thread microseconds, 0.11%)</title><rect x="132.4" y="93" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="135.42" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="157" width="3.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="245.25" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,001 thread microseconds, 0.11%)</title><rect x="109.9" y="109" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="112.86" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::bounded (22,007 thread microseconds, 0.22%)</title><rect x="147.9" y="157" width="3.4" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="150.86" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::~vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt; (11,004 thread microseconds, 0.11%)</title><rect x="106.5" y="173" width="1.7" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="109.45" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::Target::~Target (10,540 thread microseconds, 0.11%)</title><rect x="178.7" y="173" width="1.7" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="181.70" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::sync_gauges (10,994 thread microseconds, 0.11%)</title><rect x="603.9" y="333" width="1.7" height="15.0" fill="rgb(242,173,41)" rx="2" ry="2" />
+<text  x="606.87" y="343.5" ></text>
+</g>
+<g >
+<title>httpserver!http::parse_authority (11,006 thread microseconds, 0.11%)</title><rect x="182.1" y="173" width="1.7" height="15.0" fill="rgb(218,60,14)" rx="2" ry="2" />
+<text  x="185.10" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::next_action (11,005 thread microseconds, 0.11%)</title><rect x="46.2" y="221" width="1.7" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="49.21" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::event_loop::EventLoopDriver::Impl::start'::`8'::&lt;lambda_1&gt; &gt;,0&gt; (10,005,173 thread microseconds, 100.00%)</title><rect x="10.0" y="429" width="1580.0" height="15.0" fill="rgb(245,188,44)" rx="2" ry="2" />
+<text  x="13.00" y="439.5" >httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::event_loop::EventLoopDriver::Impl::start'::`8'::&lt;lambda_1&gt; &gt;,0&gt;</text>
+</g>
+<g >
+<title>ntdll!LdrFindEntryForAddress (10,999 thread microseconds, 0.11%)</title><rect x="1586.6" y="237" width="1.7" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="1589.60" y="247.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc (10,559 thread microseconds, 0.11%)</title><rect x="115.1" y="109" width="1.6" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="118.08" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::matches_key (32,521 thread microseconds, 0.33%)</title><rect x="141.0" y="173" width="5.1" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="143.97" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::RequestParser::finish_head (54,063 thread microseconds, 0.54%)</title><rect x="274.7" y="221" width="8.5" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="277.67" y="231.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="333" width="1.7" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1591.33" y="343.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::prepare_response (1,467,492 thread microseconds, 14.67%)</title><rect x="32.5" y="269" width="231.7" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="35.49" y="279.5" >httpserver!http::HttpSession::..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C78217] (11,003 thread microseconds, 0.11%)</title><rect x="1577.9" y="333" width="1.7" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="1580.91" y="343.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (43,632 thread microseconds, 0.44%)</title><rect x="581.6" y="205" width="6.9" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="584.64" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt; (10,556 thread microseconds, 0.11%)</title><rect x="185.6" y="157" width="1.6" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="188.55" y="167.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Query_perf_counter (10,742 thread microseconds, 0.11%)</title><rect x="78.9" y="189" width="1.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="81.93" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::operator= (10,738 thread microseconds, 0.11%)</title><rect x="451.2" y="221" width="1.7" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<text  x="454.23" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!std::to_string (11,001 thread microseconds, 0.11%)</title><rect x="219.8" y="173" width="1.8" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="222.83" y="183.5" ></text>
+</g>
+<g >
+<title>all (10,005,173 thread microseconds, 100%)</title><rect x="10.0" y="493" width="1580.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="503.5" ></text>
+</g>
+<g >
+<title>KERNEL32!TlsGetValue (10,555 thread microseconds, 0.11%)</title><rect x="617.6" y="317" width="1.7" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="620.63" y="327.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (11,001 thread microseconds, 0.11%)</title><rect x="262.5" y="205" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="265.50" y="215.5" ></text>
+</g>
+<g >
+<title>WS2_32!recv (476,586 thread microseconds, 4.76%)</title><rect x="615.9" y="333" width="75.3" height="15.0" fill="rgb(222,79,19)" rx="2" ry="2" />
+<text  x="618.89" y="343.5" >WS2_32!r..</text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (22,001 thread microseconds, 0.22%)</title><rect x="1584.9" y="333" width="3.4" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1587.86" y="343.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (21,563 thread microseconds, 0.22%)</title><rect x="108.2" y="157" width="3.4" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="111.19" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (10,508 thread microseconds, 0.11%)</title><rect x="257.4" y="237" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="260.44" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!LdrFindEntryForAddress (43,632 thread microseconds, 0.44%)</title><rect x="581.6" y="173" width="6.9" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="584.64" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,055 thread microseconds, 0.11%)</title><rect x="41.0" y="157" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="43.99" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (11,051 thread microseconds, 0.11%)</title><rect x="77.2" y="173" width="1.7" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="80.19" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;enum std::byte,std::allocator&lt;enum std::byte&gt; &gt;::vector&lt;enum std::byte,std::allocator&lt;enum std::byte&gt; &gt;&lt;std::_Span_iterator&lt;enum std::byte const &gt;,0&gt; (381,121 thread microseconds, 3.81%)</title><rect x="528.3" y="253" width="60.2" height="15.0" fill="rgb(227,101,24)" rx="2" ry="2" />
+<text  x="531.34" y="263.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!concurrency::event_loop::EventLoopDriver::Impl::compute_session_deadline (11,084 thread microseconds, 0.11%)</title><rect x="13.5" y="365" width="1.7" height="15.0" fill="rgb(223,83,20)" rx="2" ry="2" />
+<text  x="16.48" y="375.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="173" width="3.5" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="245.25" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (22,003 thread microseconds, 0.22%)</title><rect x="171.9" y="173" width="3.5" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="174.91" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::peak_input_bytes (11,004 thread microseconds, 0.11%)</title><rect x="25.7" y="317" width="1.7" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="28.70" y="327.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memchr (74,940 thread microseconds, 0.75%)</title><rect x="417.3" y="221" width="11.9" height="15.0" fill="rgb(250,211,50)" rx="2" ry="2" />
+<text  x="420.33" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!http::parse_authority (10,806 thread microseconds, 0.11%)</title><rect x="84.1" y="141" width="1.7" height="15.0" fill="rgb(218,60,14)" rx="2" ry="2" />
+<text  x="87.11" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::header_name_equals (11,043 thread microseconds, 0.11%)</title><rect x="56.6" y="157" width="1.8" height="15.0" fill="rgb(217,58,14)" rx="2" ry="2" />
+<text  x="59.63" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!core::Result&lt;http::Target&gt;::~Result&lt;http::Target&gt; (11,500 thread microseconds, 0.11%)</title><rect x="166.6" y="189" width="1.8" height="15.0" fill="rgb(250,211,50)" rx="2" ry="2" />
+<text  x="169.61" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!proxy::`anonymous namespace'::CacheTransaction::decision (205,505 thread microseconds, 2.05%)</title><rect x="134.2" y="205" width="32.4" height="15.0" fill="rgb(248,201,48)" rx="2" ry="2" />
+<text  x="137.16" y="215.5" >ht..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C78440] (21,992 thread microseconds, 0.22%)</title><rect x="1579.6" y="333" width="3.5" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="1582.65" y="343.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,006 thread microseconds, 0.11%)</title><rect x="279.7" y="109" width="1.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="282.74" y="119.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (21,535 thread microseconds, 0.22%)</title><rect x="230.2" y="205" width="3.4" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="233.21" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!http::RequestParser::consume (185,383 thread microseconds, 1.85%)</title><rect x="264.2" y="269" width="29.3" height="15.0" fill="rgb(234,133,31)" rx="2" ry="2" />
+<text  x="267.24" y="279.5" >ht..</text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Destroy (11,004 thread microseconds, 0.11%)</title><rect x="106.5" y="157" width="1.7" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="109.45" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::vector&lt;http::HeaderField,std::allocator&lt;http::HeaderField&gt; &gt;::_Emplace_reallocate&lt;http::HeaderField&gt; (10,759 thread microseconds, 0.11%)</title><rect x="240.5" y="205" width="1.7" height="15.0" fill="rgb(218,63,15)" rx="2" ry="2" />
+<text  x="243.55" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!`http::HttpSession::on_event'::`2'::&lt;lambda_1&gt;::operator()&lt;concurrency::WriteCompleteEvent&gt; (1,943,915 thread microseconds, 19.43%)</title><rect x="293.5" y="301" width="307.0" height="15.0" fill="rgb(209,21,5)" rx="2" ry="2" />
+<text  x="296.51" y="311.5" >httpserver!`http::HttpSession::on_event':..</text>
+</g>
+<g >
+<title>httpserver!http::ResponseWriter::operator= (455,571 thread microseconds, 4.55%)</title><rect x="452.9" y="237" width="72.0" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="455.93" y="247.5" >httpserv..</text>
+</g>
+<g >
+<title>ntdll!RtlCharToInteger (358,621 thread microseconds, 3.58%)</title><rect x="468.2" y="109" width="56.7" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="471.24" y="119.5" >ntdll..</text>
+</g>
+<g >
+<title>httpserver!http::serialize_request_head (216,906 thread microseconds, 2.17%)</title><rect x="183.8" y="189" width="34.3" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<text  x="186.84" y="199.5" >ht..</text>
+</g>
+<g >
+<title>ntdll!ExpInterlockedPopEntrySListEnd (10,535 thread microseconds, 0.11%)</title><rect x="230.2" y="173" width="1.7" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="233.21" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HeaderMap::contains (10,599 thread microseconds, 0.11%)</title><rect x="87.6" y="157" width="1.6" height="15.0" fill="rgb(229,111,26)" rx="2" ry="2" />
+<text  x="90.55" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt; (22,010 thread microseconds, 0.22%)</title><rect x="130.7" y="173" width="3.5" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="133.68" y="183.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (11,235 thread microseconds, 0.11%)</title><rect x="123.7" y="125" width="1.8" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="126.70" y="135.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7B693] (455,028 thread microseconds, 4.55%)</title><rect x="619.3" y="317" width="71.9" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="622.30" y="327.5" >mswsock!..</text>
+</g>
+<g >
+<title>ntdll!RtlQueryPerformanceCounter (10,742 thread microseconds, 0.11%)</title><rect x="78.9" y="173" width="1.7" height="15.0" fill="rgb(216,55,13)" rx="2" ry="2" />
+<text  x="81.93" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!http::Authority::wire (11,015 thread microseconds, 0.11%)</title><rect x="168.4" y="189" width="1.8" height="15.0" fill="rgb(235,138,33)" rx="2" ry="2" />
+<text  x="171.43" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!free_base (11,004 thread microseconds, 0.11%)</title><rect x="106.5" y="141" width="1.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="109.45" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!NtFreeVirtualMemory (358,621 thread microseconds, 3.58%)</title><rect x="468.2" y="93" width="56.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="471.24" y="103.5" >ntdll..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,547 thread microseconds, 0.11%)</title><rect x="1588.3" y="285" width="1.7" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1591.33" y="295.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (455,571 thread microseconds, 4.55%)</title><rect x="452.9" y="189" width="72.0" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="455.93" y="199.5" >ntdll!Rt..</text>
+</g>
+<g >
+<title>httpserver!proxy::end_to_end_fields (43,742 thread microseconds, 0.44%)</title><rect x="221.6" y="189" width="6.9" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="224.57" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!cache::policy::`anonymous namespace'::matches_key (21,834 thread microseconds, 0.22%)</title><rect x="82.4" y="173" width="3.4" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="85.36" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (21,561 thread microseconds, 0.22%)</title><rect x="242.2" y="221" width="3.5" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="245.25" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (11,006 thread microseconds, 0.11%)</title><rect x="238.8" y="189" width="1.7" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="241.81" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt; &gt;::operator= (455,571 thread microseconds, 4.55%)</title><rect x="452.9" y="221" width="72.0" height="15.0" fill="rgb(249,206,49)" rx="2" ry="2" />
+<text  x="455.93" y="231.5" >httpserv..</text>
+</g>
+<g >
+<title>ntdll!RtlGetSystemTimePrecise (11,005 thread microseconds, 0.11%)</title><rect x="104.7" y="141" width="1.8" height="15.0" fill="rgb(248,202,48)" rx="2" ry="2" />
+<text  x="107.72" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::next_action (21,517 thread microseconds, 0.22%)</title><rect x="597.1" y="285" width="3.4" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="600.10" y="295.5" ></text>
+</g>
+</g>
+</svg>

@@ -1,0 +1,1191 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1600" height="414" onload="init(evt)" viewBox="0 0 1600 414" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1600.0" height="414.0" fill="url(#background)"  />
+<text id="title" x="800.00" y="24" >profile-smoke-static-1k-event-loop-c16-r1</text>
+<text id="subtitle" x="800.00" y="48" >Sampled thread wall time including waits (not CPU events)</text>
+<text id="details" x="10.00" y="397" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1490.00" y="24" >Search</text>
+<text id="ignorecase" x="1574.00" y="24" >ic</text>
+<text id="matched" x="1490.00" y="397" > </text>
+<g id="frames">
+<g >
+<title>ucrtbase!free_base (10,647 thread microseconds, 0.08%)</title><rect x="1031.4" y="173" width="1.3" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="1034.45" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus (11,003 thread microseconds, 0.08%)</title><rect x="1368.8" y="141" width="1.3" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="1371.78" y="151.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Mtx_lock (55,269 thread microseconds, 0.43%)</title><rect x="23.1" y="237" width="6.7" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="26.06" y="247.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_filebuf&lt;char,std::char_traits&lt;char&gt; &gt;::xsgetn (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="189" width="13.3" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<text  x="1514.14" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::_Reallocate_grow_by&lt;`std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::append'::`2'::&lt;lambda_1&gt;,unsigned __int64,wchar_t&gt; (21,509 thread microseconds, 0.17%)</title><rect x="1366.2" y="157" width="2.6" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="1369.17" y="167.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetTempPath2W (11,046 thread microseconds, 0.08%)</title><rect x="179.9" y="109" width="1.3" height="15.0" fill="rgb(238,156,37)" rx="2" ry="2" />
+<text  x="182.86" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::detail::file_metadata (10,891,927 thread microseconds, 83.76%)</title><rect x="187.7" y="205" width="1323.4" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="190.70" y="215.5" >httpserver!concurrency::detail::file_metadata</text>
+</g>
+<g >
+<title>KERNELBASE!GetDriveTypeW (725,527 thread microseconds, 5.58%)</title><rect x="91.7" y="109" width="88.2" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="94.71" y="119.5" >KERNELBASE..</text>
+</g>
+<g >
+<title>ntdll!NtClose (665,091 thread microseconds, 5.11%)</title><rect x="1039.5" y="141" width="80.8" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="1042.51" y="151.5" >ntdll!NtC..</text>
+</g>
+<g >
+<title>ntdll!NtSetInformationFile (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="93" width="3.8" height="15.0" fill="rgb(246,192,45)" rx="2" ry="2" />
+<text  x="1527.40" y="103.5" ></text>
+</g>
+<g >
+<title>KERNEL32!BaseThreadInitThunk (13,003,375 thread microseconds, 100.00%)</title><rect x="10.0" y="333" width="1580.0" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="13.00" y="343.5" >KERNEL32!BaseThreadInitThunk</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,062 thread microseconds, 0.09%)</title><rect x="715.6" y="125" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="718.57" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!wcslen (11,012 thread microseconds, 0.08%)</title><rect x="189.0" y="157" width="1.4" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="192.03" y="167.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::basic_istream&lt;char,std::char_traits&lt;char&gt; &gt;::basic_istream&lt;char,std::char_traits&lt;char&gt; &gt; (21,085 thread microseconds, 0.16%)</title><rect x="185.1" y="189" width="2.6" height="15.0" fill="rgb(214,45,10)" rx="2" ry="2" />
+<text  x="188.14" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!read (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="109" width="13.3" height="15.0" fill="rgb(252,219,52)" rx="2" ry="2" />
+<text  x="1514.14" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,062 thread microseconds, 0.09%)</title><rect x="715.6" y="93" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="718.57" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::ReferenceWorkExecutor::ReferenceWorkExecutor (11,000 thread microseconds, 0.08%)</title><rect x="57.5" y="253" width="1.4" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
+<text  x="60.51" y="263.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetFileAttributesW (4,344,385 thread microseconds, 33.41%)</title><rect x="187.7" y="189" width="527.9" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
+<text  x="190.70" y="199.5" >KERNELBASE!GetFileAttributesW</text>
+</g>
+<g >
+<title>KERNELBASE!GetFullPathNameW (11,003 thread microseconds, 0.08%)</title><rect x="1508.5" y="141" width="1.3" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="1511.47" y="151.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Unlock_shared_ptr_spin_lock (10,569 thread microseconds, 0.08%)</title><rect x="185.1" y="173" width="1.3" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="188.14" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (22,746 thread microseconds, 0.17%)</title><rect x="1035.4" y="157" width="2.8" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1038.41" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,993 thread microseconds, 0.08%)</title><rect x="187.7" y="125" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="190.70" y="135.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fread (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="173" width="13.3" height="15.0" fill="rgb(243,178,42)" rx="2" ry="2" />
+<text  x="1514.14" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (22,746 thread microseconds, 0.17%)</title><rect x="1035.4" y="109" width="2.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1038.41" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,993 thread microseconds, 0.08%)</title><rect x="187.7" y="109" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="190.70" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!NtQueryInformationFile (663,107 thread microseconds, 5.10%)</title><rect x="1174.5" y="141" width="80.5" height="15.0" fill="rgb(235,138,33)" rx="2" ry="2" />
+<text  x="1177.46" y="151.5" >ntdll!NtQ..</text>
+</g>
+<g >
+<title>KERNELBASE!CloseHandle (53,840 thread microseconds, 0.41%)</title><rect x="1120.3" y="125" width="6.6" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="1123.32" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!NtCreateFile (162,278 thread microseconds, 1.25%)</title><rect x="1126.9" y="93" width="19.7" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="1129.87" y="103.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::locale::_Init (10,516 thread microseconds, 0.08%)</title><rect x="186.4" y="157" width="1.3" height="15.0" fill="rgb(207,12,3)" rx="2" ry="2" />
+<text  x="189.42" y="167.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!CreateFileW (736,573 thread microseconds, 5.66%)</title><rect x="91.7" y="125" width="89.5" height="15.0" fill="rgb(229,110,26)" rx="2" ry="2" />
+<text  x="94.71" y="135.5" >KERNELBASE..</text>
+</g>
+<g >
+<title>ntdll!RtlReleaseSRWLockExclusive (10,507 thread microseconds, 0.08%)</title><rect x="10.0" y="253" width="1.3" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="13.00" y="263.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,294 thread microseconds, 0.08%)</title><rect x="1507.2" y="157" width="1.3" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1510.22" y="167.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!SetFilePointerEx (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="125" width="31.6" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
+<text  x="63.13" y="135.5" >KE..</text>
+</g>
+<g >
+<title>ucrtbase!fgetpos (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="157" width="3.8" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="1527.40" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fseek (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="125" width="60.5" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="1531.23" y="135.5" >ucrtba..</text>
+</g>
+<g >
+<title>ntdll!NtQueryInformationFile (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="109" width="31.6" height="15.0" fill="rgb(235,138,33)" rx="2" ry="2" />
+<text  x="63.13" y="119.5" >nt..</text>
+</g>
+<g >
+<title>ntdll!wcslen (11,009 thread microseconds, 0.08%)</title><rect x="177.2" y="77" width="1.3" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="180.19" y="87.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fflush_nolock (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="141" width="31.6" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="63.13" y="151.5" >uc..</text>
+</g>
+<g >
+<title>MSVCP140!Mtx_lock (43,190 thread microseconds, 0.33%)</title><rect x="12.6" y="253" width="5.2" height="15.0" fill="rgb(218,59,14)" rx="2" ry="2" />
+<text  x="15.56" y="263.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::locale::facet::_Incref (10,516 thread microseconds, 0.08%)</title><rect x="186.4" y="141" width="1.3" height="15.0" fill="rgb(221,77,18)" rx="2" ry="2" />
+<text  x="189.42" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!ftell (747,211 thread microseconds, 5.75%)</title><rect x="91.7" y="157" width="90.8" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="94.71" y="167.5" >ucrtbase!f..</text>
+</g>
+<g >
+<title>httpserver!std::filesystem::absolute (22,012 thread microseconds, 0.17%)</title><rect x="1508.5" y="189" width="2.6" height="15.0" fill="rgb(250,211,50)" rx="2" ry="2" />
+<text  x="1511.47" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAcquireSRWLockExclusive (43,190 thread microseconds, 0.33%)</title><rect x="12.6" y="237" width="5.2" height="15.0" fill="rgb(243,177,42)" rx="2" ry="2" />
+<text  x="15.56" y="247.5" ></text>
+</g>
+<g >
+<title>ntdll!SbSelectProcedure (11,000 thread microseconds, 0.08%)</title><rect x="178.5" y="93" width="1.4" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="181.53" y="103.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (11,002 thread microseconds, 0.08%)</title><rect x="1364.8" y="157" width="1.4" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1367.83" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_filebuf&lt;char,std::char_traits&lt;char&gt; &gt;::seekpos (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="189" width="3.8" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="1527.40" y="199.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!ReadFile (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="77" width="13.3" height="15.0" fill="rgb(236,144,34)" rx="2" ry="2" />
+<text  x="1514.14" y="87.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,294 thread microseconds, 0.08%)</title><rect x="1507.2" y="125" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1510.22" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!std::filesystem::_Path_iterator&lt;std::_String_const_iterator&lt;std::_String_val&lt;std::_Simple_types&lt;wchar_t&gt; &gt; &gt; &gt;::operator++ (21,597 thread microseconds, 0.17%)</title><rect x="1505.8" y="189" width="2.7" height="15.0" fill="rgb(250,210,50)" rx="2" ry="2" />
+<text  x="1508.84" y="199.5" ></text>
+</g>
+<g >
+<title>VCRUNTIME140!_NLG_Return2 (11,005 thread microseconds, 0.08%)</title><rect x="1034.1" y="157" width="1.3" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="1037.08" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fclose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="205" width="60.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1531.23" y="215.5" >ucrtba..</text>
+</g>
+<g >
+<title>ucrtbase!fclose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="173" width="60.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1531.23" y="183.5" >ucrtba..</text>
+</g>
+<g >
+<title>ntdll!ZwQueryFullAttributesFile (2,566,580 thread microseconds, 19.74%)</title><rect x="718.3" y="157" width="311.8" height="15.0" fill="rgb(248,200,47)" rx="2" ry="2" />
+<text  x="721.25" y="167.5" >ntdll!ZwQueryFullAttributesFile</text>
+</g>
+<g >
+<title>httpserver!std::_Func_impl_no_alloc&lt;`concurrency::event_loop::EventLoopDriver::Impl::bind_listener_locked'::`35'::&lt;lambda_1&gt;,void&gt;::_Do_call (261,529 thread microseconds, 2.01%)</title><rect x="23.1" y="253" width="31.7" height="15.0" fill="rgb(232,126,30)" rx="2" ry="2" />
+<text  x="26.06" y="263.5" >ht..</text>
+</g>
+<g >
+<title>httpserver!net::Poller::wake (206,260 thread microseconds, 1.59%)</title><rect x="29.8" y="237" width="25.0" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="32.77" y="247.5" >h..</text>
+</g>
+<g >
+<title>httpserver!__std_fs_open_handle (490,930 thread microseconds, 3.78%)</title><rect x="1305.2" y="173" width="59.6" height="15.0" fill="rgb(206,5,1)" rx="2" ry="2" />
+<text  x="1308.18" y="183.5" >httpse..</text>
+</g>
+<g >
+<title>ntdll!RtlSleepConditionVariableSRW (43,190 thread microseconds, 0.33%)</title><rect x="12.6" y="221" width="5.2" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="15.56" y="231.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!DeviceIoControl (207,655 thread microseconds, 1.60%)</title><rect x="1147.9" y="125" width="25.2" height="15.0" fill="rgb(247,197,47)" rx="2" ry="2" />
+<text  x="1150.86" y="135.5" >K..</text>
+</g>
+<g >
+<title>KERNELBASE!CloseHandle (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="93" width="60.5" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="1531.23" y="103.5" >KERNEL..</text>
+</g>
+<g >
+<title>httpserver!net::Socket::write_some (206,260 thread microseconds, 1.59%)</title><rect x="29.8" y="221" width="25.0" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="32.77" y="231.5" >h..</text>
+</g>
+<g >
+<title>KERNELBASE!GetFinalPathNameByHandleW (1,521,372 thread microseconds, 11.70%)</title><rect x="1120.3" y="157" width="184.9" height="15.0" fill="rgb(225,96,22)" rx="2" ry="2" />
+<text  x="1123.32" y="167.5" >KERNELBASE!GetFinalPathN..</text>
+</g>
+<g >
+<title>ucrtbase!fread_nolock_s (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="93" width="13.3" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<text  x="1514.14" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlDeleteBoundaryDescriptor (10,993 thread microseconds, 0.08%)</title><rect x="187.7" y="157" width="1.3" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="190.70" y="167.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::_Fiopen (1,007,114 thread microseconds, 7.75%)</title><rect x="60.1" y="205" width="122.4" height="15.0" fill="rgb(213,40,9)" rx="2" ry="2" />
+<text  x="63.13" y="215.5" >MSVCP140!std::_..</text>
+</g>
+<g >
+<title>ucrtbase!fgetpos (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="141" width="3.8" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="1527.40" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fclose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="157" width="60.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1531.23" y="167.5" >ucrtba..</text>
+</g>
+<g >
+<title>ucrtbase!fgetpos (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="173" width="31.6" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="63.13" y="183.5" >uc..</text>
+</g>
+<g >
+<title>KERNELBASE!CreateFile2 (445,555 thread microseconds, 3.43%)</title><rect x="1120.3" y="141" width="54.2" height="15.0" fill="rgb(218,60,14)" rx="2" ry="2" />
+<text  x="1123.32" y="151.5" >KERNE..</text>
+</g>
+<g >
+<title>KERNELBASE!CreateFileW (490,930 thread microseconds, 3.78%)</title><rect x="1305.2" y="157" width="59.6" height="15.0" fill="rgb(229,110,26)" rx="2" ry="2" />
+<text  x="1308.18" y="167.5" >KERNEL..</text>
+</g>
+<g >
+<title>httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_5&gt;::operator()&lt;concurrency::FileReadWork&gt; (140,596 thread microseconds, 1.08%)</title><rect x="1511.1" y="221" width="17.1" height="15.0" fill="rgb(240,161,38)" rx="2" ry="2" />
+<text  x="1514.14" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!__std_fs_get_stats (2,588,640 thread microseconds, 19.91%)</title><rect x="715.6" y="189" width="314.5" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="718.57" y="199.5" >httpserver!__std_fs_get_stats</text>
+</g>
+<g >
+<title>MSVCP140!Mtx_unlock (10,507 thread microseconds, 0.08%)</title><rect x="10.0" y="269" width="1.3" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="13.00" y="279.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwWaitForAlertByThreadId (43,190 thread microseconds, 0.33%)</title><rect x="12.6" y="205" width="5.2" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="15.56" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlDeleteBoundaryDescriptor (10,503 thread microseconds, 0.08%)</title><rect x="175.9" y="77" width="1.3" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="178.91" y="87.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwQueryAttributesFile (4,322,380 thread microseconds, 33.24%)</title><rect x="190.4" y="173" width="525.2" height="15.0" fill="rgb(251,216,51)" rx="2" ry="2" />
+<text  x="193.37" y="183.5" >ntdll!ZwQueryAttributesFile</text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::_Tidy_deallocate (21,649 thread microseconds, 0.17%)</title><rect x="1030.1" y="189" width="2.6" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1033.11" y="199.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fflush_nolock (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="125" width="3.8" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="1527.40" y="135.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7C325] (10,278 thread microseconds, 0.08%)</title><rect x="29.8" y="189" width="1.2" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
+<text  x="32.77" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,506 thread microseconds, 0.08%)</title><rect x="1367.5" y="109" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1370.51" y="119.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Mtx_unlock (43,193 thread microseconds, 0.33%)</title><rect x="17.8" y="253" width="5.3" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="20.81" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAcquireSRWLockExclusive (55,269 thread microseconds, 0.43%)</title><rect x="23.1" y="221" width="6.7" height="15.0" fill="rgb(243,177,42)" rx="2" ry="2" />
+<text  x="26.06" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::helpers::CompletionPort::publish (369,484 thread microseconds, 2.84%)</title><rect x="11.3" y="269" width="44.9" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="14.28" y="279.5" >http..</text>
+</g>
+<g >
+<title>httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute (12,612,386 thread microseconds, 96.99%)</title><rect x="56.2" y="269" width="1532.5" height="15.0" fill="rgb(238,156,37)" rx="2" ry="2" />
+<text  x="59.17" y="279.5" >httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute</text>
+</g>
+<g >
+<title>MSVCP140!std::ios_base::_Init (10,516 thread microseconds, 0.08%)</title><rect x="186.4" y="173" width="1.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="189.42" y="183.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetFileAttributesExW (2,588,640 thread microseconds, 19.91%)</title><rect x="715.6" y="173" width="314.5" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="718.57" y="183.5" >KERNELBASE!GetFileAttributesExW</text>
+</g>
+<g >
+<title>ntdll!NtReadFile (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="61" width="13.3" height="15.0" fill="rgb(210,25,6)" rx="2" ry="2" />
+<text  x="1514.14" y="71.5" ></text>
+</g>
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::helpers::HelperPool::start'::`15'::&lt;lambda_1&gt; &gt;,0&gt; (13,003,375 thread microseconds, 100.00%)</title><rect x="10.0" y="301" width="1580.0" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="13.00" y="311.5" >httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::helpers::HelperPool::start'::`15'::&lt;lambda_1&gt; &gt;,0&gt;</text>
+</g>
+<g >
+<title>ntdll!RtlInitUnicodeStringEx (11,506 thread microseconds, 0.09%)</title><rect x="1363.4" y="125" width="1.4" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="1366.44" y="135.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetDriveTypeW (490,930 thread microseconds, 3.78%)</title><rect x="1305.2" y="141" width="59.6" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="1308.18" y="151.5" >KERNEL..</text>
+</g>
+<g >
+<title>ntdll!NtSetInformationThread (10,574 thread microseconds, 0.08%)</title><rect x="21.8" y="221" width="1.3" height="15.0" fill="rgb(251,213,51)" rx="2" ry="2" />
+<text  x="24.77" y="231.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetFileAttributesExW (1,128,003 thread microseconds, 8.67%)</title><rect x="1368.8" y="157" width="137.0" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1371.78" y="167.5" >KERNELBASE!GetFil..</text>
+</g>
+<g >
+<title>ntdll!NtCreateFile (693,015 thread microseconds, 5.33%)</title><rect x="91.7" y="93" width="84.2" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="94.71" y="103.5" >ntdll!NtC..</text>
+</g>
+<g >
+<title>ntdll!RtlDosApplyFileIsolationRedirection_Ustr (10,503 thread microseconds, 0.08%)</title><rect x="175.9" y="61" width="1.3" height="15.0" fill="rgb(253,224,53)" rx="2" ry="2" />
+<text  x="178.91" y="71.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::helpers::HelperPool::run (13,003,375 thread microseconds, 100.00%)</title><rect x="10.0" y="285" width="1580.0" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="13.00" y="295.5" >httpserver!concurrency::helpers::HelperPool::run</text>
+</g>
+<g >
+<title>MSVCP140!std::ios_base::clear (11,206 thread microseconds, 0.09%)</title><rect x="183.8" y="205" width="1.3" height="15.0" fill="rgb(252,218,52)" rx="2" ry="2" />
+<text  x="186.77" y="215.5" ></text>
+</g>
+<g >
+<title>ucrtbase!wcsrchr (13,003,375 thread microseconds, 100.00%)</title><rect x="10.0" y="317" width="1580.0" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
+<text  x="13.00" y="327.5" >ucrtbase!wcsrchr</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,506 thread microseconds, 0.08%)</title><rect x="1367.5" y="93" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1370.51" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,279 thread microseconds, 0.09%)</title><rect x="1173.1" y="93" width="1.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1176.09" y="103.5" ></text>
+</g>
+<g >
+<title>ucrtbase!lock_locales (10,569 thread microseconds, 0.08%)</title><rect x="185.1" y="141" width="1.3" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
+<text  x="188.14" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_5&gt;::operator()&lt;concurrency::FileOpenWork&gt; (11,952,336 thread microseconds, 91.92%)</title><rect x="58.9" y="221" width="1452.2" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<text  x="61.85" y="231.5" >httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_5&gt;::operator()&lt;concurrency::FileOpenWork&gt;</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (207,655 thread microseconds, 1.60%)</title><rect x="1147.9" y="109" width="25.2" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="1150.86" y="119.5" >n..</text>
+</g>
+<g >
+<title>httpserver!std::_Func_impl_no_alloc&lt;`concurrency::event_loop::EventLoopDriver::Impl::submit_helper_work'::`2'::&lt;lambda_2&gt;,void,concurrency::WorkEvent&gt;::_Move (10,998 thread microseconds, 0.08%)</title><rect x="54.8" y="253" width="1.4" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="57.84" y="263.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fgetpos (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="157" width="31.6" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="63.13" y="167.5" >uc..</text>
+</g>
+<g >
+<title>ucrtbase!fseek (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="109" width="60.5" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="1531.23" y="119.5" >ucrtba..</text>
+</g>
+<g >
+<title>ntdll!RtlDeleteBoundaryDescriptor (11,062 thread microseconds, 0.09%)</title><rect x="715.6" y="141" width="1.3" height="15.0" fill="rgb(213,37,8)" rx="2" ry="2" />
+<text  x="718.57" y="151.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7C414] (195,982 thread microseconds, 1.51%)</title><rect x="31.0" y="189" width="23.8" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="34.02" y="199.5" >m..</text>
+</g>
+<g >
+<title>httpserver!concurrency::FileResource::FileResource (21,085 thread microseconds, 0.16%)</title><rect x="185.1" y="205" width="2.6" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="188.14" y="215.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlDosPathNameToNtPathName_U_WithStatus (22,005 thread microseconds, 0.17%)</title><rect x="187.7" y="173" width="2.7" height="15.0" fill="rgb(208,18,4)" rx="2" ry="2" />
+<text  x="190.70" y="183.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::basic_istream&lt;char,std::char_traits&lt;char&gt; &gt;::tellg (10,501 thread microseconds, 0.08%)</title><rect x="182.5" y="205" width="1.3" height="15.0" fill="rgb(250,211,50)" rx="2" ry="2" />
+<text  x="185.50" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!__std_fs_get_final_path_name_by_handle (1,521,372 thread microseconds, 11.70%)</title><rect x="1120.3" y="173" width="184.9" height="15.0" fill="rgb(236,143,34)" rx="2" ry="2" />
+<text  x="1123.32" y="183.5" >httpserver!__std_fs_get_..</text>
+</g>
+<g >
+<title>VCRUNTIME140!memmove (11,004 thread microseconds, 0.08%)</title><rect x="1032.7" y="173" width="1.4" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1035.74" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlUserThreadStart (13,003,375 thread microseconds, 100.00%)</title><rect x="10.0" y="349" width="1580.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="13.00" y="359.5" >ntdll!RtlUserThreadStart</text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (22,746 thread microseconds, 0.17%)</title><rect x="1035.4" y="141" width="2.8" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1038.41" y="151.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fread_nolock_s (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="141" width="13.3" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<text  x="1514.14" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!wcslen (11,506 thread microseconds, 0.09%)</title><rect x="1363.4" y="109" width="1.4" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="1366.44" y="119.5" ></text>
+</g>
+<g >
+<title>ucrtbase!ftell (747,211 thread microseconds, 5.75%)</title><rect x="91.7" y="173" width="90.8" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="94.71" y="183.5" >ucrtbase!f..</text>
+</g>
+<g >
+<title>ntdll!RtlInitUnicodeStringEx (11,009 thread microseconds, 0.08%)</title><rect x="177.2" y="93" width="1.3" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="180.19" y="103.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::_Lockit::_Lockit (10,569 thread microseconds, 0.08%)</title><rect x="185.1" y="157" width="1.3" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="188.14" y="167.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!CreateFileW (172,781 thread microseconds, 1.33%)</title><rect x="1126.9" y="125" width="21.0" height="15.0" fill="rgb(229,110,26)" rx="2" ry="2" />
+<text  x="1129.87" y="135.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,506 thread microseconds, 0.08%)</title><rect x="1367.5" y="125" width="1.3" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1370.51" y="135.5" ></text>
+</g>
+<g >
+<title>ucrtbase!wfopen_s (747,211 thread microseconds, 5.75%)</title><rect x="91.7" y="189" width="90.8" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="94.71" y="199.5" >ucrtbase!w..</text>
+</g>
+<g >
+<title>VCRUNTIME140!_NLG_Return2 (11,003 thread microseconds, 0.08%)</title><rect x="1366.2" y="141" width="1.3" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="1369.17" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::allocator&lt;wchar_t&gt;::allocate (11,009 thread microseconds, 0.08%)</title><rect x="1509.8" y="141" width="1.3" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="1512.80" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!NtClose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="77" width="60.5" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="1531.23" y="87.5" >ntdll!..</text>
+</g>
+<g >
+<title>ucrtbase!fgetc (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="125" width="13.3" height="15.0" fill="rgb(248,200,48)" rx="2" ry="2" />
+<text  x="1514.14" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::resize (21,509 thread microseconds, 0.17%)</title><rect x="1366.2" y="173" width="2.6" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="1369.17" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!wcslen (11,003 thread microseconds, 0.08%)</title><rect x="1368.8" y="125" width="1.3" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="1371.78" y="135.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::basic_istream&lt;char,std::char_traits&lt;char&gt; &gt;::seekg (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="205" width="3.8" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="1527.40" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::_Reallocate_grow_by&lt;`std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::append'::`2'::&lt;lambda_1&gt;,unsigned __int64,wchar_t&gt; (11,009 thread microseconds, 0.08%)</title><rect x="1509.8" y="157" width="1.3" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="1512.80" y="167.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!GetDriveTypeW (172,781 thread microseconds, 1.33%)</title><rect x="1126.9" y="109" width="21.0" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="1129.87" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus (22,060 thread microseconds, 0.17%)</title><rect x="715.6" y="157" width="2.7" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="718.57" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Visit_impl&lt;11,void,std::_Meta_list&lt;std::integer_sequence&lt;unsigned __int64,0&gt;,std::integer_sequence&lt;unsigned __int64,1&gt;,std::integer_sequence&lt;unsigned __int64,2&gt;,std::integer_sequence&lt;unsigned __int64,3&gt;,std::integer_sequence&lt;unsigned __int64,4&gt;,std::integer_sequence&lt;unsigned __int64,5&gt;,std::integer_sequence&lt;unsigned __int64,6&gt;,std::integer_sequence&lt;unsigned __int64,7&gt;,std::integer_sequence&lt;unsigned __int64,8&gt;,std::integer_sequence&lt;unsigned __int64,9&gt;,std:: (12,590,334 thread microseconds, 96.82%)</title><rect x="58.9" y="237" width="1529.8" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<text  x="61.85" y="247.5" >httpserver!std::_Visit_impl&lt;11,void,std::_Meta_list&lt;std::integer_sequence&lt;unsigned __int64,0&gt;,std::integer_sequence&lt;unsigned __int64,1&gt;,std::integer_sequence&lt;unsigned __int64,2&gt;,std::integer_sequence&lt;unsigned __int..</text>
+</g>
+<g >
+<title>KERNELBASE!SetFilePointerEx (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="109" width="3.8" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
+<text  x="1527.40" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!__std_fs_get_full_path_name (11,003 thread microseconds, 0.08%)</title><rect x="1508.5" y="157" width="1.3" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="1511.47" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Func_impl_no_alloc&lt;`concurrency::event_loop::EventLoopDriver::Impl::submit_helper_work'::`2'::&lt;lambda_2&gt;,void,concurrency::WorkEvent&gt;::_Move (10,998 thread microseconds, 0.08%)</title><rect x="1588.7" y="253" width="1.3" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="1591.66" y="263.5" ></text>
+</g>
+<g >
+<title>ntdll!NtQueryVolumeInformationFile (10,638 thread microseconds, 0.08%)</title><rect x="181.2" y="109" width="1.3" height="15.0" fill="rgb(252,218,52)" rx="2" ry="2" />
+<text  x="184.21" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::assign (10,294 thread microseconds, 0.08%)</title><rect x="1507.2" y="173" width="1.3" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
+<text  x="1510.22" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_filebuf&lt;char,std::char_traits&lt;char&gt; &gt;::close (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="221" width="60.5" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
+<text  x="1531.23" y="231.5" >httpse..</text>
+</g>
+<g >
+<title>ntdll!NtCreateFile (468,916 thread microseconds, 3.61%)</title><rect x="1305.2" y="125" width="57.0" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="1308.18" y="135.5" >ntdll!..</text>
+</g>
+<g >
+<title>ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus (10,503 thread microseconds, 0.08%)</title><rect x="175.9" y="93" width="1.3" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="178.91" y="103.5" ></text>
+</g>
+<g >
+<title>ucrtbase!malloc_base (10,294 thread microseconds, 0.08%)</title><rect x="1507.2" y="141" width="1.3" height="15.0" fill="rgb(212,36,8)" rx="2" ry="2" />
+<text  x="1510.22" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!wcslen (10,998 thread microseconds, 0.08%)</title><rect x="716.9" y="141" width="1.4" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="719.91" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_filebuf&lt;char,std::char_traits&lt;char&gt; &gt;::seekoff (10,501 thread microseconds, 0.08%)</title><rect x="182.5" y="189" width="1.3" height="15.0" fill="rgb(218,64,15)" rx="2" ry="2" />
+<text  x="185.50" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!NtAlertThreadByThreadIdEx (32,619 thread microseconds, 0.25%)</title><rect x="17.8" y="221" width="4.0" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="20.81" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Func_class&lt;void,concurrency::WorkEvent&gt;::_Reset_move (10,998 thread microseconds, 0.08%)</title><rect x="1588.7" y="269" width="1.3" height="15.0" fill="rgb(239,158,37)" rx="2" ry="2" />
+<text  x="1591.66" y="279.5" ></text>
+</g>
+<g >
+<title>httpserver!std::filesystem::_Absolute (22,012 thread microseconds, 0.17%)</title><rect x="1508.5" y="173" width="2.6" height="15.0" fill="rgb(244,179,42)" rx="2" ry="2" />
+<text  x="1511.47" y="183.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!CloseHandle (676,073 thread microseconds, 5.20%)</title><rect x="1038.2" y="157" width="82.1" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="1041.18" y="167.5" >KERNELBAS..</text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,062 thread microseconds, 0.09%)</title><rect x="715.6" y="109" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="718.57" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (22,746 thread microseconds, 0.17%)</title><rect x="1035.4" y="125" width="2.8" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1038.41" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!__std_fs_get_stats (1,128,003 thread microseconds, 8.67%)</title><rect x="1368.8" y="173" width="137.0" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="1371.78" y="183.5" >httpserver!__std_..</text>
+</g>
+<g >
+<title>httpserver!__std_fs_close_handle (676,073 thread microseconds, 5.20%)</title><rect x="1038.2" y="173" width="82.1" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="1041.18" y="183.5" >httpserve..</text>
+</g>
+<g >
+<title>ucrtbase!fclose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="141" width="60.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1531.23" y="151.5" >ucrtba..</text>
+</g>
+<g >
+<title>ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus (10,508 thread microseconds, 0.08%)</title><rect x="1362.2" y="125" width="1.2" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="1365.16" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!wcslen (10,508 thread microseconds, 0.08%)</title><rect x="1362.2" y="109" width="1.2" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="1365.16" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!std::filesystem::_Canonical (2,720,886 thread microseconds, 20.92%)</title><rect x="1038.2" y="189" width="330.6" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="1041.18" y="199.5" >httpserver!std::filesystem::_Canonical</text>
+</g>
+<g >
+<title>ntdll!RtlFreeHeap (10,647 thread microseconds, 0.08%)</title><rect x="1031.4" y="157" width="1.3" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="1034.45" y="167.5" ></text>
+</g>
+<g >
+<title>all (13,003,375 thread microseconds, 100%)</title><rect x="10.0" y="365" width="1580.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="375.5" ></text>
+</g>
+<g >
+<title>ucrtbase!ftelli64 (10,501 thread microseconds, 0.08%)</title><rect x="182.5" y="157" width="1.3" height="15.0" fill="rgb(245,184,44)" rx="2" ry="2" />
+<text  x="185.50" y="167.5" ></text>
+</g>
+<g >
+<title>ucrtbase!ftell (747,211 thread microseconds, 5.75%)</title><rect x="91.7" y="141" width="90.8" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="94.71" y="151.5" >ucrtbase!f..</text>
+</g>
+<g >
+<title>ntdll!NtAlertThreadByThreadIdEx (10,507 thread microseconds, 0.08%)</title><rect x="10.0" y="237" width="1.3" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="13.00" y="247.5" ></text>
+</g>
+<g >
+<title>MSVCP140!std::basic_istream&lt;char,std::char_traits&lt;char&gt; &gt;::read (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="205" width="13.3" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="1514.14" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::ReferenceWorkExecutor::execute (12,590,334 thread microseconds, 96.82%)</title><rect x="58.9" y="253" width="1529.8" height="15.0" fill="rgb(214,45,10)" rx="2" ry="2" />
+<text  x="61.85" y="263.5" >httpserver!concurrency::ReferenceWorkExecutor::execute</text>
+</g>
+<g >
+<title>ntdll!NtQueryObject (412,710 thread microseconds, 3.17%)</title><rect x="1255.0" y="141" width="50.2" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<text  x="1258.03" y="151.5" >ntdll..</text>
+</g>
+<g >
+<title>KERNELBASE!GetFileType (10,638 thread microseconds, 0.08%)</title><rect x="181.2" y="125" width="1.3" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="184.21" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlGetFullPathName_UEx (11,003 thread microseconds, 0.08%)</title><rect x="1508.5" y="125" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1511.47" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlSleepConditionVariableSRW (55,269 thread microseconds, 0.43%)</title><rect x="23.1" y="205" width="6.7" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="26.06" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::append (44,755 thread microseconds, 0.34%)</title><rect x="1032.7" y="189" width="5.5" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<text  x="1035.74" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::erase (11,002 thread microseconds, 0.08%)</title><rect x="1364.8" y="173" width="1.4" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1367.83" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,279 thread microseconds, 0.09%)</title><rect x="1173.1" y="109" width="1.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1176.09" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,243 thread microseconds, 0.09%)</title><rect x="1036.8" y="93" width="1.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1039.81" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,294 thread microseconds, 0.08%)</title><rect x="1507.2" y="109" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1510.22" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (11,279 thread microseconds, 0.09%)</title><rect x="1173.1" y="125" width="1.4" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1176.09" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::_Reallocate_grow_by&lt;`std::basic_string&lt;wchar_t,std::char_traits&lt;wchar_t&gt;,std::allocator&lt;wchar_t&gt; &gt;::append'::`2'::&lt;lambda_1&gt;,wchar_t const *,unsigned __int64&gt; (33,751 thread microseconds, 0.26%)</title><rect x="1034.1" y="173" width="4.1" height="15.0" fill="rgb(232,125,30)" rx="2" ry="2" />
+<text  x="1037.08" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!operator new (10,506 thread microseconds, 0.08%)</title><rect x="1367.5" y="141" width="1.3" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1370.51" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwQueryFullAttributesFile (1,117,000 thread microseconds, 8.59%)</title><rect x="1370.1" y="141" width="135.7" height="15.0" fill="rgb(248,200,47)" rx="2" ry="2" />
+<text  x="1373.12" y="151.5" >ntdll!ZwQueryFull..</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (195,982 thread microseconds, 1.51%)</title><rect x="31.0" y="173" width="23.8" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="34.02" y="183.5" >n..</text>
+</g>
+<g >
+<title>ucrtbase!fread_s (109,094 thread microseconds, 0.84%)</title><rect x="1511.1" y="157" width="13.3" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="1514.14" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,506 thread microseconds, 0.08%)</title><rect x="1367.5" y="77" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="1370.51" y="87.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlAllocateHeap (10,993 thread microseconds, 0.08%)</title><rect x="187.7" y="141" width="1.3" height="15.0" fill="rgb(254,227,54)" rx="2" ry="2" />
+<text  x="190.70" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlReleaseSRWLockExclusive (43,193 thread microseconds, 0.33%)</title><rect x="17.8" y="237" width="5.3" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="20.81" y="247.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fseek (259,903 thread microseconds, 2.00%)</title><rect x="60.1" y="189" width="31.6" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="63.13" y="199.5" >uc..</text>
+</g>
+<g >
+<title>ucrtbase!fseeki64 (31,502 thread microseconds, 0.24%)</title><rect x="1524.4" y="173" width="3.8" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<text  x="1527.40" y="183.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwWaitForAlertByThreadId (33,268 thread microseconds, 0.26%)</title><rect x="25.7" y="189" width="4.1" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="28.73" y="199.5" ></text>
+</g>
+<g >
+<title>httpserver!std::filesystem::_Get_any_status (1,128,003 thread microseconds, 8.67%)</title><rect x="1368.8" y="189" width="137.0" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="1371.78" y="199.5" >httpserver!std::f..</text>
+</g>
+<g >
+<title>ntdll!SbSelectProcedure (10,503 thread microseconds, 0.08%)</title><rect x="1146.6" y="93" width="1.3" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="1149.58" y="103.5" ></text>
+</g>
+<g >
+<title>WS2_32!send (206,260 thread microseconds, 1.59%)</title><rect x="29.8" y="205" width="25.0" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="32.77" y="215.5" >W..</text>
+</g>
+<g >
+<title>ntdll!NtClose (53,840 thread microseconds, 0.41%)</title><rect x="1120.3" y="109" width="6.6" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="1123.32" y="119.5" ></text>
+</g>
+<g >
+<title>ucrtbase!fclose (497,402 thread microseconds, 3.83%)</title><rect x="1528.2" y="189" width="60.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1531.23" y="199.5" >ucrtba..</text>
+</g>
+<g >
+<title>ucrtbase!fgetpos (10,501 thread microseconds, 0.08%)</title><rect x="182.5" y="173" width="1.3" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="185.50" y="183.5" ></text>
+</g>
+</g>
+</svg>

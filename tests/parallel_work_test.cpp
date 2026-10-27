@@ -122,6 +122,19 @@ void work_results_and_cancellation() {
     auto result = executor.execute(action(FileInfoWork{path}));
     CHECK(result.status == WorkStatus::complete && result.info.regular && result.info.size == 6);
     CHECK(result.info.canonical_path == std::filesystem::canonical(path));
+    const auto first_modified = std::chrono::sys_days(std::chrono::year{2020}/1/2) + 3h;
+    directory.set_mtime(path, first_modified);
+    result = executor.execute(action(FileInfoWork{path}));
+    CHECK(result.status == WorkStatus::complete && result.info.modified == first_modified);
+    // Metadata must be refreshed for each action, including size and timestamp
+    // changes. No path-level cache may hide a replacement.
+    directory.write("bytes", "replacement");
+    directory.set_mtime(path, first_modified + 24h);
+    result = executor.execute(action(FileInfoWork{path.parent_path() / "." / path.filename()}));
+    CHECK(result.status == WorkStatus::complete && result.info.size == 11);
+    CHECK(result.info.modified == first_modified + 24h);
+    CHECK(result.info.canonical_path == std::filesystem::canonical(path));
+    directory.write("bytes", "abcdef");
     result = executor.execute(action(FileInfoWork{path.parent_path()}));
     CHECK(result.status == WorkStatus::complete && result.info.directory && !result.info.regular);
     result = executor.execute(action(FileOpenWork{path.parent_path()}));
@@ -182,6 +195,11 @@ void upstream_actions() {
     if (connected.error) std::cerr << connected.error.to_string() << '\n';
     CHECK(connected.status == WorkStatus::complete);
     CHECK(executor.execute(make(UpstreamWaitWork{net::Interest::write})).status == WorkStatus::complete);
+    // A retained readiness backend must rearm safely across registrations and
+    // keep the candidate/timeout/reconnect behavior exercised below intact.
+    for (unsigned repeat = 0; repeat < 32; ++repeat) {
+        CHECK(executor.execute(make(UpstreamWaitWork{net::Interest::write})).status == WorkStatus::complete);
+    }
     const auto request_text = request();
     const auto raw = bytes(request_text);
     auto outgoing = std::make_shared<const Bytes>(raw.begin(), raw.end());

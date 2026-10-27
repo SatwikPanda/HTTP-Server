@@ -1,0 +1,66 @@
+{
+  "state": "passed",
+  "binary_sha256": "1a8f6b4c67defc7899024f119ebdf2a59b6f66c6917afa1be421880c407954b6",
+  "checks": [
+    {
+      "driver": "event-loop",
+      "target": "/realdir/inner.txt",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "driver": "event-loop",
+      "target": "/alias",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "event-loop",
+      "target": "/alias/inner.txt",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "event-loop",
+      "target": "/escape",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "event-loop",
+      "target": "/escape/secret.txt",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "thread-pool",
+      "target": "/realdir/inner.txt",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "driver": "thread-pool",
+      "target": "/alias",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "thread-pool",
+      "target": "/alias/inner.txt",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "thread-pool",
+      "target": "/escape",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "driver": "thread-pool",
+      "target": "/escape/secret.txt",
+      "status": 403,
+      "expected": 403
+    }
+  ]
+}

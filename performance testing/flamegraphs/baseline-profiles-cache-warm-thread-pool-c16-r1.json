@@ -1,0 +1,904 @@
+{
+  "capture": "performance testing\\raw\\baseline-profiles\\cache-warm-thread-pool-c16-r1\\profile.sleepy",
+  "capture_sha256": "37a4e4332b5bdd6f4142001c45938732d423403c6ad94e31806e0e5a8c153a50",
+  "stats": "Filename: C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\performance-baseline\\Release\\httpserver.exe\nDuration: 10.015\nDate: Tue Oct 27 01:55:38 2026\nSamples: 919\n",
+  "weighted_thread_microseconds": 10005424,
+  "folded_stacks": 135,
+  "scope": "elapsed thread time, INCLUDING waits; not CPU-event samples",
+  "inclusive": [
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_worker",
+      "percent": 100.0
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::thread_pool::ThreadPoolDriver::start'::`11'::<lambda_2> >,0>",
+      "percent": 100.0
+    },
+    {
+      "function": "ntdll!RtlUserThreadStart",
+      "percent": 100.0
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive",
+      "percent": 100.0
+    },
+    {
+      "function": "ucrtbase!wcsrchr",
+      "percent": 100.0
+    },
+    {
+      "function": "KERNEL32!BaseThreadInitThunk",
+      "percent": 100.0
+    },
+    {
+      "function": "mswsock!Tcpip4_WSHStringToAddress",
+      "percent": 45.36520391339737
+    },
+    {
+      "function": "WS2_32!WSAPoll",
+      "percent": 45.36520391339737
+    },
+    {
+      "function": "httpserver!net::Poller::wait",
+      "percent": 45.36520391339737
+    },
+    {
+      "function": "mswsock![00007FFCA8C7951A]",
+      "percent": 43.301213421839996
+    },
+    {
+      "function": "mswsock![00007FFCA8C78464]",
+      "percent": 43.301213421839996
+    },
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 43.301213421839996
+    },
+    {
+      "function": "httpserver!http::HttpSession::on_event",
+      "percent": 33.10224534212643
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<10,concurrency::Action,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned _",
+      "percent": 32.9922749900454
+    },
+    {
+      "function": "httpserver!http::HttpSession::advance_transaction",
+      "percent": 30.356534615624486
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 22.623728889450362
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WriteCompleteEvent>",
+      "percent": 22.171863980976717
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 20.76518696259149
+    },
+    {
+      "function": "httpserver!net::Socket::write_some",
+      "percent": 19.48092354706807
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 19.48092354706807
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C414]",
+      "percent": 19.260952859169187
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheTransaction::on_event",
+      "percent": 17.660950700340134
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableCS",
+      "percent": 14.523882246269624
+    },
+    {
+      "function": "ntdll!RtlEnterCriticalSection",
+      "percent": 14.523882246269624
+    },
+    {
+      "function": "httpserver!operator new",
+      "percent": 14.42276709112977
+    },
+    {
+      "function": "ucrtbase!malloc_base",
+      "percent": 14.202696457441483
+    },
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 11.99938153545517
+    },
+    {
+      "function": "ntdll!RtlRaiseException",
+      "percent": 11.670609861211279
+    },
+    {
+      "function": "httpserver!http::HttpSession::process_parsed_input",
+      "percent": 10.709810998514406
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::ReadDataEvent>",
+      "percent": 10.709810998514406
+    },
+    {
+      "function": "httpserver!http::HttpSession::prepare_response",
+      "percent": 10.168944364576653
+    },
+    {
+      "function": "ntdll!LdrFindEntryForAddress",
+      "percent": 9.921698470749465
+    },
+    {
+      "function": "httpserver!std::vector<enum std::byte,std::allocator<enum std::byte> >::vector<enum std::byte,std::allocator<enum std::byte> ><std::_Span_iterator<enum std::byte const >,0>",
+      "percent": 9.921018839381519
+    },
+    {
+      "function": "ucrtbase!free_base",
+      "percent": 7.784797525821994
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 7.565006740344037
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheTransaction::start",
+      "percent": 6.9748968159670195
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseBody>",
+      "percent": 4.265266519439856
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::assign",
+      "percent": 3.823985870064077
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::body",
+      "percent": 3.7140355071409266
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<std::vector<enum std::byte,std::allocator<enum std::byte> > const >::_Destroy",
+      "percent": 3.6059141521638662
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheTransaction::cached_head",
+      "percent": 3.29474293143399
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseFinished>",
+      "percent": 3.071414065011138
+    },
+    {
+      "function": "httpserver!http::HttpSession::finish_response",
+      "percent": 3.071414065011138
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::operator=",
+      "percent": 2.958155496458721
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::operator=",
+      "percent": 2.7368855132975876
+    },
+    {
+      "function": "httpserver!proxy::prepare_downstream_head",
+      "percent": 2.635760363578795
+    },
+    {
+      "function": "httpserver!proxy::end_to_end_fields",
+      "percent": 2.4127413291030946
+    },
+    {
+      "function": "VCRUNTIME140!memchr",
+      "percent": 2.2959946525004837
+    },
+    {
+      "function": "ntdll!RtlSetProcessPreferredUILanguages",
+      "percent": 2.0844693838062236
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Emplace_reallocate<http::HeaderField>",
+      "percent": 2.0679483448177707
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::basic_string<char,std::char_traits<char>,std::allocator<char> >",
+      "percent": 1.9865724830851745
+    },
+    {
+      "function": "mswsock![00007FFCA8C78440]",
+      "percent": 1.8463885188673663
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseHead>",
+      "percent": 1.6479861323218286
+    },
+    {
+      "function": "httpserver!cache::policy::CachePolicy::evaluate",
+      "percent": 1.6303556950709934
+    },
+    {
+      "function": "httpserver!proxy::prepare_outbound",
+      "percent": 1.6130250951883698
+    },
+    {
+      "function": "WS2_32!recv",
+      "percent": 1.5163875114138092
+    },
+    {
+      "function": "httpserver!net::Socket::read_some",
+      "percent": 1.5163875114138092
+    },
+    {
+      "function": "mswsock![00007FFCA8C7B693]",
+      "percent": 1.5163875114138092
+    },
+    {
+      "function": "VCRUNTIME140!_NLG_Return2",
+      "percent": 1.3138973420816549
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheTransaction::decision",
+      "percent": 1.3037228607203453
+    },
+    {
+      "function": "ntdll!RtlLeaveCriticalSection",
+      "percent": 1.201008572950032
+    },
+    {
+      "function": "httpserver!http::HeaderMap::set",
+      "percent": 1.0990738623370684
+    },
+    {
+      "function": "httpserver!http::HeaderMap::add",
+      "percent": 1.0788848128774953
+    },
+    {
+      "function": "httpserver!http::make_fixed_response",
+      "percent": 0.9866448438367029
+    },
+    {
+      "function": "ntdll!RtlCharToInteger",
+      "percent": 0.9856353913637244
+    },
+    {
+      "function": "ntdll!RtlGetProcessPreferredUILanguages",
+      "percent": 0.9856353913637244
+    },
+    {
+      "function": "ntdll!NtFreeVirtualMemory",
+      "percent": 0.9856353913637244
+    },
+    {
+      "function": "ntdll!DbgPrint",
+      "percent": 0.9856353913637244
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::begin",
+      "percent": 0.8847201278026798
+    },
+    {
+      "function": "httpserver!cache::policy::parse_cache_control",
+      "percent": 0.8669897447624408
+    },
+    {
+      "function": "ntdll!RtlGetSuiteMask",
+      "percent": 0.7635258635715988
+    },
+    {
+      "function": "httpserver!cache::storage::LruStorage::lookup",
+      "percent": 0.7634059286243142
+    },
+    {
+      "function": "ntdll!RtlRaiseStatus",
+      "percent": 0.7576890294704153
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::response_head",
+      "percent": 0.663779965746579
+    },
+    {
+      "function": "httpserver!http::serialize_response_head",
+      "percent": 0.663779965746579
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::serialize_head",
+      "percent": 0.6611713806431392
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::~vector<http::HeaderField,std::allocator<http::HeaderField> >",
+      "percent": 0.5552188492961417
+    },
+    {
+      "function": "ntdll!NtAllocateVirtualMemory",
+      "percent": 0.5509811478254195
+    },
+    {
+      "function": "ntdll!NtAlertThreadByThreadIdEx",
+      "percent": 0.5507212887729696
+    },
+    {
+      "function": "httpserver!http::HttpSession::next_action",
+      "percent": 0.549531933879064
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::_Reallocate_grow_by<`std::basic_string<char,std::char_traits<char>,std::allocator<char> >::append'::`2'::<lambda_1>,char const *,unsigned __int64>",
+      "percent": 0.549272074826614
+    },
+    {
+      "function": "httpserver!core::RealSteadyClock::now",
+      "percent": 0.5474530614594644
+    },
+    {
+      "function": "ntdll!RtlAcquireSRWLockExclusive",
+      "percent": 0.5443247582511246
+    },
+    {
+      "function": "MSVCP140!Mtx_lock",
+      "percent": 0.5443247582511246
+    },
+    {
+      "function": "httpserver!http::RequestParser::accept_byte",
+      "percent": 0.5408666339377521
+    },
+    {
+      "function": "httpserver!http::RequestParser::consume",
+      "percent": 0.5408666339377521
+    },
+    {
+      "function": "httpserver!http::serialize_request_head",
+      "percent": 0.5376783632557701
+    },
+    {
+      "function": "httpserver!http::format_http_date",
+      "percent": 0.43978146253472117
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableSRW",
+      "percent": 0.4388519666932656
+    },
+    {
+      "function": "httpserver!http::RequestParser::reset",
+      "percent": 0.33452855171355056
+    },
+    {
+      "function": "httpserver!std::shared_ptr<cache::Entry const >::reset",
+      "percent": 0.3324796630307721
+    },
+    {
+      "function": "httpserver!http::Response::~Response",
+      "percent": 0.33210986360997796
+    },
+    {
+      "function": "httpserver!snprintf",
+      "percent": 0.3298211050326303
+    },
+    {
+      "function": "ucrtbase!_stdio_common_vsprintf",
+      "percent": 0.3298211050326303
+    },
+    {
+      "function": "httpserver!http::is_valid_header_name",
+      "percent": 0.32091593519674927
+    },
+    {
+      "function": "ntdll!NtAlertThreadByThreadId",
+      "percent": 0.3169081090416558
+    },
+    {
+      "function": "ntdll!RtlWakeAddressAll",
+      "percent": 0.3169081090416558
+    },
+    {
+      "function": "httpserver!std::_Ref_count_resource<cache::Entry const *,cache::storage::`anonymous namespace'::PinDelete>::`scalar deleting destructor'",
+      "percent": 0.22177970668709293
+    },
+    {
+      "function": "httpserver!http::parse_target",
+      "percent": 0.22113005905596805
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::matches_key",
+      "percent": 0.22113005905596805
+    },
+    {
+      "function": "httpserver!http::HeaderMap::contains",
+      "percent": 0.22093016747716038
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.2208102325298758
+    },
+    {
+      "function": "MSVCP140!Query_perf_counter",
+      "percent": 0.2208102325298758
+    },
+    {
+      "function": "ucrtbase!towlower_l",
+      "percent": 0.2199307095831221
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Destroy",
+      "percent": 0.2198807366884202
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::request_allowed",
+      "percent": 0.21713222747981495
+    },
+    {
+      "function": "httpserver!http::parse_http_date",
+      "percent": 0.21505335506021533
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::freshness",
+      "percent": 0.21505335506021533
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::content_length",
+      "percent": 0.2150133767444538
+    },
+    {
+      "function": "httpserver!http::header_name_equals",
+      "percent": 0.21500338216551343
+    },
+    {
+      "function": "httpserver!http::RequestParser::finish_head",
+      "percent": 0.21498339300763267
+    },
+    {
+      "function": "ntdll!RtlUpcaseUnicodeString",
+      "percent": 0.2123648133252524
+    },
+    {
+      "function": "ucrtbase!free",
+      "percent": 0.21007605474790475
+    },
+    {
+      "function": "httpserver!std::_Uninitialized_move<http::HeaderField *,std::allocator<http::HeaderField> >",
+      "percent": 0.20978621195863364
+    },
+    {
+      "function": "httpserver!std::_Ref_count_base::_Decref",
+      "percent": 0.11571723497175132
+    },
+    {
+      "function": "ntdll!NtSetInformationThread",
+      "percent": 0.11556731628764558
+    },
+    {
+      "function": "httpserver!http::parse_authority",
+      "percent": 0.1150376036038053
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheFactory::create",
+      "percent": 0.11388822702566129
+    },
+    {
+      "function": "ntdll!ExpInterlockedPopEntrySListEnd",
+      "percent": 0.1121991431847366
+    },
+    {
+      "function": "httpserver!std::_Ref_count_resource<cache::Entry const *,cache::storage::`anonymous namespace'::PinDelete>::_Destroy",
+      "percent": 0.11069995634367918
+    },
+    {
+      "function": "httpserver!http::HttpSession::read_capacity",
+      "percent": 0.11060001055427536
+    },
+    {
+      "function": "ntdll!RtlTryEnterCriticalSection",
+      "percent": 0.11047008102805038
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Assign_range<http::HeaderField *>",
+      "percent": 0.1101102761861966
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::response_allowed",
+      "percent": 0.1100503087125543
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C2A4]",
+      "percent": 0.11001033039679278
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::pending",
+      "percent": 0.10999034123891202
+    },
+    {
+      "function": "httpserver!observability::MetricsRegistry::record",
+      "percent": 0.10998034665997163
+    },
+    {
+      "function": "httpserver!http::HeaderMap::get_all",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "ucrtbase!malloc",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "httpserver!http::Authority::wire",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "ntdll!RtlReleaseSRWLockExclusive",
+      "percent": 0.1099403683442101
+    },
+    {
+      "function": "MSVCP140!Mtx_unlock",
+      "percent": 0.1099403683442101
+    },
+    {
+      "function": "VCRUNTIME140!memmove",
+      "percent": 0.10990039002844856
+    },
+    {
+      "function": "httpserver!http::method_from_string",
+      "percent": 0.10990039002844856
+    },
+    {
+      "function": "httpserver!http::RequestParser::finish_request_line",
+      "percent": 0.10990039002844856
+    },
+    {
+      "function": "mswsock![00007FFCA8C7A6F6]",
+      "percent": 0.10989039544950818
+    },
+    {
+      "function": "WS2_32!WahReferenceContextByHandle",
+      "percent": 0.10989039544950818
+    },
+    {
+      "function": "mswsock![00007FFCA8C78743]",
+      "percent": 0.10989039544950818
+    },
+    {
+      "function": "httpserver!core::Result<std::vector<net::ReadyEvent,std::allocator<net::ReadyEvent> > >::~Result<std::vector<net::ReadyEvent,std::allocator<net::ReadyEvent> > >",
+      "percent": 0.10981043881798512
+    },
+    {
+      "function": "httpserver!std::shared_ptr<cache::Entry const >::_Setpd<cache::Entry const *,cache::storage::`anonymous namespace'::PinDelete>",
+      "percent": 0.10856111645043728
+    },
+    {
+      "function": "mswsock![00007FFCA8C7877C]",
+      "percent": 0.10771157724050474
+    },
+    {
+      "function": "ntdll!strncpy",
+      "percent": 0.10734177781971059
+    },
+    {
+      "function": "httpserver!http::detail::parse_field_line",
+      "percent": 0.10593254218911663
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::drain",
+      "percent": 0.10547279155785902
+    },
+    {
+      "function": "httpserver!std::chrono::operator<=><__int64,std::ratio<1,1000000000>,__int64,std::ratio<1,1000> >",
+      "percent": 0.10503303008448217
+    },
+    {
+      "function": "httpserver!std::_Func_impl_no_alloc<`concurrency::thread_pool::ThreadPoolDriver::State::drive'::`2'::<lambda_1>,bool>::_Do_call",
+      "percent": 0.10500304634766103
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<std::vector<enum std::byte,std::allocator<enum std::byte> > const >::`scalar deleting destructor'",
+      "percent": 0.10500304634766103
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::bounded",
+      "percent": 0.10500304634766103
+    },
+    {
+      "function": "httpserver!http::Request::Request",
+      "percent": 0.10494307887401873
+    },
+    {
+      "function": "httpserver!std::_Variant_destroy_layer_<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,core::Error>::~_Variant_destroy_layer_<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,core::Error>",
+      "percent": 0.10485312766355528
+    }
+  ],
+  "exclusive": [
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 43.301213421839996
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 22.623728889450362
+    },
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 11.99938153545517
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableCS",
+      "percent": 2.8532723850583444
+    },
+    {
+      "function": "VCRUNTIME140!memchr",
+      "percent": 2.2959946525004837
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 2.0803516172827856
+    },
+    {
+      "function": "VCRUNTIME140!_NLG_Return2",
+      "percent": 1.3138973420816549
+    },
+    {
+      "function": "ntdll!NtFreeVirtualMemory",
+      "percent": 0.9856353913637244
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 0.8903170920092942
+    },
+    {
+      "function": "ntdll!RtlGetSuiteMask",
+      "percent": 0.7635258635715988
+    },
+    {
+      "function": "httpserver!cache::policy::parse_cache_control",
+      "percent": 0.7570493764182308
+    },
+    {
+      "function": "ntdll!NtAllocateVirtualMemory",
+      "percent": 0.5509811478254195
+    },
+    {
+      "function": "ntdll!NtAlertThreadByThreadIdEx",
+      "percent": 0.5507212887729696
+    },
+    {
+      "function": "ntdll!RtlSetProcessPreferredUILanguages",
+      "percent": 0.4446788062155087
+    },
+    {
+      "function": "ntdll!RtlLeaveCriticalSection",
+      "percent": 0.32775222719197106
+    },
+    {
+      "function": "httpserver!core::RealSteadyClock::now",
+      "percent": 0.32664282892958857
+    },
+    {
+      "function": "httpserver!http::is_valid_header_name",
+      "percent": 0.32091593519674927
+    },
+    {
+      "function": "ntdll!NtAlertThreadByThreadId",
+      "percent": 0.3169081090416558
+    },
+    {
+      "function": "httpserver!http::HeaderMap::contains",
+      "percent": 0.22093016747716038
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.2208102325298758
+    },
+    {
+      "function": "ucrtbase!towlower_l",
+      "percent": 0.2199307095831221
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::assign",
+      "percent": 0.21987074210947982
+    },
+    {
+      "function": "ucrtbase!free_base",
+      "percent": 0.21979078547795675
+    },
+    {
+      "function": "httpserver!http::HttpSession::next_action",
+      "percent": 0.21813168537385322
+    },
+    {
+      "function": "httpserver!http::serialize_request_head",
+      "percent": 0.21532320869160568
+    },
+    {
+      "function": "httpserver!http::parse_http_date",
+      "percent": 0.21505335506021533
+    },
+    {
+      "function": "httpserver!http::header_name_equals",
+      "percent": 0.21500338216551343
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::CacheTransaction::on_event",
+      "percent": 0.21255471032511966
+    },
+    {
+      "function": "ucrtbase!free",
+      "percent": 0.21007605474790475
+    },
+    {
+      "function": "httpserver!std::_Uninitialized_move<http::HeaderField *,std::allocator<http::HeaderField> >",
+      "percent": 0.20978621195863364
+    },
+    {
+      "function": "httpserver!std::_Ref_count_base::_Decref",
+      "percent": 0.11571723497175132
+    },
+    {
+      "function": "ntdll!NtSetInformationThread",
+      "percent": 0.11556731628764558
+    },
+    {
+      "function": "httpserver!http::parse_authority",
+      "percent": 0.1150376036038053
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::basic_string<char,std::char_traits<char>,std::allocator<char> >",
+      "percent": 0.11496764155122262
+    },
+    {
+      "function": "ntdll!ExpInterlockedPopEntrySListEnd",
+      "percent": 0.1121991431847366
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::request_allowed",
+      "percent": 0.11212918113215392
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::serialize_head",
+      "percent": 0.11189930581652512
+    },
+    {
+      "function": "httpserver!std::_Ref_count_resource<cache::Entry const *,cache::storage::`anonymous namespace'::PinDelete>::_Destroy",
+      "percent": 0.11069995634367918
+    },
+    {
+      "function": "httpserver!http::HttpSession::read_capacity",
+      "percent": 0.11060001055427536
+    },
+    {
+      "function": "httpserver!proxy::end_to_end_fields",
+      "percent": 0.11049007018593116
+    },
+    {
+      "function": "ntdll!RtlTryEnterCriticalSection",
+      "percent": 0.11047008102805038
+    },
+    {
+      "function": "httpserver!operator new",
+      "percent": 0.1101102761861966
+    },
+    {
+      "function": "ntdll!RtlRaiseException",
+      "percent": 0.11008029244937546
+    },
+    {
+      "function": "httpserver!http::RequestParser::accept_byte",
+      "percent": 0.1100503087125543
+    },
+    {
+      "function": "httpserver!cache::policy::`anonymous namespace'::response_allowed",
+      "percent": 0.1100503087125543
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C2A4]",
+      "percent": 0.11001033039679278
+    },
+    {
+      "function": "httpserver!http::HeaderMap::set",
+      "percent": 0.11001033039679278
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::pending",
+      "percent": 0.10999034123891202
+    },
+    {
+      "function": "httpserver!observability::MetricsRegistry::record",
+      "percent": 0.10998034665997163
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseBody>",
+      "percent": 0.10998034665997163
+    },
+    {
+      "function": "httpserver!http::HttpSession::on_event",
+      "percent": 0.10997035208103124
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::begin",
+      "percent": 0.10997035208103124
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "httpserver!http::HeaderMap::get_all",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "ucrtbase!malloc",
+      "percent": 0.10996035750209086
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive",
+      "percent": 0.10992037918632934
+    },
+    {
+      "function": "VCRUNTIME140!memmove",
+      "percent": 0.10990039002844856
+    },
+    {
+      "function": "WS2_32!WahReferenceContextByHandle",
+      "percent": 0.10989039544950818
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::~vector<http::HeaderField,std::allocator<http::HeaderField> >",
+      "percent": 0.10985041713374666
+    },
+    {
+      "function": "httpserver!core::Result<std::vector<net::ReadyEvent,std::allocator<net::ReadyEvent> > >::~Result<std::vector<net::ReadyEvent,std::allocator<net::ReadyEvent> > >",
+      "percent": 0.10981043881798512
+    },
+    {
+      "function": "ntdll!strncpy",
+      "percent": 0.10734177781971059
+    },
+    {
+      "function": "httpserver!http::parse_target",
+      "percent": 0.10609245545216275
+    },
+    {
+      "function": "httpserver!cache::storage::LruStorage::lookup",
+      "percent": 0.10605247713640122
+    },
+    {
+      "function": "httpserver!proxy::prepare_outbound",
+      "percent": 0.10550277529468016
+    },
+    {
+      "function": "ntdll!RtlAcquireSRWLockExclusive",
+      "percent": 0.10547279155785902
+    },
+    {
+      "function": "httpserver!std::chrono::operator<=><__int64,std::ratio<1,1000000000>,__int64,std::ratio<1,1000> >",
+      "percent": 0.10503303008448217
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::content_length",
+      "percent": 0.10503303008448217
+    },
+    {
+      "function": "httpserver!http::RequestParser::finish_head",
+      "percent": 0.10502303550554179
+    },
+    {
+      "function": "ntdll!RtlUpcaseUnicodeString",
+      "percent": 0.10502303550554179
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<std::vector<enum std::byte,std::allocator<enum std::byte> > const >::_Destroy",
+      "percent": 0.10501304092660141
+    },
+    {
+      "function": "httpserver!std::_Func_impl_no_alloc<`concurrency::thread_pool::ThreadPoolDriver::State::drive'::`2'::<lambda_1>,bool>::_Do_call",
+      "percent": 0.10500304634766103
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Emplace_reallocate<http::HeaderField>",
+      "percent": 0.10500304634766103
+    },
+    {
+      "function": "httpserver!http::Request::Request",
+      "percent": 0.10494307887401873
+    }
+  ]
+}

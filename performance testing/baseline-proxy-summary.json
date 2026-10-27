@@ -1,0 +1,238 @@
+{
+  "groups": [
+    {
+      "label": "baseline-proxy",
+      "case": "proxy-off",
+      "driver": "event-loop",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 200,
+      "n": 3,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-event-loop-c16-r1\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 200,
+          "requests_per_second": 199.99068574848192,
+          "p99_ms": 1.8792,
+          "p50_ms": 0.9959000000000001,
+          "server_cores": 0.11550411108725386,
+          "cpu_us_per_request": 577.5474525474525,
+          "generator_cores_approx": 0.03850922987158003,
+          "max_rss_mib": 6.81640625,
+          "max_handles": 107,
+          "max_threads": 11,
+          "completed_requests": 1001
+        },
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-event-loop-c16-r2\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 200,
+          "requests_per_second": 199.6044120000336,
+          "p99_ms": 12.051400000000001,
+          "p50_ms": 0.939,
+          "server_cores": 0.0873269302500147,
+          "cpu_us_per_request": 437.5,
+          "generator_cores_approx": 0.04883698789595696,
+          "max_rss_mib": 6.82421875,
+          "max_handles": 107,
+          "max_threads": 11,
+          "completed_requests": 1000
+        },
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-event-loop-c16-r3\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 200,
+          "requests_per_second": 199.5584943101858,
+          "p99_ms": 2.3411,
+          "p50_ms": 0.9746,
+          "server_cores": 0.0873942354962025,
+          "cpu_us_per_request": 437.93793793793793,
+          "generator_cores_approx": 0.031535964340366394,
+          "max_rss_mib": 6.82421875,
+          "max_handles": 105,
+          "max_threads": 11,
+          "completed_requests": 999
+        }
+      ],
+      "requests_per_second": {
+        "median": 199.6044120000336,
+        "min": 199.5584943101858,
+        "max": 199.99068574848192
+      },
+      "p99_ms": {
+        "median": 2.3411,
+        "min": 1.8792,
+        "max": 12.051400000000001
+      },
+      "p50_ms": {
+        "median": 0.9746,
+        "min": 0.939,
+        "max": 0.9959000000000001
+      },
+      "server_cores": {
+        "median": 0.0873942354962025,
+        "min": 0.0873269302500147,
+        "max": 0.11550411108725386
+      },
+      "cpu_us_per_request": {
+        "median": 437.93793793793793,
+        "min": 437.5,
+        "max": 577.5474525474525
+      },
+      "generator_cores_approx": {
+        "median": 0.03850922987158003,
+        "min": 0.031535964340366394,
+        "max": 0.04883698789595696
+      },
+      "max_rss_mib": {
+        "median": 6.82421875,
+        "min": 6.81640625,
+        "max": 6.82421875
+      },
+      "max_handles": {
+        "median": 107,
+        "min": 105,
+        "max": 107
+      },
+      "max_threads": {
+        "median": 11,
+        "min": 11,
+        "max": 11
+      }
+    },
+    {
+      "label": "baseline-proxy",
+      "case": "proxy-off",
+      "driver": "thread-pool",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 200,
+      "n": 3,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-thread-pool-c16-r1\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 200,
+          "requests_per_second": 199.58944789531034,
+          "p99_ms": 24.1317,
+          "p50_ms": 1.0460999999999998,
+          "server_cores": 0.17758177026149927,
+          "cpu_us_per_request": 889.7352647352648,
+          "generator_cores_approx": 0.051661668641386056,
+          "max_rss_mib": 9.0703125,
+          "max_handles": 192,
+          "max_threads": 27,
+          "completed_requests": 1001
+        },
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-thread-pool-c16-r2\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 200,
+          "requests_per_second": 199.74846075833625,
+          "p99_ms": 23.1392,
+          "p50_ms": 1.0258,
+          "server_cores": 0.18726418196094022,
+          "cpu_us_per_request": 937.5,
+          "generator_cores_approx": 0.038783936798050735,
+          "max_rss_mib": 9.03125,
+          "max_handles": 191,
+          "max_threads": 27,
+          "completed_requests": 1000
+        },
+        {
+          "path": "performance testing\\raw\\baseline-proxy\\proxy-off-thread-pool-c16-r3\\record.json",
+          "label": "baseline-proxy",
+          "case": "proxy-off",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 200,
+          "requests_per_second": 199.71260557207756,
+          "p99_ms": 23.717399999999998,
+          "p50_ms": 1.0385,
+          "server_cores": 0.16538700148937674,
+          "cpu_us_per_request": 828.125,
+          "generator_cores_approx": 0.04168012913462438,
+          "max_rss_mib": 9.0703125,
+          "max_handles": 192,
+          "max_threads": 27,
+          "completed_requests": 1000
+        }
+      ],
+      "requests_per_second": {
+        "median": 199.71260557207756,
+        "min": 199.58944789531034,
+        "max": 199.74846075833625
+      },
+      "p99_ms": {
+        "median": 23.717399999999998,
+        "min": 23.1392,
+        "max": 24.1317
+      },
+      "p50_ms": {
+        "median": 1.0385,
+        "min": 1.0258,
+        "max": 1.0460999999999998
+      },
+      "server_cores": {
+        "median": 0.17758177026149927,
+        "min": 0.16538700148937674,
+        "max": 0.18726418196094022
+      },
+      "cpu_us_per_request": {
+        "median": 889.7352647352648,
+        "min": 828.125,
+        "max": 937.5
+      },
+      "generator_cores_approx": {
+        "median": 0.04168012913462438,
+        "min": 0.038783936798050735,
+        "max": 0.051661668641386056
+      },
+      "max_rss_mib": {
+        "median": 9.0703125,
+        "min": 9.03125,
+        "max": 9.0703125
+      },
+      "max_handles": {
+        "median": 192,
+        "min": 191,
+        "max": 192
+      },
+      "max_threads": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    }
+  ],
+  "failures": [],
+  "note": "Latency summaries are medians of per-trial percentiles, not a pooled percentile; generator CPU stops at last live sample."
+}

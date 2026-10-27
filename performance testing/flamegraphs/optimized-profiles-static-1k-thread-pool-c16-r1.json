@@ -1,0 +1,552 @@
+{
+  "capture": "performance testing\\raw\\optimized-profiles\\static-1k-thread-pool-c16-r1\\profile.sleepy",
+  "capture_sha256": "7b9905069031351c8edbc75ff73a04b5efad5eeb84d6be36b9eaa28cadb1184f",
+  "stats": "Filename: C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\performance-optimized\\Release\\httpserver.exe\nDuration: 10.046\nDate: Tue Oct 27 02:13:49 2026\nSamples: 924\n",
+  "weighted_thread_microseconds": 10020213,
+  "folded_stacks": 54,
+  "scope": "elapsed thread time, INCLUDING waits; not CPU-event samples",
+  "inclusive": [
+    {
+      "function": "ucrtbase!wcsrchr",
+      "percent": 100.0
+    },
+    {
+      "function": "ntdll!RtlUserThreadStart",
+      "percent": 100.0
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::helpers::HelperPool::start'::`15'::<lambda_1> >,0>",
+      "percent": 100.0
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::run",
+      "percent": 100.0
+    },
+    {
+      "function": "KERNEL32!BaseThreadInitThunk",
+      "percent": 100.0
+    },
+    {
+      "function": "httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute",
+      "percent": 93.71776827498577
+    },
+    {
+      "function": "httpserver!concurrency::ReferenceWorkExecutor::execute",
+      "percent": 93.49743363738875
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<11,void,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned __int64,9>,std::",
+      "percent": 93.27794728515252
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileOpenWork>",
+      "percent": 87.10039397366104
+    },
+    {
+      "function": "httpserver!concurrency::detail::file_metadata",
+      "percent": 77.69030458733762
+    },
+    {
+      "function": "KERNELBASE!GetFileAttributesW",
+      "percent": 30.58215429153053
+    },
+    {
+      "function": "ntdll!ZwQueryAttributesFile",
+      "percent": 30.357538307818405
+    },
+    {
+      "function": "httpserver!std::filesystem::_Canonical",
+      "percent": 24.266420284678578
+    },
+    {
+      "function": "KERNELBASE!GetFileAttributesExW",
+      "percent": 22.303398141336917
+    },
+    {
+      "function": "ntdll!ZwQueryFullAttributesFile",
+      "percent": 22.087993538660307
+    },
+    {
+      "function": "KERNELBASE!GetDriveTypeW",
+      "percent": 14.200895729462038
+    },
+    {
+      "function": "KERNELBASE!CreateFileW",
+      "percent": 14.200895729462038
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 13.668980888929207
+    },
+    {
+      "function": "httpserver!__std_fs_get_final_path_name_by_handle",
+      "percent": 12.10021184180416
+    },
+    {
+      "function": "KERNELBASE!GetFinalPathNameByHandleW",
+      "percent": 12.10021184180416
+    },
+    {
+      "function": "httpserver!__std_fs_get_stats",
+      "percent": 9.864540803673535
+    },
+    {
+      "function": "KERNELBASE!CloseHandle",
+      "percent": 9.550365845516458
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 9.33261598331293
+    },
+    {
+      "function": "MSVCP140!std::_Fiopen",
+      "percent": 9.080236118733204
+    },
+    {
+      "function": "ntdll!NtQueryInformationFile",
+      "percent": 8.75015331510418
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 7.24585395539995
+    },
+    {
+      "function": "ucrtbase!fseek",
+      "percent": 6.8194059347840215
+    },
+    {
+      "function": "httpserver!__std_fs_open_handle",
+      "percent": 6.522725614714977
+    },
+    {
+      "function": "ucrtbase!wfopen_s",
+      "percent": 6.276024272138726
+    },
+    {
+      "function": "ucrtbase!ftell",
+      "percent": 6.276024272138726
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::publish",
+      "percent": 6.062505856911425
+    },
+    {
+      "function": "httpserver!net::Poller::wake",
+      "percent": 5.732323255004659
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::`anonymous namespace'::WakeHandle::wake",
+      "percent": 5.732323255004659
+    },
+    {
+      "function": "httpserver!net::Socket::write_some",
+      "percent": 5.6242517000387116
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 5.519383669788257
+    },
+    {
+      "function": "httpserver!__std_fs_close_handle",
+      "percent": 5.425303833361626
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C414]",
+      "percent": 5.302432193806658
+    },
+    {
+      "function": "httpserver!std::basic_filebuf<char,std::char_traits<char> >::close",
+      "percent": 4.015194088189542
+    },
+    {
+      "function": "ucrtbase!fclose",
+      "percent": 4.015194088189542
+    },
+    {
+      "function": "KERNELBASE!CreateFile2",
+      "percent": 3.5612516420559124
+    },
+    {
+      "function": "ucrtbase!fflush_nolock",
+      "percent": 3.0200356020376016
+    },
+    {
+      "function": "ucrtbase!fgetpos",
+      "percent": 3.0200356020376016
+    },
+    {
+      "function": "KERNELBASE!SetFilePointerEx",
+      "percent": 3.0200356020376016
+    },
+    {
+      "function": "ntdll!NtQueryObject",
+      "percent": 2.374490442468638
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileReadWork>",
+      "percent": 2.0545371640303456
+    },
+    {
+      "function": "KERNELBASE!DeviceIoControl",
+      "percent": 1.9434217615932914
+    },
+    {
+      "function": "ucrtbase!fread_nolock_s",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ntdll!NtReadFile",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "KERNELBASE!ReadFile",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ucrtbase!fread_s",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ucrtbase!fread",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "MSVCP140!std::basic_istream<char,std::char_traits<char> >::read",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "httpserver!std::basic_filebuf<char,std::char_traits<char> >::xsgetn",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ucrtbase!read",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ucrtbase!fgetc",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.4352402488849289
+    },
+    {
+      "function": "ntdll!NtSetInformationFile",
+      "percent": 0.4343520442130322
+    },
+    {
+      "function": "ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus",
+      "percent": 0.41958189910733434
+    },
+    {
+      "function": "httpserver!operator new",
+      "percent": 0.33018260190676585
+    },
+    {
+      "function": "ntdll!wcslen",
+      "percent": 0.32448412024774326
+    },
+    {
+      "function": "ntdll!RtlDeleteBoundaryDescriptor",
+      "percent": 0.3197137625717138
+    },
+    {
+      "function": "ntdll!RtlDosPathNameToNtPathName_U_WithStatus",
+      "percent": 0.22461598371212269
+    },
+    {
+      "function": "ucrtbase!malloc_base",
+      "percent": 0.22039451656366985
+    },
+    {
+      "function": "httpserver!concurrency::ReferenceWorkExecutor::ReferenceWorkExecutor",
+      "percent": 0.22033463759702512
+    },
+    {
+      "function": "ntdll!SbSelectProcedure",
+      "percent": 0.21721095150372552
+    },
+    {
+      "function": "MSVCP140!Mtx_unlock",
+      "percent": 0.21589361423754166
+    },
+    {
+      "function": "ntdll!RtlReleaseSRWLockExclusive",
+      "percent": 0.21589361423754166
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.11485783785234904
+    },
+    {
+      "function": "MSVCP140!Query_perf_counter",
+      "percent": 0.11485783785234904
+    },
+    {
+      "function": "MSVCP140!Mtx_lock",
+      "percent": 0.11051661277060677
+    },
+    {
+      "function": "httpserver!std::filesystem::_Path_iterator<std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t> > > >::operator++",
+      "percent": 0.11050663294283265
+    },
+    {
+      "function": "ntdll![00007FFCACAE80C0]",
+      "percent": 0.11029705655957613
+    },
+    {
+      "function": "ucrtbase!ftelli64",
+      "percent": 0.11027709690402789
+    },
+    {
+      "function": "MSVCP140!std::basic_istream<char,std::char_traits<char> >::tellg",
+      "percent": 0.11027709690402789
+    },
+    {
+      "function": "httpserver!std::basic_filebuf<char,std::char_traits<char> >::seekoff",
+      "percent": 0.11027709690402789
+    },
+    {
+      "function": "httpserver!std::_Func_impl_no_alloc<`concurrency::thread_pool::ThreadPoolDriver::State::run_worker'::`8'::<lambda_1>,void>::_Do_call",
+      "percent": 0.10985794413751485
+    },
+    {
+      "function": "httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::resize",
+      "percent": 0.10984796430974073
+    },
+    {
+      "function": "httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::_Reallocate_grow_by<`std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::append'::`2'::<lambda_1>,unsigned __int64,wchar_t>",
+      "percent": 0.10984796430974073
+    },
+    {
+      "function": "ntdll!RtlFlsGetValue2",
+      "percent": 0.10979806517087012
+    },
+    {
+      "function": "ucrtbase!errno",
+      "percent": 0.10979806517087012
+    },
+    {
+      "function": "ucrtbase!malloc",
+      "percent": 0.109788085343096
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_2>::operator()",
+      "percent": 0.10977810551532188
+    },
+    {
+      "function": "httpserver!std::advance<std::filesystem::_Path_iterator<std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t> > > >,__int64>",
+      "percent": 0.10974816603199952
+    },
+    {
+      "function": "ntdll!NtSetInformationThread",
+      "percent": 0.10807155496594734
+    },
+    {
+      "function": "ntdll!RtlInitUnicodeStringEx",
+      "percent": 0.1073629871939848
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C2A4]",
+      "percent": 0.1064747825220881
+    },
+    {
+      "function": "ntdll!NtQueryVolumeInformationFile",
+      "percent": 0.10581611388899617
+    },
+    {
+      "function": "KERNELBASE!GetFileType",
+      "percent": 0.10581611388899617
+    },
+    {
+      "function": "httpserver!std::basic_filebuf<char,std::char_traits<char> >::seekpos",
+      "percent": 0.10554665853909492
+    },
+    {
+      "function": "ucrtbase!fseeki64",
+      "percent": 0.10554665853909492
+    },
+    {
+      "function": "MSVCP140!std::basic_istream<char,std::char_traits<char> >::seekg",
+      "percent": 0.10554665853909492
+    },
+    {
+      "function": "ucrtbase!free_base",
+      "percent": 0.10524726370587133
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 0.10524726370587133
+    },
+    {
+      "function": "ntdll!RtlDosApplyFileIsolationRedirection_Ustr",
+      "percent": 0.10486803025045476
+    },
+    {
+      "function": "httpserver!std::filesystem::path::is_absolute",
+      "percent": 0.10302176211224252
+    },
+    {
+      "function": "httpserver!std::filesystem::path::operator/=",
+      "percent": 0.10302176211224252
+    }
+  ],
+  "exclusive": [
+    {
+      "function": "ntdll!ZwQueryAttributesFile",
+      "percent": 30.357538307818405
+    },
+    {
+      "function": "ntdll!ZwQueryFullAttributesFile",
+      "percent": 22.087993538660307
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 13.668980888929207
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 9.33261598331293
+    },
+    {
+      "function": "ntdll!NtQueryInformationFile",
+      "percent": 8.75015331510418
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 7.24585395539995
+    },
+    {
+      "function": "ntdll!NtQueryObject",
+      "percent": 2.374490442468638
+    },
+    {
+      "function": "ntdll!NtReadFile",
+      "percent": 1.8400407256811806
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.4352402488849289
+    },
+    {
+      "function": "ntdll!NtSetInformationFile",
+      "percent": 0.4343520442130322
+    },
+    {
+      "function": "ntdll!wcslen",
+      "percent": 0.32448412024774326
+    },
+    {
+      "function": "ntdll!SbSelectProcedure",
+      "percent": 0.21721095150372552
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.11485783785234904
+    },
+    {
+      "function": "KERNELBASE!GetFileAttributesExW",
+      "percent": 0.11061641104834798
+    },
+    {
+      "function": "MSVCP140!Mtx_lock",
+      "percent": 0.11051661277060677
+    },
+    {
+      "function": "httpserver!std::filesystem::_Path_iterator<std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t> > > >::operator++",
+      "percent": 0.11050663294283265
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 0.11047669345951029
+    },
+    {
+      "function": "ntdll![00007FFCACAE80C0]",
+      "percent": 0.11029705655957613
+    },
+    {
+      "function": "httpserver!std::_Func_impl_no_alloc<`concurrency::thread_pool::ThreadPoolDriver::State::run_worker'::`8'::<lambda_1>,void>::_Do_call",
+      "percent": 0.10985794413751485
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::publish",
+      "percent": 0.10980804499864424
+    },
+    {
+      "function": "httpserver!concurrency::detail::file_metadata",
+      "percent": 0.10980804499864424
+    },
+    {
+      "function": "ntdll!RtlFlsGetValue2",
+      "percent": 0.10979806517087012
+    },
+    {
+      "function": "ucrtbase!malloc",
+      "percent": 0.109788085343096
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_2>::operator()",
+      "percent": 0.10977810551532188
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileOpenWork>",
+      "percent": 0.10977810551532188
+    },
+    {
+      "function": "httpserver!std::advance<std::filesystem::_Path_iterator<std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t> > > >,__int64>",
+      "percent": 0.10974816603199952
+    },
+    {
+      "function": "httpserver!concurrency::ReferenceWorkExecutor::execute",
+      "percent": 0.10970824672090304
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileReadWork>",
+      "percent": 0.10894977981006991
+    },
+    {
+      "function": "httpserver!std::filesystem::_Canonical",
+      "percent": 0.10833103048807445
+    },
+    {
+      "function": "ntdll!NtSetInformationThread",
+      "percent": 0.10807155496594734
+    },
+    {
+      "function": "ntdll!RtlReleaseSRWLockExclusive",
+      "percent": 0.10782205927159433
+    },
+    {
+      "function": "ntdll!RtlInitUnicodeStringEx",
+      "percent": 0.1073629871939848
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C2A4]",
+      "percent": 0.1064747825220881
+    },
+    {
+      "function": "ntdll!NtQueryVolumeInformationFile",
+      "percent": 0.10581611388899617
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 0.10524726370587133
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::run",
+      "percent": 0.10486803025045476
+    },
+    {
+      "function": "httpserver!net::Socket::write_some",
+      "percent": 0.10486803025045476
+    },
+    {
+      "function": "ntdll!RtlDosApplyFileIsolationRedirection_Ustr",
+      "percent": 0.10486803025045476
+    },
+    {
+      "function": "httpserver!std::filesystem::path::is_absolute",
+      "percent": 0.10302176211224252
+    }
+  ]
+}

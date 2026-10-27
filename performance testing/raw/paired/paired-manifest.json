@@ -1,0 +1,10 @@
+{
+  "state": "complete",
+  "expected_trials": 80,
+  "current_source": "dd61ed1349d8a31de0d515d4ca66c9fd00b69e49ecbd72650e62f9609006fb79",
+  "baseline_source": "f899ad329217e2c334d1d828087005759a78d140a62b1152bbbc70e446ad0623",
+  "before_sha256": "fbc160dfaf07725849648084e15db8c2c142c7ba8eea3d5ff8428edc19d0cfca",
+  "after_sha256": "1a8f6b4c67defc7899024f119ebdf2a59b6f66c6917afa1be421880c407954b6",
+  "script_sha256": "914e5b040848857c09b81cfd4f57569a8a4f4e9014fdee404837aad5250a9353",
+  "trials": 80
+}

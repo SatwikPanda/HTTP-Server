@@ -1,0 +1,6 @@
+{
+  "source_sha256": "aa9f5920bed401b0aa0ea32f484cb3857c7a399d012df99bf227d3d39f4d44c1",
+  "binary_sha256": "99c0ae5e9bf9bd3716235c975afac4fb77df491d48325d5e20baafd7e0fb08dd",
+  "prior_build": "optimized-build.json",
+  "qualification": "validation/cached-output-msvc-final.json"
+}

@@ -1,0 +1,26 @@
+{
+  "source_sha256": "dd61ed1349d8a31de0d515d4ca66c9fd00b69e49ecbd72650e62f9609006fb79",
+  "binary_sha256": "1a8f6b4c67defc7899024f119ebdf2a59b6f66c6917afa1be421880c407954b6",
+  "compiler": {
+    "CMAKE_CXX_COMPILER": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe",
+    "CMAKE_CXX_COMPILER_ID": "MSVC",
+    "CMAKE_CXX_COMPILER_VERSION": "19.29.30159.0"
+  },
+  "configuration": "Release",
+  "flags": {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_DEBUG": "/Zi /Ob0 /Od /RTC1",
+    "CMAKE_CXX_FLAGS_MINSIZEREL": "/O1 /Ob1 /DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG /Zi",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "/Zi /O2 /Ob1 /DNDEBUG",
+    "CMAKE_CXX_FLAGS-ADVANCED": "1",
+    "CMAKE_CXX_FLAGS_DEBUG-ADVANCED": "1",
+    "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED": "1",
+    "CMAKE_CXX_FLAGS_RELEASE-ADVANCED": "1",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED": "1",
+    "CMAKE_GENERATOR": "Visual Studio 16 2019",
+    "CMAKE_GENERATOR_INSTANCE": "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools",
+    "CMAKE_GENERATOR_PLATFORM": "x64",
+    "CMAKE_GENERATOR_TOOLSET": ""
+  }
+}

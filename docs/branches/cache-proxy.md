@@ -50,8 +50,11 @@ cache directives fail closed. Ordinary bypass requests use B without capture.
 Fresh hits retain a budgeted immutable snapshot until the final body segment has
 drained. Metadata is sanitized, Age recalculated, Via appended and framing rebuilt;
 opaque content-encoded bytes keep their Content-Encoding. Output segments are
-bounded by downstream demand and `max_read_bytes`. Eviction/replacement cannot
-alter a reader's body or metadata. Cancellation drops its pin.
+bounded by downstream demand and the transaction's response window. `max_read_bytes`
+limits origin reads only; resident cache hits can fill the downstream window.
+Eviction/replacement cannot alter a reader's body or metadata. Cancellation drops
+its pin. The [cached-output follow-up](../../performance%20testing/CACHED_OUTPUT.md)
+records the regression checks, memory tradeoff and measured Windows effect.
 
 D's new `can_store_head` is a preliminary eligibility gate. Only the final
 `can_store_stream(..., complete=true, decoded_byte_count)` gate permits insertion.

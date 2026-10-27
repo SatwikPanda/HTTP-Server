@@ -1,0 +1,29 @@
+{
+  "run_id": 40392338558,
+  "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40392338558",
+  "head_sha": "9c621054a09fb70db068aba59405912dcdd4219a",
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "build (macos-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40392338558/job/121816278782"
+    },
+    {
+      "name": "build (windows-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40392338558/job/121816278807"
+    },
+    {
+      "name": "sanitizers",
+      "conclusion": "success",
+      "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40392338558/job/121816278957"
+    },
+    {
+      "name": "build (ubuntu-latest)",
+      "conclusion": "success",
+      "url": "https://github.com/SatwikPanda/HTTP-Server/actions/runs/40392338558/job/121816278977"
+    }
+  ]
+}

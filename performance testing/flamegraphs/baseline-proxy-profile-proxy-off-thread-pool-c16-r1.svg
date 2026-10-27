@@ -1,0 +1,911 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1600" height="382" onload="init(evt)" viewBox="0 0 1600 382" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1600.0" height="382.0" fill="url(#background)"  />
+<text id="title" x="800.00" y="24" >baseline-proxy-profile-proxy-off-thread-pool-c16-r1</text>
+<text id="subtitle" x="800.00" y="48" >Sampled thread wall time including waits (not CPU events)</text>
+<text id="details" x="10.00" y="365" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1490.00" y="24" >Search</text>
+<text id="ignorecase" x="1574.00" y="24" >ic</text>
+<text id="matched" x="1490.00" y="365" > </text>
+<g id="frames">
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::thread_pool::ThreadPoolDriver::start'::`11'::&lt;lambda_2&gt; &gt;,0&gt; (159,936,846 thread microseconds, 59.26%)</title><rect x="536.7" y="269" width="936.3" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="539.67" y="279.5" >httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::thread_pool::ThreadPoolDriver::start'::`11'::&lt;lambda_2&gt; &gt;,0&gt;</text>
+</g>
+<g >
+<title>WS2_32!socket (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="141" width="0.4" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="554.02" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::thread_pool::`anonymous namespace'::WakeHandle::wake (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="221" width="0.3" height="15.0" fill="rgb(211,29,6)" rx="2" ry="2" />
+<text  x="539.38" y="231.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::Impl::close (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="125" width="0.4" height="15.0" fill="rgb(230,118,28)" rx="2" ry="2" />
+<text  x="559.39" y="135.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (159,430 thread microseconds, 0.06%)</title><rect x="552.0" y="77" width="0.9" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="554.97" y="87.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!SleepConditionVariableSRW (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="221" width="58.5" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="1534.48" y="231.5" >KERNEL..</text>
+</g>
+<g >
+<title>WS2_32!bind (47,024 thread microseconds, 0.02%)</title><rect x="537.2" y="141" width="0.3" height="15.0" fill="rgb(245,184,44)" rx="2" ry="2" />
+<text  x="540.23" y="151.5" ></text>
+</g>
+<g >
+<title>WS2_32!closesocket (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="109" width="0.4" height="15.0" fill="rgb(221,73,17)" rx="2" ry="2" />
+<text  x="559.39" y="119.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C71924] (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="93" width="0.4" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="554.49" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::begin_connect (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="173" width="1.3" height="15.0" fill="rgb(254,225,53)" rx="2" ry="2" />
+<text  x="559.85" y="183.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C71301] (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="109" width="0.4" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="554.49" y="119.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7994C] (500,257 thread microseconds, 0.19%)</title><rect x="553.1" y="109" width="2.9" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="556.09" y="119.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C74E38] (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="109" width="0.3" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="561.06" y="119.5" ></text>
+</g>
+<g >
+<title>WS2_32!send (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="173" width="0.3" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="539.38" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::finish_connect (500,257 thread microseconds, 0.19%)</title><rect x="553.1" y="141" width="2.9" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="556.09" y="151.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (159,430 thread microseconds, 0.06%)</title><rect x="552.0" y="109" width="0.9" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="554.97" y="119.5" ></text>
+</g>
+<g >
+<title>ucrtbase!wcsrchr (219,913,157 thread microseconds, 81.48%)</title><rect x="302.6" y="285" width="1287.4" height="15.0" fill="rgb(228,109,26)" rx="2" ry="2" />
+<text  x="305.59" y="295.5" >ucrtbase!wcsrchr</text>
+</g>
+<g >
+<title>mswsock!NSPStartup (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="125" width="0.4" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="539.76" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!NtClose (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="61" width="0.4" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="559.39" y="71.5" ></text>
+</g>
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::helpers::HelperPool::start'::`15'::&lt;lambda_1&gt; &gt;,0&gt; (39,984,191 thread microseconds, 14.81%)</title><rect x="302.6" y="269" width="234.1" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="305.59" y="279.5" >httpserver!std::thread::_Invoke..</text>
+</g>
+<g >
+<title>ntdll!RtlUserThreadStart (269,893,472 thread microseconds, 100.00%)</title><rect x="10.0" y="317" width="1580.0" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="13.00" y="327.5" >ntdll!RtlUserThreadStart</text>
+</g>
+<g >
+<title>WS2_32!WSAPoll (156,046,083 thread microseconds, 57.82%)</title><rect x="559.2" y="205" width="913.5" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="562.17" y="215.5" >WS2_32!WSAPoll</text>
+</g>
+<g >
+<title>httpserver!net::Poller::wake (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="205" width="0.3" height="15.0" fill="rgb(205,1,0)" rx="2" ry="2" />
+<text  x="539.38" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Visit_impl&lt;10,concurrency::Action,std::_Meta_list&lt;std::integer_sequence&lt;unsigned __int64,0&gt;,std::integer_sequence&lt;unsigned __int64,1&gt;,std::integer_sequence&lt;unsigned __int64,2&gt;,std::integer_sequence&lt;unsigned __int64,3&gt;,std::integer_sequence&lt;unsigned __int64,4&gt;,std::integer_sequence&lt;unsigned __int64,5&gt;,std::integer_sequence&lt;unsigned __int64,6&gt;,std::integer_sequence&lt;unsigned __int64,7&gt;,std::integer_sequence&lt;unsigned __int64,8&gt;,std::integer_sequence&lt;unsigned _ (62,182 thread microseconds, 0.02%)</title><rect x="558.7" y="205" width="0.4" height="15.0" fill="rgb(241,166,39)" rx="2" ry="2" />
+<text  x="561.71" y="215.5" ></text>
+</g>
+<g >
+<title>httpserver!main (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="269" width="58.5" height="15.0" fill="rgb(253,224,53)" rx="2" ry="2" />
+<text  x="13.00" y="279.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_5&gt;::operator()&lt;concurrency::ConnectWork&gt; (1,122,641 thread microseconds, 0.42%)</title><rect x="551.9" y="189" width="6.5" height="15.0" fill="rgb(213,37,9)" rx="2" ry="2" />
+<text  x="554.87" y="199.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C746AB] (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="109" width="0.4" height="15.0" fill="rgb(221,77,18)" rx="2" ry="2" />
+<text  x="554.02" y="119.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C71924] (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="77" width="0.4" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="559.39" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!net::create_tcp_socket (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="157" width="0.4" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="554.02" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!NtWaitForSingleObject (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="157" width="58.5" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<text  x="1475.96" y="167.5" >ntdll!..</text>
+</g>
+<g >
+<title>httpserver!__scrt_common_main_seh (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="285" width="58.5" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="13.00" y="295.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!std::condition_variable::wait_for&lt;__int64,std::ratio&lt;1,1000&gt;,`observability::StopController::wait_for_stop'::`2'::&lt;lambda_1&gt; &gt; (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="237" width="58.5" height="15.0" fill="rgb(244,179,42)" rx="2" ry="2" />
+<text  x="13.00" y="247.5" >httpse..</text>
+</g>
+<g >
+<title>WS2_32!WSASocketW (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="125" width="0.4" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<text  x="554.02" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`concurrency::thread_pool::ThreadPoolDriver::start'::`20'::&lt;lambda_3&gt; &gt;,0&gt; (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="269" width="58.5" height="15.0" fill="rgb(246,192,45)" rx="2" ry="2" />
+<text  x="1475.96" y="279.5" >httpse..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7A953] (500,257 thread microseconds, 0.19%)</title><rect x="553.1" y="93" width="2.9" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="556.09" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!std::_Visit_impl&lt;11,void,std::_Meta_list&lt;std::integer_sequence&lt;unsigned __int64,0&gt;,std::integer_sequence&lt;unsigned __int64,1&gt;,std::integer_sequence&lt;unsigned __int64,2&gt;,std::integer_sequence&lt;unsigned __int64,3&gt;,std::integer_sequence&lt;unsigned __int64,4&gt;,std::integer_sequence&lt;unsigned __int64,5&gt;,std::integer_sequence&lt;unsigned __int64,6&gt;,std::integer_sequence&lt;unsigned __int64,7&gt;,std::integer_sequence&lt;unsigned __int64,8&gt;,std::integer_sequence&lt;unsigned __int64,9&gt;,std:: (3,765,714 thread microseconds, 1.40%)</title><rect x="536.7" y="205" width="22.0" height="15.0" fill="rgb(253,222,53)" rx="2" ry="2" />
+<text  x="539.67" y="215.5" >h..</text>
+</g>
+<g >
+<title>ntdll!ZwWaitForAlertByThreadId (39,935,700 thread microseconds, 14.80%)</title><rect x="302.6" y="189" width="233.8" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="305.59" y="199.5" >ntdll!ZwWaitForAlertByThreadId</text>
+</g>
+<g >
+<title>ntdll!RtlSleepConditionVariableSRW (39,935,700 thread microseconds, 14.80%)</title><rect x="302.6" y="205" width="233.8" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="305.59" y="215.5" >ntdll!RtlSleepConditionVariable..</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="141" width="0.3" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="539.38" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_4&gt;::operator() (850,808 thread microseconds, 0.32%)</title><rect x="551.9" y="173" width="4.9" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="554.87" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!observability::StopController::wait_for_stop (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="253" width="58.5" height="15.0" fill="rgb(216,53,12)" rx="2" ry="2" />
+<text  x="13.00" y="263.5" >httpse..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7951A] (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="173" width="58.5" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="1475.96" y="183.5" >mswsoc..</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="93" width="1.3" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="559.85" y="103.5" ></text>
+</g>
+<g >
+<title>WS2_32!connect (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="141" width="0.4" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="539.76" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::~Socket (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="141" width="0.4" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<text  x="559.39" y="151.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Cnd_timedwait (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="237" width="58.5" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="1534.48" y="247.5" >MSVCP1..</text>
+</g>
+<g >
+<title>KERNELBASE!SleepConditionVariableSRW (39,935,700 thread microseconds, 14.80%)</title><rect x="302.6" y="221" width="233.8" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="305.59" y="231.5" >KERNELBASE!SleepConditionVariab..</text>
+</g>
+<g >
+<title>httpserver!net::Socket::bind (47,024 thread microseconds, 0.02%)</title><rect x="537.2" y="157" width="0.3" height="15.0" fill="rgb(208,16,4)" rx="2" ry="2" />
+<text  x="540.23" y="167.5" ></text>
+</g>
+<g >
+<title>WS2_32!getsockopt (500,257 thread microseconds, 0.19%)</title><rect x="553.1" y="125" width="2.9" height="15.0" fill="rgb(215,47,11)" rx="2" ry="2" />
+<text  x="556.09" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!NtCreateFile (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="77" width="0.4" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="554.02" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::&lt;lambda_4&gt;::operator() (2,596,788 thread microseconds, 0.96%)</title><rect x="536.7" y="189" width="15.2" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="539.67" y="199.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwRemoveIoCompletion (9,981,050 thread microseconds, 3.70%)</title><rect x="68.6" y="269" width="58.4" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="71.61" y="279.5" >ntdll!..</text>
+</g>
+<g >
+<title>mswsock!NSPStartup (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="109" width="0.4" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="539.76" y="119.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwWaitForAlertByThreadId (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="189" width="58.5" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="1534.48" y="199.5" >ntdll!..</text>
+</g>
+<g >
+<title>WS2_32!WSAPoll (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="221" width="58.5" height="15.0" fill="rgb(215,49,11)" rx="2" ry="2" />
+<text  x="1475.96" y="231.5" >WS2_32..</text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (126,137 thread microseconds, 0.05%)</title><rect x="552.2" y="61" width="0.7" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="555.16" y="71.5" ></text>
+</g>
+<g >
+<title>httpserver!std::unique_ptr&lt;net::Poller::Impl,std::default_delete&lt;net::Poller::Impl&gt; &gt;::~unique_ptr&lt;net::Poller::Impl,std::default_delete&lt;net::Poller::Impl&gt; &gt; (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="173" width="0.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="554.49" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::helpers::CompletionPort::publish (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="237" width="0.3" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="539.38" y="247.5" ></text>
+</g>
+<g >
+<title>mswsock!Tcpip6_WSHGetSockaddrType (9,996,055 thread microseconds, 3.70%)</title><rect x="68.5" y="285" width="58.5" height="15.0" fill="rgb(211,27,6)" rx="2" ry="2" />
+<text  x="71.52" y="295.5" >mswsoc..</text>
+</g>
+<g >
+<title>httpserver!net::Socket::begin_connect (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="157" width="0.4" height="15.0" fill="rgb(254,225,53)" rx="2" ry="2" />
+<text  x="539.76" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::~Socket (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="157" width="0.4" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<text  x="554.49" y="167.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7951A] (156,029,572 thread microseconds, 57.81%)</title><rect x="559.3" y="157" width="913.4" height="15.0" fill="rgb(205,3,0)" rx="2" ry="2" />
+<text  x="562.26" y="167.5" >mswsock![00007FFCA8C7951A]</text>
+</g>
+<g >
+<title>mswsock!NSPStartup (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="93" width="0.4" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="539.76" y="103.5" ></text>
+</g>
+<g >
+<title>httpserver!net::create_tcp_socket (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="173" width="0.3" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="561.06" y="183.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::helpers::HelperPool::run (39,984,191 thread microseconds, 14.81%)</title><rect x="302.6" y="253" width="234.1" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="305.59" y="263.5" >httpserver!concurrency::helpers..</text>
+</g>
+<g >
+<title>KERNEL32!BaseThreadInitThunk (269,893,472 thread microseconds, 100.00%)</title><rect x="10.0" y="301" width="1580.0" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="13.00" y="311.5" >KERNEL32!BaseThreadInitThunk</text>
+</g>
+<g >
+<title>WS2_32!connect (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="157" width="1.3" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="559.85" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwWaitForAlertByThreadId (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="173" width="58.5" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="13.00" y="183.5" >ntdll!..</text>
+</g>
+<g >
+<title>WS2_32!getsockopt (2,260,940 thread microseconds, 0.84%)</title><rect x="537.5" y="141" width="13.2" height="15.0" fill="rgb(215,47,11)" rx="2" ry="2" />
+<text  x="540.51" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::ReferenceWorkExecutor::execute (3,765,714 thread microseconds, 1.40%)</title><rect x="536.7" y="221" width="22.0" height="15.0" fill="rgb(214,45,10)" rx="2" ry="2" />
+<text  x="539.67" y="231.5" >h..</text>
+</g>
+<g >
+<title>mswsock!Tcpip4_WSHStringToAddress (156,046,083 thread microseconds, 57.82%)</title><rect x="559.2" y="189" width="913.5" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="562.17" y="199.5" >mswsock!Tcpip4_WSHStringToAddress</text>
+</g>
+<g >
+<title>ntdll!RtlSleepConditionVariableSRW (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="189" width="58.5" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="13.00" y="199.5" >ntdll!..</text>
+</g>
+<g >
+<title>httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_worker (159,936,846 thread microseconds, 59.26%)</title><rect x="536.7" y="253" width="936.3" height="15.0" fill="rgb(242,172,41)" rx="2" ry="2" />
+<text  x="539.67" y="263.5" >httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_worker</text>
+</g>
+<g >
+<title>httpserver!net::Poller::wait (156,061,869 thread microseconds, 57.82%)</title><rect x="559.1" y="221" width="913.6" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
+<text  x="562.08" y="231.5" >httpserver!net::Poller::wait</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C746AB] (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="125" width="0.3" height="15.0" fill="rgb(221,77,18)" rx="2" ry="2" />
+<text  x="561.06" y="135.5" ></text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (47,024 thread microseconds, 0.02%)</title><rect x="537.2" y="109" width="0.3" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="540.23" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive (159,936,846 thread microseconds, 59.26%)</title><rect x="536.7" y="237" width="936.3" height="15.0" fill="rgb(235,142,34)" rx="2" ry="2" />
+<text  x="539.67" y="247.5" >httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive</text>
+</g>
+<g >
+<title>all (269,893,472 thread microseconds, 100%)</title><rect x="10.0" y="333" width="1580.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="343.5" ></text>
+</g>
+<g >
+<title>ntdll!NtWaitForWorkViaWorkerFactory (29,988,200 thread microseconds, 11.11%)</title><rect x="127.0" y="269" width="175.6" height="15.0" fill="rgb(208,15,3)" rx="2" ry="2" />
+<text  x="130.04" y="279.5" >ntdll!NtWaitForWorkVia..</text>
+</g>
+<g >
+<title>WS2_32!WSASocketW (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="141" width="0.3" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<text  x="561.06" y="151.5" ></text>
+</g>
+<g >
+<title>ntdll!NtDeviceIoControlFile (80,554 thread microseconds, 0.03%)</title><rect x="536.8" y="77" width="0.4" height="15.0" fill="rgb(241,167,40)" rx="2" ry="2" />
+<text  x="539.76" y="87.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Poller::create (2,516,460 thread microseconds, 0.93%)</title><rect x="536.7" y="173" width="14.7" height="15.0" fill="rgb(237,149,35)" rx="2" ry="2" />
+<text  x="539.67" y="183.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="125" width="1.3" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="559.85" y="135.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (47,024 thread microseconds, 0.02%)</title><rect x="537.2" y="125" width="0.3" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="540.23" y="135.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="109" width="1.3" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="559.85" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::finish_connect (2,260,940 thread microseconds, 0.84%)</title><rect x="537.5" y="157" width="13.2" height="15.0" fill="rgb(253,221,52)" rx="2" ry="2" />
+<text  x="540.51" y="167.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C78464] (156,029,572 thread microseconds, 57.81%)</title><rect x="559.3" y="173" width="913.4" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="562.26" y="183.5" >mswsock![00007FFCA8C78464]</text>
+</g>
+<g >
+<title>httpserver!std::thread::_Invoke&lt;std::tuple&lt;`observability::ScopedStopHooks::ScopedStopHooks'::`2'::&lt;lambda_1&gt; &gt;,0&gt; (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="269" width="58.5" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="1534.48" y="279.5" >httpse..</text>
+</g>
+<g >
+<title>WS2_32!connect (159,430 thread microseconds, 0.06%)</title><rect x="552.0" y="125" width="0.9" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="554.97" y="135.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Cnd_wait (39,935,700 thread microseconds, 14.80%)</title><rect x="302.6" y="237" width="233.8" height="15.0" fill="rgb(223,83,19)" rx="2" ry="2" />
+<text  x="305.59" y="247.5" >MSVCP140!Cnd_wait</text>
+</g>
+<g >
+<title>ntdll!TpCallbackMayRunLong (29,988,200 thread microseconds, 11.11%)</title><rect x="127.0" y="285" width="175.6" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="130.04" y="295.5" >ntdll!TpCallbackMayRun..</text>
+</g>
+<g >
+<title>httpserver!net::Poller::wait (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="237" width="58.5" height="15.0" fill="rgb(221,75,17)" rx="2" ry="2" />
+<text  x="1475.96" y="247.5" >httpse..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C71301] (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="93" width="0.4" height="15.0" fill="rgb(230,115,27)" rx="2" ry="2" />
+<text  x="559.39" y="103.5" ></text>
+</g>
+<g >
+<title>MSVCP140!Cnd_timedwait (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="221" width="58.5" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="13.00" y="231.5" >MSVCP1..</text>
+</g>
+<g >
+<title>WS2_32!socket (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="157" width="0.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="561.06" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwRemoveIoCompletion (2,260,940 thread microseconds, 0.84%)</title><rect x="537.5" y="93" width="13.2" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="540.51" y="103.5" ></text>
+</g>
+<g >
+<title>KERNELBASE!SleepConditionVariableSRW (9,996,060 thread microseconds, 3.70%)</title><rect x="10.0" y="205" width="58.5" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="13.00" y="215.5" >KERNEL..</text>
+</g>
+<g >
+<title>httpserver!std::unique_ptr&lt;net::Poller::Impl,std::default_delete&lt;net::Poller::Impl&gt; &gt;::~unique_ptr&lt;net::Poller::Impl,std::default_delete&lt;net::Poller::Impl&gt; &gt; (78,745 thread microseconds, 0.03%)</title><rect x="556.4" y="157" width="0.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="559.39" y="167.5" ></text>
+</g>
+<g >
+<title>httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_acceptor (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="253" width="58.5" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="1475.96" y="263.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!`observability::ScopedStopHooks::ScopedStopHooks'::`2'::&lt;lambda_1&gt;::operator() (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="253" width="58.5" height="15.0" fill="rgb(237,151,36)" rx="2" ry="2" />
+<text  x="1534.48" y="263.5" >httpse..</text>
+</g>
+<g >
+<title>httpserver!net::Socket::begin_connect (159,430 thread microseconds, 0.06%)</title><rect x="552.0" y="141" width="0.9" height="15.0" fill="rgb(254,225,53)" rx="2" ry="2" />
+<text  x="554.97" y="151.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::Impl::close (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="141" width="0.4" height="15.0" fill="rgb(230,118,28)" rx="2" ry="2" />
+<text  x="554.49" y="151.5" ></text>
+</g>
+<g >
+<title>WS2_32!closesocket (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="125" width="0.4" height="15.0" fill="rgb(221,73,17)" rx="2" ry="2" />
+<text  x="554.49" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Socket::write_some (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="189" width="0.3" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="539.38" y="199.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C74E38] (64,720 thread microseconds, 0.02%)</title><rect x="551.0" y="93" width="0.4" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="554.02" y="103.5" ></text>
+</g>
+<g >
+<title>mswsock!Tcpip4_WSHStringToAddress (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="205" width="58.5" height="15.0" fill="rgb(251,212,50)" rx="2" ry="2" />
+<text  x="1475.96" y="215.5" >mswsoc..</text>
+</g>
+<g >
+<title>ntdll!NtCreateFile (64,596 thread microseconds, 0.02%)</title><rect x="558.1" y="93" width="0.3" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="561.06" y="103.5" ></text>
+</g>
+<g >
+<title>ntdll!NtClose (64,777 thread microseconds, 0.02%)</title><rect x="551.5" y="77" width="0.4" height="15.0" fill="rgb(253,220,52)" rx="2" ry="2" />
+<text  x="554.49" y="87.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C78464] (9,996,060 thread microseconds, 3.70%)</title><rect x="1473.0" y="189" width="58.5" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="1475.96" y="199.5" >mswsoc..</text>
+</g>
+<g >
+<title>mswsock!NSPStartup (207,237 thread microseconds, 0.08%)</title><rect x="556.8" y="141" width="1.3" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="559.85" y="151.5" ></text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7C414] (48,491 thread microseconds, 0.02%)</title><rect x="536.4" y="157" width="0.3" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="539.38" y="167.5" ></text>
+</g>
+<g >
+<title>ntdll!RtlSleepConditionVariableSRW (9,996,060 thread microseconds, 3.70%)</title><rect x="1531.5" y="205" width="58.5" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="1534.48" y="215.5" >ntdll!..</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7994C] (2,260,940 thread microseconds, 0.84%)</title><rect x="537.5" y="125" width="13.2" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="540.51" y="135.5" ></text>
+</g>
+<g >
+<title>httpserver!http::HttpSession::on_event (62,182 thread microseconds, 0.02%)</title><rect x="558.7" y="221" width="0.4" height="15.0" fill="rgb(244,182,43)" rx="2" ry="2" />
+<text  x="561.71" y="231.5" ></text>
+</g>
+<g >
+<title>ntdll!ZwRemoveIoCompletion (500,257 thread microseconds, 0.19%)</title><rect x="553.1" y="77" width="2.9" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="556.09" y="87.5" ></text>
+</g>
+<g >
+<title>ntdll!NtWaitForSingleObject (156,029,572 thread microseconds, 57.81%)</title><rect x="559.3" y="141" width="913.4" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<text  x="562.26" y="151.5" >ntdll!NtWaitForSingleObject</text>
+</g>
+<g >
+<title>mswsock![00007FFCA8C7A953] (2,260,940 thread microseconds, 0.84%)</title><rect x="537.5" y="109" width="13.2" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="540.51" y="119.5" ></text>
+</g>
+<g >
+<title>httpserver!net::Poller::create (772,063 thread microseconds, 0.29%)</title><rect x="551.9" y="157" width="4.5" height="15.0" fill="rgb(237,149,35)" rx="2" ry="2" />
+<text  x="554.87" y="167.5" ></text>
+</g>
+<g >
+<title>mswsock!NSPStartup (159,430 thread microseconds, 0.06%)</title><rect x="552.0" y="93" width="0.9" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="554.97" y="103.5" ></text>
+</g>
+</g>
+</svg>

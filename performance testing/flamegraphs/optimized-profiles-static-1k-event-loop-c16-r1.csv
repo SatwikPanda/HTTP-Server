@@ -1,0 +1,104 @@
+function,inclusive_thread_wall_percent,exclusive_thread_wall_percent
+ucrtbase!wcsrchr,100.0,0.0
+ntdll!RtlUserThreadStart,100.0,0.0
+"httpserver!std::thread::_Invoke<std::tuple<`concurrency::helpers::HelperPool::start'::`15'::<lambda_1> >,0>",100.0,0.0
+httpserver!concurrency::helpers::HelperPool::run,100.0,0.10996823861459006
+KERNEL32!BaseThreadInitThunk,100.0,0.0
+httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute,95.4496331977175,0.0
+httpserver!concurrency::ReferenceWorkExecutor::execute,95.34375192044715,0.0
+"httpserver!std::_Visit_impl<11,void,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned __int64,9>,std::",95.34375192044715,0.0
+httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileOpenWork>,88.53981065078115,0.0
+httpserver!concurrency::detail::file_metadata,76.8485630933401,0.21514004337774864
+KERNELBASE!GetFileAttributesW,30.37748434039292,0.11047785971130465
+ntdll!ZwQueryAttributesFile,29.73129478232934,29.73129478232934
+KERNELBASE!GetFileAttributesExW,24.06753578714226,0.0
+ntdll!ZwQueryFullAttributesFile,23.847669257906745,23.847669257906745
+httpserver!std::filesystem::_Canonical,21.654100176518757,0.0
+KERNELBASE!CreateFileW,15.656149652733193,0.0
+KERNELBASE!GetDriveTypeW,15.551527439348844,0.0
+ntdll!NtCreateFile,15.116241074760914,15.116241074760914
+httpserver!__std_fs_get_stats,12.140603461326505,0.0
+httpserver!__std_fs_get_final_path_name_by_handle,11.17618050979097,0.0
+KERNELBASE!GetFinalPathNameByHandleW,11.17618050979097,0.0
+MSVCP140!std::_Fiopen,11.039801907281936,0.0
+KERNELBASE!CloseHandle,8.977435276871645,0.10990828319144716
+ucrtbase!wfopen_s,8.976116257562502,0.10992826833249479
+ntdll!NtClose,8.8675269936802,8.8675269936802
+ucrtbase!ftell,8.866187989230008,0.0
+ntdll!NtQueryInformationFile,8.141396871426094,8.141396871426094
+ucrtbase!fseek,6.385172624153942,0.0
+httpserver!__std_fs_open_handle,5.496693208599407,0.0
+httpserver!__std_fs_close_handle,4.655948302437138,0.0
+"httpserver!std::basic_filebuf<char,std::char_traits<char> >::close",4.321486974434508,0.0
+ucrtbase!fclose,4.321486974434508,0.0
+httpserver!concurrency::helpers::CompletionPort::publish,3.9050465978544953,0.0
+ntdll!NtDeviceIoControlFile,3.251572455879054,3.251572455879054
+"httpserver!std::_Func_impl_no_alloc<`concurrency::event_loop::EventLoopDriver::Impl::bind_listener_locked'::`35'::<lambda_1>,void>::_Do_call",3.244327842249288,0.0
+ntdll!NtQueryObject,2.829616180369895,2.829616180369895
+ucrtbase!fread_nolock_s,2.4824542952314954,0.0
+ntdll!NtReadFile,2.4824542952314954,2.4824542952314954
+KERNELBASE!ReadFile,2.4824542952314954,0.0
+ucrtbase!fread_s,2.4824542952314954,0.0
+ucrtbase!fread,2.4824542952314954,0.0
+httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::FileReadWork>,2.4824542952314954,0.0
+"MSVCP140!std::basic_istream<char,std::char_traits<char> >::read",2.4824542952314954,0.0
+"httpserver!std::basic_filebuf<char,std::char_traits<char> >::xsgetn",2.4824542952314954,0.0
+ucrtbase!read,2.4824542952314954,0.0
+ucrtbase!fgetc,2.4824542952314954,0.0
+KERNELBASE!CreateFile2,2.3786514726300996,0.0
+ucrtbase!fflush_nolock,2.2793153290528494,0.0
+ucrtbase!fgetpos,2.2793153290528494,0.0
+KERNELBASE!SetFilePointerEx,2.2793153290528494,0.0
+mswsock![00007FFCA8C7C414],2.271371235486416,0.0
+httpserver!net::Socket::write_some,2.271371235486416,0.0
+WS2_32!send,2.271371235486416,0.0
+httpserver!net::Poller::wake,2.271371235486416,0.0
+ntdll!RtlSleepConditionVariableSRW,1.8484956434890658,0.6569615490882529
+ntdll!RtlAcquireSRWLockExclusive,1.633695347509127,0.0
+MSVCP140!Mtx_lock,1.633695347509127,0.0
+ntdll!ZwWaitForAlertByThreadId,1.191534094400813,1.191534094400813
+KERNELBASE!DeviceIoControl,0.9802012203926381,0.0
+ntdll!RtlDeleteBoundaryDescriptor,0.8655064959202833,0.0
+ntdll!RtlDosApplyFileIsolationRedirection_Ustr,0.7555782275877885,0.7555782275877885
+ntdll!RtlDosPathNameToNtPathName_U_WithStatus,0.5357116983522751,0.0
+ntdll!RtlDosPathNameToRelativeNtPathName_U_WithStatus,0.32979479756800817,0.0
+ntdll!RtlFreeHeap,0.32570783622376764,0.32570783622376764
+"httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::erase",0.3252781556912436,0.0
+VCRUNTIME140!memmove,0.3252781556912436,0.3252781556912436
+"MSVCP140!std::basic_istream<char,std::char_traits<char> >::tellg",0.32270007249609917,0.0
+"httpserver!std::basic_filebuf<char,std::char_traits<char> >::seekoff",0.32270007249609917,0.0
+MSVCP140!Mtx_unlock,0.32053168469243115,0.10995824604406623
+MSVCP140!std::locale::_Init,0.21985653666498958,0.0
+MSVCP140!std::ios_base::_Init,0.21985653666498958,0.0
+httpserver!concurrency::FileResource::FileResource,0.21985653666498958,0.0
+"MSVCP140!std::basic_istream<char,std::char_traits<char> >::basic_istream<char,std::char_traits<char> >",0.21985653666498958,0.0
+ucrtbase!free_base,0.21578956046179665,0.0
+ucrtbase!ftelli64,0.21562967933341562,0.0
+MSVCP140!Cnd_wait,0.2148002959799389,0.0
+KERNELBASE!SleepConditionVariableSRW,0.2148002959799389,0.0
+httpserver!std::filesystem::absolute,0.21077329005884124,0.0
+httpserver!std::filesystem::_Absolute,0.21077329005884124,0.10496196078215847
+ntdll!NtAlertThreadByThreadIdEx,0.21057343864836495,0.21057343864836495
+ntdll!RtlReleaseSRWLockExclusive,0.21057343864836495,0.0
+MSVCP140!std::locale::facet::_Incref,0.10994825347354242,0.10994825347354242
+ntdll!RtlInitUnicodeStringEx,0.10992826833249479,0.10992826833249479
+ntdll!RtlAllocateHeap,0.10992826833249479,0.10992826833249479
+MSVCP140!std::_Lockit::_Lockit,0.10990828319144716,0.0
+ucrtbase!lock_locales,0.10990828319144716,0.10990828319144716
+httpserver!operator new,0.10888904099801798,0.0
+ucrtbase!malloc_base,0.10888904099801798,0.10888904099801798
+httpserver!std::allocator<wchar_t>::allocate,0.10796972450982695,0.10796972450982695
+httpserver!std::filesystem::path::operator/=,0.10796972450982695,0.0
+"httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::append",0.10796972450982695,0.0
+"httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::_Reallocate_grow_by<`std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::append'::`2'::<lambda_1>,wchar_t const *,unsigned __int64>",0.10796972450982695,0.0
+"httpserver!std::basic_filebuf<char,std::char_traits<char> >::_Endwrite",0.10707039316268355,0.0
+httpserver!__security_check_cookie,0.10707039316268355,0.10707039316268355
+ntdll!NtSetInformationFile,0.10583131441773042,0.10583131441773042
+ntdll!RtlGetFullPathName_UEx,0.10581132927668278,0.10581132927668278
+KERNELBASE!GetFullPathNameW,0.10581132927668278,0.0
+httpserver!__std_fs_get_full_path_name,0.10581132927668278,0.0
+"httpserver!std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >::_Tidy_deallocate",0.10565144814830174,0.10565144814830174
+ntdll!SbSelectProcedure,0.10551155216096832,0.10551155216096832
+ntdll!NtQueryVolumeInformationFile,0.10518179733368241,0.10518179733368241
+KERNELBASE!GetFileType,0.10518179733368241,0.0
+KERNELBASE!GetTempPath2W,0.10462221338434874,0.10462221338434874

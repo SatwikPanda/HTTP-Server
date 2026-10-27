@@ -4,6 +4,11 @@ A C++20 learning project that implements HTTP/1.1 directly on TCP sockets. It ca
 
 The applications share one HTTP state machine and run with a thread pool or an event loop. A sequential reference driver and the original fixed-response demo remain available.
 
+The [performance investigation](performance%20testing/README.md) contains native
+flame graphs, retained baseline measurements, targeted optimizations, and their
+validation. Its Windows measurements have a narrower scope than the complete
+cross-platform milestone 32 performance campaign.
+
 ## Build and run
 
 Requirements: CMake 3.20+, a C++20 compiler, and Ninja or a supported native build tool. Python 3.10+ is needed only when benchmark tooling is enabled.

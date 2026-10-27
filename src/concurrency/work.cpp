@@ -9,6 +9,7 @@
 #include <fstream>
 #include <limits>
 #include <mutex>
+#include <optional>
 #include <type_traits>
 
 namespace concurrency {
@@ -20,6 +21,9 @@ public:
 struct ReferenceWorkExecutor::Impl {
     WorkLimits limits;
     net::Socket upstream;
+    // Lazily retained on the executor's owner thread. Rebuilding this for each
+    // readiness wait would create a new TCP wake pair on every proxy request.
+    std::optional<net::Poller> readiness;
     core::TransactionId owner{};
     std::uint64_t last_operation{};
     bool busy{};
@@ -81,9 +85,12 @@ WorkEvent ReferenceWorkExecutor::execute(const WorkAction& action, const std::fu
     impl_->last_operation = action.id.sequence;
     if (interrupted()) { impl_->upstream.close(); return result; }
     auto wait = [&](net::Socket& socket, net::Interest interest) -> bool {
-        auto created = net::Poller::create();
-        if (!created) { fail(created.error()); return false; }
-        auto poller = std::move(created.value());
+        if (!impl_->readiness) {
+            auto created = net::Poller::create(action.deadline);
+            if (!created) { fail(created.error()); return false; }
+            impl_->readiness.emplace(std::move(created.value()));
+        }
+        auto& poller = *impl_->readiness;
         auto watched = poller.watch(socket, interest, action.id.transaction.connection);
         if (!watched) { fail(watched.error()); return false; }
         struct Guard { net::Poller& poller; net::RegistrationToken token; ~Guard() { (void)poller.unwatch(token); } } guard{poller, watched.value()};

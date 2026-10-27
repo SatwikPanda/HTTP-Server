@@ -1,0 +1,2707 @@
+{
+  "comparisons": [
+    {
+      "case": "static-1k",
+      "driver": "event-loop",
+      "before": {
+        "label": "before",
+        "case": "static-1k",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-1k-event-loop-before\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6807.787539085069,
+            "p99_ms": 4.3601,
+            "p50_ms": 2.2041,
+            "server_cores": 3.1862556717595676,
+            "cpu_us_per_request": 468.03100911515577,
+            "generator_cores_approx": 0.336745379630908,
+            "max_rss_mib": 8.19921875,
+            "max_handles": 124,
+            "max_threads": 11,
+            "completed_requests": 34119
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-1k-event-loop-before\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6971.899392697571,
+            "p99_ms": 3.9188,
+            "p50_ms": 2.1852,
+            "server_cores": 3.2112490309455306,
+            "cpu_us_per_request": 460.5988770160713,
+            "generator_cores_approx": 0.2788170128733409,
+            "max_rss_mib": 8.15234375,
+            "max_handles": 124,
+            "max_threads": 11,
+            "completed_requests": 34907
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-1k-event-loop-before\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 7107.285043084619,
+            "p99_ms": 3.7391,
+            "p50_ms": 2.1418,
+            "server_cores": 3.19019726871367,
+            "cpu_us_per_request": 448.8629975264223,
+            "generator_cores_approx": 0.3019672684399195,
+            "max_rss_mib": 8.2265625,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 35576
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-1k-event-loop-before\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6891.350346172156,
+            "p99_ms": 3.7876,
+            "p50_ms": 2.2236000000000002,
+            "server_cores": 3.397116391722051,
+            "cpu_us_per_request": 492.9536623557386,
+            "generator_cores_approx": 0.3319589433799239,
+            "max_rss_mib": 8.1640625,
+            "max_handles": 124,
+            "max_threads": 11,
+            "completed_requests": 34486
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-1k-event-loop-before\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6906.335583665313,
+            "p99_ms": 3.9478999999999997,
+            "p50_ms": 2.2155,
+            "server_cores": 3.312771176835471,
+            "cpu_us_per_request": 479.67133028848934,
+            "generator_cores_approx": 0.33213762070163066,
+            "max_rss_mib": 8.1328125,
+            "max_handles": 122,
+            "max_threads": 11,
+            "completed_requests": 34594
+          }
+        ],
+        "requests_per_second": {
+          "median": 6906.335583665313,
+          "min": 6807.787539085069,
+          "max": 7107.285043084619
+        },
+        "p99_ms": {
+          "median": 3.9188,
+          "min": 3.7391,
+          "max": 4.3601
+        },
+        "p50_ms": {
+          "median": 2.2041,
+          "min": 2.1418,
+          "max": 2.2236000000000002
+        },
+        "server_cores": {
+          "median": 3.2112490309455306,
+          "min": 3.1862556717595676,
+          "max": 3.397116391722051
+        },
+        "cpu_us_per_request": {
+          "median": 468.03100911515577,
+          "min": 448.8629975264223,
+          "max": 492.9536623557386
+        },
+        "generator_cores_approx": {
+          "median": 0.3319589433799239,
+          "min": 0.2788170128733409,
+          "max": 0.336745379630908
+        },
+        "max_rss_mib": {
+          "median": 8.1640625,
+          "min": 8.1328125,
+          "max": 8.2265625
+        },
+        "max_handles": {
+          "median": 124,
+          "min": 122,
+          "max": 124
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "static-1k",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-1k-event-loop-after\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 9073.96207944385,
+            "p99_ms": 2.9554,
+            "p50_ms": 1.6821,
+            "server_cores": 3.4800650090875456,
+            "cpu_us_per_request": 383.52210187998065,
+            "generator_cores_approx": 0.36057814706011804,
+            "max_rss_mib": 8.16015625,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 45426
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-1k-event-loop-after\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 9011.236827002205,
+            "p99_ms": 3.0261,
+            "p50_ms": 1.6893,
+            "server_cores": 3.578988121818326,
+            "cpu_us_per_request": 397.1694663593653,
+            "generator_cores_approx": 0.3930477512937088,
+            "max_rss_mib": 8.2578125,
+            "max_handles": 122,
+            "max_threads": 11,
+            "completed_requests": 45124
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-1k-event-loop-after\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 9169.32261721383,
+            "p99_ms": 2.8874999999999997,
+            "p50_ms": 1.6678000000000002,
+            "server_cores": 3.5547400305524453,
+            "cpu_us_per_request": 387.6774958140344,
+            "generator_cores_approx": 0.40483557336370785,
+            "max_rss_mib": 8.1328125,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 45987
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-1k-event-loop-after\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 8841.219010781753,
+            "p99_ms": 3.1638,
+            "p50_ms": 1.7228,
+            "server_cores": 3.545038173920565,
+            "cpu_us_per_request": 400.9671256415474,
+            "generator_cores_approx": 0.44663502223000073,
+            "max_rss_mib": 8.19140625,
+            "max_handles": 125,
+            "max_threads": 11,
+            "completed_requests": 44229
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-1k-event-loop-after\\static-1k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 8897.21160917332,
+            "p99_ms": 2.9295,
+            "p50_ms": 1.7259,
+            "server_cores": 3.404087206958467,
+            "cpu_us_per_request": 382.6015786169163,
+            "generator_cores_approx": 0.3288378135073289,
+            "max_rss_mib": 8.2734375,
+            "max_handles": 121,
+            "max_threads": 11,
+            "completed_requests": 44596
+          }
+        ],
+        "requests_per_second": {
+          "median": 9011.236827002205,
+          "min": 8841.219010781753,
+          "max": 9169.32261721383
+        },
+        "p99_ms": {
+          "median": 2.9554,
+          "min": 2.8874999999999997,
+          "max": 3.1638
+        },
+        "p50_ms": {
+          "median": 1.6893,
+          "min": 1.6678000000000002,
+          "max": 1.7259
+        },
+        "server_cores": {
+          "median": 3.545038173920565,
+          "min": 3.404087206958467,
+          "max": 3.578988121818326
+        },
+        "cpu_us_per_request": {
+          "median": 387.6774958140344,
+          "min": 382.6015786169163,
+          "max": 400.9671256415474
+        },
+        "generator_cores_approx": {
+          "median": 0.3930477512937088,
+          "min": 0.3288378135073289,
+          "max": 0.44663502223000073
+        },
+        "max_rss_mib": {
+          "median": 8.19140625,
+          "min": 8.1328125,
+          "max": 8.2734375
+        },
+        "max_handles": {
+          "median": 123,
+          "min": 121,
+          "max": 125
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 29.0130135716953,
+          "min": 28.29443529442186,
+          "max": 33.28797391734326
+        },
+        "p99_ms": {
+          "median_percent_change": -22.779932632438506,
+          "min": -32.21715098277562,
+          "max": -16.46953215756679
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -18.05626242477927,
+          "min": -20.23672159292744,
+          "max": -13.63121978188595
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "static-1k",
+      "driver": "thread-pool",
+      "before": {
+        "label": "before",
+        "case": "static-1k",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-1k-thread-pool-before\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 5460.021426886265,
+            "p99_ms": 4.9071,
+            "p50_ms": 2.8139,
+            "server_cores": 3.374711631203009,
+            "cpu_us_per_request": 618.0766277921983,
+            "generator_cores_approx": 0.30967283199574797,
+            "max_rss_mib": 9.6171875,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 27353
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-1k-thread-pool-before\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6601.651077787388,
+            "p99_ms": 4.0342,
+            "p50_ms": 2.3249999999999997,
+            "server_cores": 3.435551583554502,
+            "cpu_us_per_request": 520.4079317542427,
+            "generator_cores_approx": 0.26770139685700733,
+            "max_rss_mib": 9.87890625,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 33057
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-1k-thread-pool-before\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6809.407676240478,
+            "p99_ms": 3.8030999999999997,
+            "p50_ms": 2.2659999999999996,
+            "server_cores": 3.399833553140534,
+            "cpu_us_per_request": 499.2847711267606,
+            "generator_cores_approx": 0.2972293694554698,
+            "max_rss_mib": 9.68359375,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 34080
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-1k-thread-pool-before\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6679.265449855372,
+            "p99_ms": 3.9078000000000004,
+            "p50_ms": 2.313,
+            "server_cores": 3.4626521054083805,
+            "cpu_us_per_request": 518.4181002243829,
+            "generator_cores_approx": 0.31598757769810804,
+            "max_rss_mib": 9.66796875,
+            "max_handles": 202,
+            "max_threads": 27,
+            "completed_requests": 33425
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-1k-thread-pool-before\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6671.943761347048,
+            "p99_ms": 3.7494,
+            "p50_ms": 2.3236,
+            "server_cores": 3.2710502722173027,
+            "cpu_us_per_request": 490.2694610778443,
+            "generator_cores_approx": 0.2725022948334554,
+            "max_rss_mib": 9.58203125,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 33400
+          }
+        ],
+        "requests_per_second": {
+          "median": 6671.943761347048,
+          "min": 5460.021426886265,
+          "max": 6809.407676240478
+        },
+        "p99_ms": {
+          "median": 3.9078000000000004,
+          "min": 3.7494,
+          "max": 4.9071
+        },
+        "p50_ms": {
+          "median": 2.3236,
+          "min": 2.2659999999999996,
+          "max": 2.8139
+        },
+        "server_cores": {
+          "median": 3.399833553140534,
+          "min": 3.2710502722173027,
+          "max": 3.4626521054083805
+        },
+        "cpu_us_per_request": {
+          "median": 518.4181002243829,
+          "min": 490.2694610778443,
+          "max": 618.0766277921983
+        },
+        "generator_cores_approx": {
+          "median": 0.2972293694554698,
+          "min": 0.26770139685700733,
+          "max": 0.31598757769810804
+        },
+        "max_rss_mib": {
+          "median": 9.66796875,
+          "min": 9.58203125,
+          "max": 9.87890625
+        },
+        "max_handles": {
+          "median": 203,
+          "min": 202,
+          "max": 203
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "static-1k",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-1k-thread-pool-after\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 7058.3130951282155,
+            "p99_ms": 3.8016,
+            "p50_ms": 2.1748000000000003,
+            "server_cores": 3.8480619509686322,
+            "cpu_us_per_request": 545.1815326277662,
+            "generator_cores_approx": 0.3983633384590785,
+            "max_rss_mib": 9.73046875,
+            "max_handles": 207,
+            "max_threads": 27,
+            "completed_requests": 35338
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-1k-thread-pool-after\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 8612.29096469222,
+            "p99_ms": 3.0135,
+            "p50_ms": 1.7922,
+            "server_cores": 3.762980438402871,
+            "cpu_us_per_request": 436.93141044931593,
+            "generator_cores_approx": 0.3704224724098616,
+            "max_rss_mib": 9.7890625,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 43199
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-1k-thread-pool-after\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 8617.999955170977,
+            "p99_ms": 3.0912,
+            "p50_ms": 1.7788000000000002,
+            "server_cores": 3.79880515073479,
+            "cpu_us_per_request": 440.7989290433251,
+            "generator_cores_approx": 0.33281183592459035,
+            "max_rss_mib": 9.74609375,
+            "max_handles": 204,
+            "max_threads": 27,
+            "completed_requests": 43139
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-1k-thread-pool-after\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 8693.272694722944,
+            "p99_ms": 3.0872,
+            "p50_ms": 1.7619999999999998,
+            "server_cores": 3.7115573558314496,
+            "cpu_us_per_request": 426.9459254492807,
+            "generator_cores_approx": 0.4229239319731726,
+            "max_rss_mib": 9.77734375,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 43514
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-1k-thread-pool-after\\static-1k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-1k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 8377.255213464814,
+            "p99_ms": 3.2023,
+            "p50_ms": 1.8373,
+            "server_cores": 3.9098188026578895,
+            "cpu_us_per_request": 466.71835858284624,
+            "generator_cores_approx": 0.41973879612750614,
+            "max_rss_mib": 9.75,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 41915
+          }
+        ],
+        "requests_per_second": {
+          "median": 8612.29096469222,
+          "min": 7058.3130951282155,
+          "max": 8693.272694722944
+        },
+        "p99_ms": {
+          "median": 3.0912,
+          "min": 3.0135,
+          "max": 3.8016
+        },
+        "p50_ms": {
+          "median": 1.7922,
+          "min": 1.7619999999999998,
+          "max": 2.1748000000000003
+        },
+        "server_cores": {
+          "median": 3.79880515073479,
+          "min": 3.7115573558314496,
+          "max": 3.9098188026578895
+        },
+        "cpu_us_per_request": {
+          "median": 440.7989290433251,
+          "min": 426.9459254492807,
+          "max": 545.1815326277662
+        },
+        "generator_cores_approx": {
+          "median": 0.3983633384590785,
+          "min": 0.33281183592459035,
+          "max": 0.4229239319731726
+        },
+        "max_rss_mib": {
+          "median": 9.75,
+          "min": 9.73046875,
+          "max": 9.7890625
+        },
+        "max_handles": {
+          "median": 203,
+          "min": 203,
+          "max": 207
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 29.272626300908545,
+          "min": 25.559439844161226,
+          "max": 30.45662158168345
+        },
+        "p99_ms": {
+          "median_percent_change": -20.999027585853934,
+          "min": -25.30117495414209,
+          "max": -14.591668000213364
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -11.79386048374248,
+          "min": -17.64447937591511,
+          "max": -4.803705791346169
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "static-64k",
+      "driver": "event-loop",
+      "before": {
+        "label": "before",
+        "case": "static-64k",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-64k-event-loop-before\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 5700.301150281666,
+            "p99_ms": 4.3231,
+            "p50_ms": 2.7238,
+            "server_cores": 3.376261236521616,
+            "cpu_us_per_request": 592.2952397619881,
+            "generator_cores_approx": 0.33806784119841804,
+            "max_rss_mib": 9.02734375,
+            "max_handles": 122,
+            "max_threads": 11,
+            "completed_requests": 28570
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-64k-event-loop-before\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 5765.177719900051,
+            "p99_ms": 4.2394,
+            "p50_ms": 2.6984,
+            "server_cores": 3.4829993212859764,
+            "cpu_us_per_request": 604.1443109834192,
+            "generator_cores_approx": 0.3625520023682875,
+            "max_rss_mib": 8.96875,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 28889
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-64k-event-loop-before\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6662.496994943524,
+            "p99_ms": 3.9053999999999998,
+            "p50_ms": 2.2913,
+            "server_cores": 3.425889072766757,
+            "cpu_us_per_request": 514.2049708040125,
+            "generator_cores_approx": 0.3629321110270521,
+            "max_rss_mib": 9.08203125,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 33395
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-64k-event-loop-before\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6505.426815762974,
+            "p99_ms": 3.8497000000000003,
+            "p50_ms": 2.3685,
+            "server_cores": 3.4990623534880587,
+            "cpu_us_per_request": 537.8682218067008,
+            "generator_cores_approx": 0.41386704578911226,
+            "max_rss_mib": 9.0234375,
+            "max_handles": 122,
+            "max_threads": 11,
+            "completed_requests": 32623
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-64k-event-loop-before\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 6549.6465809505535,
+            "p99_ms": 4.1501,
+            "p50_ms": 2.3257999999999996,
+            "server_cores": 3.4950855162156977,
+            "cpu_us_per_request": 533.6296352815505,
+            "generator_cores_approx": 0.363068823331783,
+            "max_rss_mib": 8.83203125,
+            "max_handles": 124,
+            "max_threads": 11,
+            "completed_requests": 32765
+          }
+        ],
+        "requests_per_second": {
+          "median": 6505.426815762974,
+          "min": 5700.301150281666,
+          "max": 6662.496994943524
+        },
+        "p99_ms": {
+          "median": 4.1501,
+          "min": 3.8497000000000003,
+          "max": 4.3231
+        },
+        "p50_ms": {
+          "median": 2.3685,
+          "min": 2.2913,
+          "max": 2.7238
+        },
+        "server_cores": {
+          "median": 3.4829993212859764,
+          "min": 3.376261236521616,
+          "max": 3.4990623534880587
+        },
+        "cpu_us_per_request": {
+          "median": 537.8682218067008,
+          "min": 514.2049708040125,
+          "max": 604.1443109834192
+        },
+        "generator_cores_approx": {
+          "median": 0.3629321110270521,
+          "min": 0.33806784119841804,
+          "max": 0.41386704578911226
+        },
+        "max_rss_mib": {
+          "median": 9.0234375,
+          "min": 8.83203125,
+          "max": 9.08203125
+        },
+        "max_handles": {
+          "median": 123,
+          "min": 122,
+          "max": 124
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "static-64k",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-64k-event-loop-after\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 7215.792174953313,
+            "p99_ms": 3.4079,
+            "p50_ms": 2.1670000000000003,
+            "server_cores": 3.6659010083723333,
+            "cpu_us_per_request": 508.0386074722353,
+            "generator_cores_approx": 0.37167384825553307,
+            "max_rss_mib": 9.23046875,
+            "max_handles": 126,
+            "max_threads": 11,
+            "completed_requests": 36107
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-64k-event-loop-after\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 7268.6798646694815,
+            "p99_ms": 3.3519,
+            "p50_ms": 2.1461,
+            "server_cores": 3.675738049225594,
+            "cpu_us_per_request": 505.69541067451263,
+            "generator_cores_approx": 0.4560905614238677,
+            "max_rss_mib": 9.0390625,
+            "max_handles": 122,
+            "max_threads": 11,
+            "completed_requests": 36367
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-64k-event-loop-after\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 8382.769180575193,
+            "p99_ms": 3.0338000000000003,
+            "p50_ms": 1.8312000000000002,
+            "server_cores": 3.6221765236776804,
+            "cpu_us_per_request": 432.097848056117,
+            "generator_cores_approx": 0.4384001517689946,
+            "max_rss_mib": 9.12109375,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 42055
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-64k-event-loop-after\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 8237.542035677763,
+            "p99_ms": 3.2498,
+            "p50_ms": 1.8518000000000001,
+            "server_cores": 3.7443372889444375,
+            "cpu_us_per_request": 454.54545454545456,
+            "generator_cores_approx": 0.46023803836703203,
+            "max_rss_mib": 8.89453125,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 41250
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-64k-event-loop-after\\static-64k-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 8279.082221012002,
+            "p99_ms": 2.9955,
+            "p50_ms": 1.8692,
+            "server_cores": 3.6432160352985536,
+            "cpu_us_per_request": 440.050713115544,
+            "generator_cores_approx": 0.38279459366912344,
+            "max_rss_mib": 9.15234375,
+            "max_handles": 123,
+            "max_threads": 11,
+            "completed_requests": 41508
+          }
+        ],
+        "requests_per_second": {
+          "median": 8237.542035677763,
+          "min": 7215.792174953313,
+          "max": 8382.769180575193
+        },
+        "p99_ms": {
+          "median": 3.2498,
+          "min": 2.9955,
+          "max": 3.4079
+        },
+        "p50_ms": {
+          "median": 1.8692,
+          "min": 1.8312000000000002,
+          "max": 2.1670000000000003
+        },
+        "server_cores": {
+          "median": 3.6659010083723333,
+          "min": 3.6221765236776804,
+          "max": 3.7443372889444375
+        },
+        "cpu_us_per_request": {
+          "median": 454.54545454545456,
+          "min": 432.097848056117,
+          "max": 508.0386074722353
+        },
+        "generator_cores_approx": {
+          "median": 0.4384001517689946,
+          "min": 0.37167384825553307,
+          "max": 0.46023803836703203
+        },
+        "max_rss_mib": {
+          "median": 9.12109375,
+          "min": 8.89453125,
+          "max": 9.23046875
+        },
+        "max_handles": {
+          "median": 123,
+          "min": 122,
+          "max": 126
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 26.405022296797796,
+          "min": 25.820232068205982,
+          "max": 26.62569680620781
+        },
+        "p99_ms": {
+          "median_percent_change": -21.16999375448174,
+          "min": -27.82101636105154,
+          "max": -15.583032444086564
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -15.967780828628042,
+          "min": -17.536305328438683,
+          "max": -14.225444783856622
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "static-64k",
+      "driver": "thread-pool",
+      "before": {
+        "label": "before",
+        "case": "static-64k",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-64k-thread-pool-before\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 5662.336819841499,
+            "p99_ms": 4.1808000000000005,
+            "p50_ms": 2.7601,
+            "server_cores": 3.6201007005159496,
+            "cpu_us_per_request": 639.3298059964727,
+            "generator_cores_approx": 0.33435868625258985,
+            "max_rss_mib": 10.1015625,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 28350
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-64k-thread-pool-before\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6130.249003271095,
+            "p99_ms": 4.5915,
+            "p50_ms": 2.4824,
+            "server_cores": 3.5776074146335004,
+            "cpu_us_per_request": 583.5990369599167,
+            "generator_cores_approx": 0.4065277160465711,
+            "max_rss_mib": 10.0546875,
+            "max_handles": 204,
+            "max_threads": 27,
+            "completed_requests": 30736
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-64k-thread-pool-before\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6435.084075187101,
+            "p99_ms": 3.8839,
+            "p50_ms": 2.4019000000000004,
+            "server_cores": 3.736124898384881,
+            "cpu_us_per_request": 580.5868042642866,
+            "generator_cores_approx": 0.4074237579270587,
+            "max_rss_mib": 10.125,
+            "max_handles": 204,
+            "max_threads": 27,
+            "completed_requests": 32268
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-64k-thread-pool-before\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6438.3567896014,
+            "p99_ms": 3.8677,
+            "p50_ms": 2.4042,
+            "server_cores": 3.575037918322038,
+            "cpu_us_per_request": 555.2717929668153,
+            "generator_cores_approx": 0.35483074247560376,
+            "max_rss_mib": 10.0,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 32304
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-64k-thread-pool-before\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6514.484168906158,
+            "p99_ms": 3.8151,
+            "p50_ms": 2.3691,
+            "server_cores": 3.5674378124988286,
+            "cpu_us_per_request": 547.6163146617693,
+            "generator_cores_approx": 0.3455839730646571,
+            "max_rss_mib": 9.921875,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 32670
+          }
+        ],
+        "requests_per_second": {
+          "median": 6435.084075187101,
+          "min": 5662.336819841499,
+          "max": 6514.484168906158
+        },
+        "p99_ms": {
+          "median": 3.8839,
+          "min": 3.8151,
+          "max": 4.5915
+        },
+        "p50_ms": {
+          "median": 2.4042,
+          "min": 2.3691,
+          "max": 2.7601
+        },
+        "server_cores": {
+          "median": 3.5776074146335004,
+          "min": 3.5674378124988286,
+          "max": 3.736124898384881
+        },
+        "cpu_us_per_request": {
+          "median": 580.5868042642866,
+          "min": 547.6163146617693,
+          "max": 639.3298059964727
+        },
+        "generator_cores_approx": {
+          "median": 0.35483074247560376,
+          "min": 0.33435868625258985,
+          "max": 0.4074237579270587
+        },
+        "max_rss_mib": {
+          "median": 10.0546875,
+          "min": 9.921875,
+          "max": 10.125
+        },
+        "max_handles": {
+          "median": 203,
+          "min": 203,
+          "max": 204
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "static-64k",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-static-64k-thread-pool-after\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 6946.9859307681945,
+            "p99_ms": 3.5363,
+            "p50_ms": 2.2295000000000003,
+            "server_cores": 3.7575999234431703,
+            "cpu_us_per_request": 540.8964349273781,
+            "generator_cores_approx": 0.41396254953018213,
+            "max_rss_mib": 10.03515625,
+            "max_handles": 204,
+            "max_threads": 27,
+            "completed_requests": 34838
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-static-64k-thread-pool-after\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 7855.107585795306,
+            "p99_ms": 3.1677,
+            "p50_ms": 1.9651999999999998,
+            "server_cores": 3.9425516830283516,
+            "cpu_us_per_request": 501.90931695930175,
+            "generator_cores_approx": 0.47056975084966535,
+            "max_rss_mib": 10.15234375,
+            "max_handles": 205,
+            "max_threads": 27,
+            "completed_requests": 39412
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-static-64k-thread-pool-after\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 7970.19201477514,
+            "p99_ms": 3.2935,
+            "p50_ms": 1.9247999999999998,
+            "server_cores": 3.9707292998114134,
+            "cpu_us_per_request": 498.1974452372636,
+            "generator_cores_approx": 0.5056595946946948,
+            "max_rss_mib": 10.17578125,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 40082
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-static-64k-thread-pool-after\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 7783.43242354536,
+            "p99_ms": 3.4034,
+            "p50_ms": 1.9748999999999999,
+            "server_cores": 3.9692397423502586,
+            "cpu_us_per_request": 509.96006984567185,
+            "generator_cores_approx": 0.5322068550263411,
+            "max_rss_mib": 9.98046875,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 38943
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-static-64k-thread-pool-after\\static-64k-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "static-64k",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 8034.046142744211,
+            "p99_ms": 3.0546,
+            "p50_ms": 1.9305999999999999,
+            "server_cores": 3.7662711651333978,
+            "cpu_us_per_request": 468.7888391747452,
+            "generator_cores_approx": 0.37911983744008587,
+            "max_rss_mib": 10.1015625,
+            "max_handles": 203,
+            "max_threads": 27,
+            "completed_requests": 40230
+          }
+        ],
+        "requests_per_second": {
+          "median": 7855.107585795306,
+          "min": 6946.9859307681945,
+          "max": 8034.046142744211
+        },
+        "p99_ms": {
+          "median": 3.2935,
+          "min": 3.0546,
+          "max": 3.5363
+        },
+        "p50_ms": {
+          "median": 1.9651999999999998,
+          "min": 1.9247999999999998,
+          "max": 2.2295000000000003
+        },
+        "server_cores": {
+          "median": 3.9425516830283516,
+          "min": 3.7575999234431703,
+          "max": 3.9707292998114134
+        },
+        "cpu_us_per_request": {
+          "median": 501.90931695930175,
+          "min": 468.7888391747452,
+          "max": 540.8964349273781
+        },
+        "generator_cores_approx": {
+          "median": 0.47056975084966535,
+          "min": 0.37911983744008587,
+          "max": 0.5322068550263411
+        },
+        "max_rss_mib": {
+          "median": 10.1015625,
+          "min": 9.98046875,
+          "max": 10.17578125
+        },
+        "max_handles": {
+          "median": 203,
+          "min": 203,
+          "max": 205
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 23.32589863509027,
+          "min": 20.891598243147904,
+          "max": 28.136843733489904
+        },
+        "p99_ms": {
+          "median_percent_change": -15.41570991197857,
+          "min": -31.009474028095397,
+          "max": -12.00455050805389
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -14.190704718379866,
+          "min": -15.39633693687632,
+          "max": -8.16027820881069
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "proxy-off",
+      "driver": "event-loop",
+      "before": {
+        "label": "before",
+        "case": "proxy-off",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 200,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-proxy-off-event-loop-before\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.69291180134636,
+            "p99_ms": 2.2398000000000002,
+            "p50_ms": 1.0106,
+            "server_cores": 0.05922460858244226,
+            "cpu_us_per_request": 296.57842157842157,
+            "generator_cores_approx": 0.0355324547913551,
+            "max_rss_mib": 6.80859375,
+            "max_handles": 106,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-proxy-off-event-loop-before\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.67320617361625,
+            "p99_ms": 2.4257,
+            "p50_ms": 0.9387,
+            "server_cores": 0.08103620380422738,
+            "cpu_us_per_request": 405.84415584415586,
+            "generator_cores_approx": 0.022466743006842545,
+            "max_rss_mib": 6.78515625,
+            "max_handles": 108,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-proxy-off-event-loop-before\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.98972680144644,
+            "p99_ms": 2.7946999999999997,
+            "p50_ms": 0.9269999999999999,
+            "server_cores": 0.08740809737825456,
+            "cpu_us_per_request": 437.06293706293707,
+            "generator_cores_approx": 0.019630811340681308,
+            "max_rss_mib": 6.8046875,
+            "max_handles": 106,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-proxy-off-event-loop-before\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.59936558906938,
+            "p99_ms": 1.8256999999999999,
+            "p50_ms": 0.8630000000000001,
+            "server_cores": 0.0810062360345249,
+            "cpu_us_per_request": 405.84415584415586,
+            "generator_cores_approx": 0.034213312878802436,
+            "max_rss_mib": 6.8203125,
+            "max_handles": 106,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-proxy-off-event-loop-before\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.55233891937252,
+            "p99_ms": 1.8661,
+            "p50_ms": 0.8951,
+            "server_cores": 0.06873358367087605,
+            "cpu_us_per_request": 344.43887775551104,
+            "generator_cores_approx": 0.025631113891933212,
+            "max_rss_mib": 6.80859375,
+            "max_handles": 106,
+            "max_threads": 11,
+            "completed_requests": 998
+          }
+        ],
+        "requests_per_second": {
+          "median": 199.67320617361625,
+          "min": 199.55233891937252,
+          "max": 199.98972680144644
+        },
+        "p99_ms": {
+          "median": 2.2398000000000002,
+          "min": 1.8256999999999999,
+          "max": 2.7946999999999997
+        },
+        "p50_ms": {
+          "median": 0.9269999999999999,
+          "min": 0.8630000000000001,
+          "max": 1.0106
+        },
+        "server_cores": {
+          "median": 0.0810062360345249,
+          "min": 0.05922460858244226,
+          "max": 0.08740809737825456
+        },
+        "cpu_us_per_request": {
+          "median": 405.84415584415586,
+          "min": 296.57842157842157,
+          "max": 437.06293706293707
+        },
+        "generator_cores_approx": {
+          "median": 0.025631113891933212,
+          "min": 0.019630811340681308,
+          "max": 0.0355324547913551
+        },
+        "max_rss_mib": {
+          "median": 6.80859375,
+          "min": 6.78515625,
+          "max": 6.8203125
+        },
+        "max_handles": {
+          "median": 106,
+          "min": 106,
+          "max": 108
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "proxy-off",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 200,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-proxy-off-event-loop-after\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 200.01196475169766,
+            "p99_ms": 1.9815000000000003,
+            "p50_ms": 0.9645,
+            "server_cores": 0.056197167918496466,
+            "cpu_us_per_request": 280.969030969031,
+            "generator_cores_approx": 0.022420854077650487,
+            "max_rss_mib": 6.78125,
+            "max_handles": 108,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-proxy-off-event-loop-after\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.55927503564305,
+            "p99_ms": 2.5493,
+            "p50_ms": 1.0621999999999998,
+            "server_cores": 0.049839978780130634,
+            "cpu_us_per_request": 249.75024975024974,
+            "generator_cores_approx": 0.023141737519290925,
+            "max_rss_mib": 6.81640625,
+            "max_handles": 108,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-proxy-off-event-loop-after\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.94629442531735,
+            "p99_ms": 1.7219,
+            "p50_ms": 0.8371999999999999,
+            "server_cores": 0.09997314721265867,
+            "cpu_us_per_request": 500.0,
+            "generator_cores_approx": 0.0357479530435716,
+            "max_rss_mib": 6.78125,
+            "max_handles": 106,
+            "max_threads": 11,
+            "completed_requests": 1000
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-proxy-off-event-loop-after\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.9657880710639,
+            "p99_ms": 1.8351000000000002,
+            "p50_ms": 0.9339,
+            "server_cores": 0.1030043551190233,
+            "cpu_us_per_request": 515.1098901098901,
+            "generator_cores_approx": 0.030063443968111555,
+            "max_rss_mib": 6.80859375,
+            "max_handles": 105,
+            "max_threads": 11,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-proxy-off-event-loop-after\\proxy-off-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 200,
+            "requests_per_second": 199.52542478663648,
+            "p99_ms": 1.8273,
+            "p50_ms": 0.8533,
+            "server_cores": 0.08105720381957107,
+            "cpu_us_per_request": 406.25,
+            "generator_cores_approx": 0.0388480683742409,
+            "max_rss_mib": 6.81640625,
+            "max_handles": 105,
+            "max_threads": 11,
+            "completed_requests": 1000
+          }
+        ],
+        "requests_per_second": {
+          "median": 199.94629442531735,
+          "min": 199.52542478663648,
+          "max": 200.01196475169766
+        },
+        "p99_ms": {
+          "median": 1.8351000000000002,
+          "min": 1.7219,
+          "max": 2.5493
+        },
+        "p50_ms": {
+          "median": 0.9339,
+          "min": 0.8371999999999999,
+          "max": 1.0621999999999998
+        },
+        "server_cores": {
+          "median": 0.08105720381957107,
+          "min": 0.049839978780130634,
+          "max": 0.1030043551190233
+        },
+        "cpu_us_per_request": {
+          "median": 406.25,
+          "min": 249.75024975024974,
+          "max": 515.1098901098901
+        },
+        "generator_cores_approx": {
+          "median": 0.030063443968111555,
+          "min": 0.022420854077650487,
+          "max": 0.0388480683742409
+        },
+        "max_rss_mib": {
+          "median": 6.80859375,
+          "min": 6.78125,
+          "max": 6.81640625
+        },
+        "max_handles": {
+          "median": 106,
+          "min": 105,
+          "max": 108
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": -0.013487254963673312,
+          "min": -0.05705880130664198,
+          "max": 0.18357898128238404
+        },
+        "p99_ms": {
+          "median_percent_change": -2.0792026150795895,
+          "min": -38.38694672057823,
+          "max": 5.0954363688832105
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": 14.399999999999991,
+          "min": -38.46153846153847,
+          "max": 26.923076923076916
+        }
+      },
+      "host_ipv4_active_opens_per_response": {
+        "before": [
+          1.0898502495840265,
+          1.0890924229808492,
+          1.0908333333333333,
+          1.0923460898502495,
+          1.0927318295739348
+        ],
+        "after": [
+          1.0924229808492922,
+          1.0908333333333333,
+          1.0915903413821815,
+          1.0915141430948418,
+          1.0915903413821815
+        ]
+      }
+    },
+    {
+      "case": "proxy-off",
+      "driver": "thread-pool",
+      "before": {
+        "label": "before",
+        "case": "proxy-off",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 200,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-proxy-off-thread-pool-before\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.4615098285907,
+            "p99_ms": 23.6362,
+            "p50_ms": 1.1245999999999998,
+            "server_cores": 0.1528655840465613,
+            "cpu_us_per_request": 766.3913913913914,
+            "generator_cores_approx": 0.06805895285722345,
+            "max_rss_mib": 9.12109375,
+            "max_handles": 189,
+            "max_threads": 27,
+            "completed_requests": 999
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-proxy-off-thread-pool-before\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.64814761892106,
+            "p99_ms": 20.3251,
+            "p50_ms": 1.0961,
+            "server_cores": 0.09367874794431356,
+            "cpu_us_per_request": 469.2192192192192,
+            "generator_cores_approx": 0.020091877422979968,
+            "max_rss_mib": 9.00390625,
+            "max_handles": 188,
+            "max_threads": 27,
+            "completed_requests": 999
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-proxy-off-thread-pool-before\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.2704268843293,
+            "p99_ms": 24.3797,
+            "p50_ms": 0.9775999999999999,
+            "server_cores": 0.1371355540370134,
+            "cpu_us_per_request": 688.1881881881882,
+            "generator_cores_approx": 0.015987144964274957,
+            "max_rss_mib": 8.96484375,
+            "max_handles": 191,
+            "max_threads": 27,
+            "completed_requests": 999
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-proxy-off-thread-pool-before\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.8616661770289,
+            "p99_ms": 24.174500000000002,
+            "p50_ms": 0.9917999999999999,
+            "server_cores": 0.12478875260803503,
+            "cpu_us_per_request": 624.3756243756244,
+            "generator_cores_approx": 0.01607965547451856,
+            "max_rss_mib": 8.98828125,
+            "max_handles": 192,
+            "max_threads": 27,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-proxy-off-thread-pool-before\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 200.12682562747756,
+            "p99_ms": 23.586,
+            "p50_ms": 0.9970999999999999,
+            "server_cores": 0.17805989418029192,
+            "cpu_us_per_request": 889.7352647352648,
+            "generator_cores_approx": 0.029744367231166333,
+            "max_rss_mib": 8.94140625,
+            "max_handles": 189,
+            "max_threads": 27,
+            "completed_requests": 1001
+          }
+        ],
+        "requests_per_second": {
+          "median": 199.64814761892106,
+          "min": 199.2704268843293,
+          "max": 200.12682562747756
+        },
+        "p99_ms": {
+          "median": 23.6362,
+          "min": 20.3251,
+          "max": 24.3797
+        },
+        "p50_ms": {
+          "median": 0.9970999999999999,
+          "min": 0.9775999999999999,
+          "max": 1.1245999999999998
+        },
+        "server_cores": {
+          "median": 0.1371355540370134,
+          "min": 0.09367874794431356,
+          "max": 0.17805989418029192
+        },
+        "cpu_us_per_request": {
+          "median": 688.1881881881882,
+          "min": 469.2192192192192,
+          "max": 889.7352647352648
+        },
+        "generator_cores_approx": {
+          "median": 0.020091877422979968,
+          "min": 0.015987144964274957,
+          "max": 0.06805895285722345
+        },
+        "max_rss_mib": {
+          "median": 8.98828125,
+          "min": 8.94140625,
+          "max": 9.12109375
+        },
+        "max_handles": {
+          "median": 189,
+          "min": 188,
+          "max": 192
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "proxy-off",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 200,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-proxy-off-thread-pool-after\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.60658340836542,
+            "p99_ms": 1.6481,
+            "p50_ms": 0.919,
+            "server_cores": 0.12163526176447269,
+            "cpu_us_per_request": 609.375,
+            "generator_cores_approx": 0.02631881475199464,
+            "max_rss_mib": 7.72265625,
+            "max_handles": 217,
+            "max_threads": 27,
+            "completed_requests": 1000
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-proxy-off-thread-pool-after\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.69620216764238,
+            "p99_ms": 16.0627,
+            "p50_ms": 0.8786,
+            "server_cores": 0.0249620252709553,
+            "cpu_us_per_request": 125.0,
+            "generator_cores_approx": 0.006416602067791157,
+            "max_rss_mib": 7.6875,
+            "max_handles": 219,
+            "max_threads": 27,
+            "completed_requests": 1000
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-proxy-off-thread-pool-after\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 200.02016986608018,
+            "p99_ms": 1.7123,
+            "p50_ms": 0.8019999999999999,
+            "server_cores": 0.10303236771947812,
+            "cpu_us_per_request": 515.1098901098901,
+            "generator_cores_approx": 0.019895256936710702,
+            "max_rss_mib": 7.67578125,
+            "max_handles": 218,
+            "max_threads": 27,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-proxy-off-thread-pool-after\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.56604652265335,
+            "p99_ms": 1.8445,
+            "p50_ms": 0.7601,
+            "server_cores": 0.10591354866649311,
+            "cpu_us_per_request": 530.7192807192807,
+            "generator_cores_approx": 0.016107496182306162,
+            "max_rss_mib": 7.73828125,
+            "max_handles": 218,
+            "max_threads": 27,
+            "completed_requests": 1001
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-proxy-off-thread-pool-after\\proxy-off-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "proxy-off",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 200,
+            "requests_per_second": 199.62616154600252,
+            "p99_ms": 4.8648,
+            "p50_ms": 0.8216,
+            "server_cores": 0.11552439904282553,
+            "cpu_us_per_request": 578.7037037037037,
+            "generator_cores_approx": 0.02539193518418046,
+            "max_rss_mib": 7.7265625,
+            "max_handles": 218,
+            "max_threads": 27,
+            "completed_requests": 999
+          }
+        ],
+        "requests_per_second": {
+          "median": 199.62616154600252,
+          "min": 199.56604652265335,
+          "max": 200.02016986608018
+        },
+        "p99_ms": {
+          "median": 1.8445,
+          "min": 1.6481,
+          "max": 16.0627
+        },
+        "p50_ms": {
+          "median": 0.8216,
+          "min": 0.7601,
+          "max": 0.919
+        },
+        "server_cores": {
+          "median": 0.10591354866649311,
+          "min": 0.0249620252709553,
+          "max": 0.12163526176447269
+        },
+        "cpu_us_per_request": {
+          "median": 530.7192807192807,
+          "min": 125.0,
+          "max": 609.375
+        },
+        "generator_cores_approx": {
+          "median": 0.019895256936710702,
+          "min": 0.006416602067791157,
+          "max": 0.02631881475199464
+        },
+        "max_rss_mib": {
+          "median": 7.72265625,
+          "min": 7.67578125,
+          "max": 7.73828125
+        },
+        "max_handles": {
+          "median": 218,
+          "min": 217,
+          "max": 219
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 0.024069619124666985,
+          "min": -0.2501733987461452,
+          "max": 0.37624397833306844
+        },
+        "p99_ms": {
+          "median_percent_change": -92.3700593600695,
+          "min": -93.02722095768355,
+          "max": -20.971114533261826
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -25.14985014985015,
+          "min": -73.36,
+          "max": -15.000000000000002
+        }
+      },
+      "host_ipv4_active_opens_per_response": {
+        "before": [
+          3.0925,
+          3.0918196994991654,
+          3.091743119266055,
+          3.0932556203164028,
+          3.090682196339434
+        ],
+        "after": [
+          1.1167639699749792,
+          1.1166666666666667,
+          1.1174021648626145,
+          1.1183333333333334,
+          1.1176961602671118
+        ]
+      }
+    },
+    {
+      "case": "cache-warm",
+      "driver": "event-loop",
+      "before": {
+        "label": "before",
+        "case": "cache-warm",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 16901.088278031722,
+            "p99_ms": 2.118,
+            "p50_ms": 0.8942000000000001,
+            "server_cores": 0.9935646017174138,
+            "cpu_us_per_request": 58.78701923643955,
+            "generator_cores_approx": 1.0940965418966506,
+            "max_rss_mib": 6.9765625,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 84787
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 17618.710345034506,
+            "p99_ms": 2.0128,
+            "p50_ms": 0.8589,
+            "server_cores": 0.9881074602883788,
+            "cpu_us_per_request": 56.08284834348604,
+            "generator_cores_approx": 1.06858230722119,
+            "max_rss_mib": 7.0078125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 88318
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 22892.026477768148,
+            "p99_ms": 1.4799,
+            "p50_ms": 0.6171,
+            "server_cores": 0.9924938402461541,
+            "cpu_us_per_request": 43.355438244404695,
+            "generator_cores_approx": 1.214252538698186,
+            "max_rss_mib": 7.01953125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 114605
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 20360.713743323955,
+            "p99_ms": 1.6321,
+            "p50_ms": 0.7182,
+            "server_cores": 1.0019987133662278,
+            "cpu_us_per_request": 49.21235699287663,
+            "generator_cores_approx": 1.0402609671022753,
+            "max_rss_mib": 7.07421875,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 101918
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 22359.796363228055,
+            "p99_ms": 1.5007,
+            "p50_ms": 0.6539999999999999,
+            "server_cores": 0.9968434354510382,
+            "cpu_us_per_request": 44.581955007891004,
+            "generator_cores_approx": 1.1286108356014537,
+            "max_rss_mib": 7.03125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 112153
+          }
+        ],
+        "requests_per_second": {
+          "median": 20360.713743323955,
+          "min": 16901.088278031722,
+          "max": 22892.026477768148
+        },
+        "p99_ms": {
+          "median": 1.6321,
+          "min": 1.4799,
+          "max": 2.118
+        },
+        "p50_ms": {
+          "median": 0.7182,
+          "min": 0.6171,
+          "max": 0.8942000000000001
+        },
+        "server_cores": {
+          "median": 0.9935646017174138,
+          "min": 0.9881074602883788,
+          "max": 1.0019987133662278
+        },
+        "cpu_us_per_request": {
+          "median": 49.21235699287663,
+          "min": 43.355438244404695,
+          "max": 58.78701923643955
+        },
+        "generator_cores_approx": {
+          "median": 1.0940965418966506,
+          "min": 1.0402609671022753,
+          "max": 1.214252538698186
+        },
+        "max_rss_mib": {
+          "median": 7.01953125,
+          "min": 6.9765625,
+          "max": 7.07421875
+        },
+        "max_handles": {
+          "median": 99,
+          "min": 99,
+          "max": 99
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "cache-warm",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 20964.353060313457,
+            "p99_ms": 1.7931,
+            "p50_ms": 0.6844,
+            "server_cores": 0.9879366859663494,
+            "cpu_us_per_request": 47.12459683941127,
+            "generator_cores_approx": 1.1488061381478158,
+            "max_rss_mib": 7.046875,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 105107
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 17666.391300552845,
+            "p99_ms": 2.1021,
+            "p50_ms": 0.8231999999999999,
+            "server_cores": 0.9953307841016976,
+            "cpu_us_per_request": 56.34035650905967,
+            "generator_cores_approx": 1.0504656321387713,
+            "max_rss_mib": 7.0234375,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 88469
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 22949.148819066595,
+            "p99_ms": 1.5643,
+            "p50_ms": 0.6142,
+            "server_cores": 1.00567807088109,
+            "cpu_us_per_request": 43.82202053810175,
+            "generator_cores_approx": 1.1501215256310093,
+            "max_rss_mib": 7.0390625,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 114811
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 22553.594690373266,
+            "p99_ms": 1.5867,
+            "p50_ms": 0.6264000000000001,
+            "server_cores": 0.9898961790392206,
+            "cpu_us_per_request": 43.89083836208806,
+            "generator_cores_approx": 1.2393660681909233,
+            "max_rss_mib": 7.0390625,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 112851
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 20597.65456025736,
+            "p99_ms": 1.6158,
+            "p50_ms": 0.6804,
+            "server_cores": 0.989330777263799,
+            "cpu_us_per_request": 48.03123454515482,
+            "generator_cores_approx": 1.1064955778145154,
+            "max_rss_mib": 7.01953125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 103123
+          }
+        ],
+        "requests_per_second": {
+          "median": 20964.353060313457,
+          "min": 17666.391300552845,
+          "max": 22949.148819066595
+        },
+        "p99_ms": {
+          "median": 1.6158,
+          "min": 1.5643,
+          "max": 2.1021
+        },
+        "p50_ms": {
+          "median": 0.6804,
+          "min": 0.6142,
+          "max": 0.8231999999999999
+        },
+        "server_cores": {
+          "median": 0.9898961790392206,
+          "min": 0.9879366859663494,
+          "max": 1.00567807088109
+        },
+        "cpu_us_per_request": {
+          "median": 47.12459683941127,
+          "min": 43.82202053810175,
+          "max": 56.34035650905967
+        },
+        "generator_cores_approx": {
+          "median": 1.1488061381478158,
+          "min": 1.0504656321387713,
+          "max": 1.2393660681909233
+        },
+        "max_rss_mib": {
+          "median": 7.0390625,
+          "min": 7.01953125,
+          "max": 7.046875
+        },
+        "max_handles": {
+          "median": 99,
+          "min": 99,
+          "max": 99
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 0.27062681992371385,
+          "min": -7.8808490665354896,
+          "max": 24.041438725358443
+        },
+        "p99_ms": {
+          "median_percent_change": 4.436605723370435,
+          "min": -15.339943342776207,
+          "max": 7.669754114746441
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": 0.4591567175698419,
+          "min": -19.83843125320299,
+          "max": 7.7369409588549765
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "cache-warm",
+      "driver": "thread-pool",
+      "before": {
+        "label": "before",
+        "case": "cache-warm",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 86969.40393174966,
+            "p99_ms": 0.5201,
+            "p50_ms": 0.1463,
+            "server_cores": 7.2533378176714995,
+            "cpu_us_per_request": 83.40102943977456,
+            "generator_cores_approx": 3.4040917720960113,
+            "max_rss_mib": 8.1015625,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 435771
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 79870.98007666439,
+            "p99_ms": 0.5696,
+            "p50_ms": 0.1658,
+            "server_cores": 7.248132051754828,
+            "cpu_us_per_request": 90.74800440407377,
+            "generator_cores_approx": 3.357433693149104,
+            "max_rss_mib": 8.09375,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 399630
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 78972.34255753056,
+            "p99_ms": 0.5651999999999999,
+            "p50_ms": 0.16770000000000002,
+            "server_cores": 7.465586914605795,
+            "cpu_us_per_request": 94.53419605942663,
+            "generator_cores_approx": 3.407654104855171,
+            "max_rss_mib": 8.10546875,
+            "max_handles": 179,
+            "max_threads": 27,
+            "completed_requests": 396186
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 83284.44028158573,
+            "p99_ms": 0.49269999999999997,
+            "p50_ms": 0.16119999999999998,
+            "server_cores": 7.537872462275332,
+            "cpu_us_per_request": 90.50757184402862,
+            "generator_cores_approx": 3.4325961685707567,
+            "max_rss_mib": 8.19921875,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 418128
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 78332.28970620791,
+            "p99_ms": 0.5537,
+            "p50_ms": 0.1728,
+            "server_cores": 7.53814759084943,
+            "cpu_us_per_request": 96.23295347451108,
+            "generator_cores_approx": 3.4289327098565376,
+            "max_rss_mib": 8.0703125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 392602
+          }
+        ],
+        "requests_per_second": {
+          "median": 79870.98007666439,
+          "min": 78332.28970620791,
+          "max": 86969.40393174966
+        },
+        "p99_ms": {
+          "median": 0.5537,
+          "min": 0.49269999999999997,
+          "max": 0.5696
+        },
+        "p50_ms": {
+          "median": 0.1658,
+          "min": 0.1463,
+          "max": 0.1728
+        },
+        "server_cores": {
+          "median": 7.465586914605795,
+          "min": 7.248132051754828,
+          "max": 7.53814759084943
+        },
+        "cpu_us_per_request": {
+          "median": 90.74800440407377,
+          "min": 83.40102943977456,
+          "max": 96.23295347451108
+        },
+        "generator_cores_approx": {
+          "median": 3.407654104855171,
+          "min": 3.357433693149104,
+          "max": 3.4325961685707567
+        },
+        "max_rss_mib": {
+          "median": 8.1015625,
+          "min": 8.0703125,
+          "max": 8.19921875
+        },
+        "max_handles": {
+          "median": 180,
+          "min": 179,
+          "max": 180
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "cache-warm",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-1-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 84648.46749449833,
+            "p99_ms": 0.5035000000000001,
+            "p50_ms": 0.15239999999999998,
+            "server_cores": 7.137571746234523,
+            "cpu_us_per_request": 84.32015318763361,
+            "generator_cores_approx": 3.453813216937818,
+            "max_rss_mib": 8.02734375,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 423794
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-2-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 81710.72374269961,
+            "p99_ms": 0.5217,
+            "p50_ms": 0.1636,
+            "server_cores": 7.588157298089375,
+            "cpu_us_per_request": 92.86611292275248,
+            "generator_cores_approx": 3.5615032608286943,
+            "max_rss_mib": 8.0859375,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 409696
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-3-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 79573.32220008777,
+            "p99_ms": 0.5496,
+            "p50_ms": 0.1672,
+            "server_cores": 7.364408373638136,
+            "cpu_us_per_request": 92.54871067366359,
+            "generator_cores_approx": 3.422930107845786,
+            "max_rss_mib": 8.15625,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 398270
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-4-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 83678.90132674812,
+            "p99_ms": 0.5046,
+            "p50_ms": 0.1596,
+            "server_cores": 7.623043374820108,
+            "cpu_us_per_request": 91.09875074785892,
+            "generator_cores_approx": 3.3190702322790093,
+            "max_rss_mib": 8.0703125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 419531
+          },
+          {
+            "path": "C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\performance testing\\raw\\paired\\pair-5-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 83292.85750014361,
+            "p99_ms": 0.49879999999999997,
+            "p50_ms": 0.1614,
+            "server_cores": 7.712722076994476,
+            "cpu_us_per_request": 92.59764052375293,
+            "generator_cores_approx": 3.3493861665183844,
+            "max_rss_mib": 8.125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 417296
+          }
+        ],
+        "requests_per_second": {
+          "median": 83292.85750014361,
+          "min": 79573.32220008777,
+          "max": 84648.46749449833
+        },
+        "p99_ms": {
+          "median": 0.5046,
+          "min": 0.49879999999999997,
+          "max": 0.5496
+        },
+        "p50_ms": {
+          "median": 0.1614,
+          "min": 0.15239999999999998,
+          "max": 0.1672
+        },
+        "server_cores": {
+          "median": 7.588157298089375,
+          "min": 7.137571746234523,
+          "max": 7.712722076994476
+        },
+        "cpu_us_per_request": {
+          "median": 92.54871067366359,
+          "min": 84.32015318763361,
+          "max": 92.86611292275248
+        },
+        "generator_cores_approx": {
+          "median": 3.422930107845786,
+          "min": 3.3190702322790093,
+          "max": 3.5615032608286943
+        },
+        "max_rss_mib": {
+          "median": 8.0859375,
+          "min": 8.02734375,
+          "max": 8.15625
+        },
+        "max_handles": {
+          "median": 180,
+          "min": 180,
+          "max": 180
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 0.7610001464999128,
+          "min": -2.668681550436658,
+          "max": 6.332724107185861
+        },
+        "p99_ms": {
+          "median_percent_change": -3.191693905018256,
+          "min": -9.915116489073505,
+          "max": 2.415262837426435
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": 0.6531817082100932,
+          "min": -3.7776175618687846,
+          "max": 2.33405520329395
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    }
+  ],
+  "note": "Latency summaries are medians of per-trial percentiles, not a pooled percentile; generator CPU stops at last live sample."
+}

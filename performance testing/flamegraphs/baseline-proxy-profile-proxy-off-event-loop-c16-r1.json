@@ -1,0 +1,600 @@
+{
+  "capture": "performance testing\\raw\\baseline-proxy-profile\\proxy-off-event-loop-c16-r1\\profile.sleepy",
+  "capture_sha256": "0e8b24d4c414cdecb4a12474bd60e191af079ca9227b8741da318f04324cf17f",
+  "stats": "Filename: C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\performance-baseline\\Release\\httpserver.exe\nDuration: 10\nDate: Tue Oct 27 01:55:52 2026\nSamples: 9284\n",
+  "weighted_thread_microseconds": 109904719,
+  "folded_stacks": 34,
+  "scope": "elapsed thread time, INCLUDING waits; not CPU-event samples",
+  "inclusive": [
+    {
+      "function": "ntdll!RtlUserThreadStart",
+      "percent": 100.0
+    },
+    {
+      "function": "KERNEL32!BaseThreadInitThunk",
+      "percent": 100.0
+    },
+    {
+      "function": "ucrtbase!wcsrchr",
+      "percent": 54.54546405782631
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableSRW",
+      "percent": 54.5242966318853
+    },
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 54.513849400770496
+    },
+    {
+      "function": "KERNELBASE!SleepConditionVariableSRW",
+      "percent": 54.481627854396315
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::run",
+      "percent": 36.36363967228741
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::helpers::HelperPool::start'::`15'::<lambda_1> >,0>",
+      "percent": 36.36363967228741
+    },
+    {
+      "function": "MSVCP140!Cnd_wait",
+      "percent": 36.29980619849454
+    },
+    {
+      "function": "ntdll!NtWaitForWorkViaWorkerFactory",
+      "percent": 27.27271428627191
+    },
+    {
+      "function": "ntdll!TpCallbackMayRunLong",
+      "percent": 27.27271428627191
+    },
+    {
+      "function": "MSVCP140!Cnd_timedwait",
+      "percent": 18.181821655901782
+    },
+    {
+      "function": "ntdll!ZwRemoveIoCompletion",
+      "percent": 9.10076754757
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::event_loop::EventLoopDriver::Impl::start'::`8'::<lambda_1> >,0>",
+      "percent": 9.090913557588005
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_iteration",
+      "percent": 9.090913557588005
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::run_loop",
+      "percent": 9.090913557588005
+    },
+    {
+      "function": "mswsock!Tcpip6_WSHGetSockaddrType",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1> >,0>",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1>::operator()",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!std::condition_variable::wait_for<__int64,std::ratio<1,1000>,`observability::StopController::wait_for_stop'::`2'::<lambda_1> >",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!main",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!__scrt_common_main_seh",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!observability::StopController::wait_for_stop",
+      "percent": 9.090910827950891
+    },
+    {
+      "function": "httpserver!net::Poller::wait",
+      "percent": 8.570507331900826
+    },
+    {
+      "function": "mswsock!Tcpip4_WSHStringToAddress",
+      "percent": 8.560711574177265
+    },
+    {
+      "function": "WS2_32!WSAPoll",
+      "percent": 8.560060100786027
+    },
+    {
+      "function": "mswsock![00007FFCA8C78464]",
+      "percent": 8.538805326457366
+    },
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 8.538805326457366
+    },
+    {
+      "function": "mswsock![00007FFCA8C7951A]",
+      "percent": 8.538805326457366
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::process_runnable_sessions",
+      "percent": 0.49910868704372924
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::advance_session_turn",
+      "percent": 0.49910868704372924
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_work_action",
+      "percent": 0.3591419946217232
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 0.3246657679912725
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::try_next_connect_candidate",
+      "percent": 0.19449938268801725
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::start_connect_work",
+      "percent": 0.19449938268801725
+    },
+    {
+      "function": "httpserver!net::Socket::begin_connect",
+      "percent": 0.1511099810009068
+    },
+    {
+      "function": "mswsock!NSPStartup",
+      "percent": 0.14015321762480462
+    },
+    {
+      "function": "WS2_32!connect",
+      "percent": 0.14015321762480462
+    },
+    {
+      "function": "httpserver!net::Socket::write_some",
+      "percent": 0.11939705700898975
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 0.11939705700898975
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C414]",
+      "percent": 0.11939705700898975
+    },
+    {
+      "function": "httpserver!`concurrency::event_loop::EventLoopDriver::Impl::execute_work_action'::`2'::<lambda_2>::operator()<concurrency::UpstreamReadWork>",
+      "percent": 0.08807902051958297
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<10,concurrency::Action,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned _",
+      "percent": 0.08757585741154572
+    },
+    {
+      "function": "httpserver!http::HttpSession::on_event",
+      "percent": 0.08757585741154572
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::deliver_event",
+      "percent": 0.08757585741154572
+    },
+    {
+      "function": "httpserver!http::HttpSession::advance_transaction",
+      "percent": 0.0656841677562544
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WorkEvent>",
+      "percent": 0.04420374342615807
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseBody>",
+      "percent": 0.04403905532027246
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::body",
+      "percent": 0.04403905532027246
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::assign",
+      "percent": 0.04403905532027246
+    },
+    {
+      "function": "VCRUNTIME140!_NLG_Return2",
+      "percent": 0.04403905532027246
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "WS2_32!closesocket",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "mswsock![00007FFCA8C71924]",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::close_upstream_on_owner",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "mswsock![00007FFCA8C71301]",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "httpserver!net::Socket::Impl::close",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "httpserver!net::Socket::close",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "WS2_32!WSASocketW",
+      "percent": 0.04338940168711045
+    },
+    {
+      "function": "WS2_32!socket",
+      "percent": 0.04338940168711045
+    },
+    {
+      "function": "httpserver!net::create_tcp_socket",
+      "percent": 0.04338940168711045
+    },
+    {
+      "function": "MSVCP140!Mtx_lock",
+      "percent": 0.04266877748898116
+    },
+    {
+      "function": "ntdll!RtlAcquireSRWLockExclusive",
+      "percent": 0.04266877748898116
+    },
+    {
+      "function": "mswsock![00007FFCA8C746AB]",
+      "percent": 0.032469943351568005
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 0.032469943351568005
+    },
+    {
+      "function": "mswsock![00007FFCA8C74E38]",
+      "percent": 0.032469943351568005
+    },
+    {
+      "function": "WS2_32!recv",
+      "percent": 0.03228978730203568
+    },
+    {
+      "function": "mswsock![00007FFCA8C7B693]",
+      "percent": 0.03228978730203568
+    },
+    {
+      "function": "httpserver!net::Socket::read_some",
+      "percent": 0.03228978730203568
+    },
+    {
+      "function": "httpserver!net::Poller::wake",
+      "percent": 0.03195586169507426
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::publish",
+      "percent": 0.03195586169507426
+    },
+    {
+      "function": "httpserver!std::_Func_impl_no_alloc<`concurrency::event_loop::EventLoopDriver::Impl::bind_listener_locked'::`35'::<lambda_1>,void>::_Do_call",
+      "percent": 0.03195586169507426
+    },
+    {
+      "function": "httpserver!`concurrency::event_loop::EventLoopDriver::Impl::execute_work_action'::`2'::<lambda_2>::operator()<concurrency::UpstreamWriteWork>",
+      "percent": 0.022169202761894147
+    },
+    {
+      "function": "httpserver!std::vector<enum std::byte,std::allocator<enum std::byte> >::vector<enum std::byte,std::allocator<enum std::byte> >",
+      "percent": 0.022032720906187842
+    },
+    {
+      "function": "httpserver!http::HttpSession::process_parsed_input",
+      "percent": 0.021891689655291327
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::ReadDataEvent>",
+      "percent": 0.021891689655291327
+    },
+    {
+      "function": "httpserver!http::HttpSession::prepare_response",
+      "percent": 0.021891689655291327
+    },
+    {
+      "function": "httpserver!operator new",
+      "percent": 0.02183982655012293
+    },
+    {
+      "function": "ucrtbase!malloc_base",
+      "percent": 0.02183982655012293
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.02183982655012293
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::pump",
+      "percent": 0.021645112435981936
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_event",
+      "percent": 0.021645112435981936
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WriteCompleteEvent>",
+      "percent": 0.021480424330096327
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::drain",
+      "percent": 0.021297538643449878
+    },
+    {
+      "function": "httpserver!net::Socket::finish_connect",
+      "percent": 0.020820762027515854
+    },
+    {
+      "function": "mswsock![00007FFCA8C7994C]",
+      "percent": 0.020820762027515854
+    },
+    {
+      "function": "WS2_32!getsockopt",
+      "percent": 0.020820762027515854
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::step_connect_readiness",
+      "percent": 0.020820762027515854
+    },
+    {
+      "function": "mswsock![00007FFCA8C7A953]",
+      "percent": 0.020820762027515854
+    },
+    {
+      "function": "VCRUNTIME140!memmove",
+      "percent": 0.011118721844873648
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<concurrency::Cancellation>::`scalar deleting destructor'",
+      "percent": 0.010965862166482588
+    },
+    {
+      "function": "httpserver!std::shared_ptr<concurrency::helpers::HelperPool>::operator=",
+      "percent": 0.010965862166482588
+    },
+    {
+      "function": "mswsock![00007FFCA8C742BC]",
+      "percent": 0.010964042408406503
+    },
+    {
+      "function": "mswsock!Tcpip6_WSHSetSocketInformation",
+      "percent": 0.010964042408406503
+    },
+    {
+      "function": "ucrtbase!memcpy",
+      "percent": 0.010964042408406503
+    },
+    {
+      "function": "httpserver!net::Socket::set_nonblocking",
+      "percent": 0.010956763376102166
+    },
+    {
+      "function": "mswsock![00007FFCA8C71205]",
+      "percent": 0.010956763376102166
+    },
+    {
+      "function": "WS2_32!ioctlsocket",
+      "percent": 0.010956763376102166
+    },
+    {
+      "function": "mswsock![00007FFCA8C78440]",
+      "percent": 0.010949484343797831
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardFactory::create",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::ForwardTransaction",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Emplace_reallocate<http::HeaderField>",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!http::HeaderMap::add",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!proxy::end_to_end_fields",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!proxy::prepare_outbound",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperExecutor::submit",
+      "percent": 0.010924007730732654
+    },
+    {
+      "function": "httpserver!concurrency::event_loop::EventLoopDriver::Impl::submit_helper_work",
+      "percent": 0.010924007730732654
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::submit",
+      "percent": 0.010924007730732654
+    },
+    {
+      "function": "mswsock![00007FFCA8C743E7]",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "mswsock![00007FFCA8C746CD]",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::read",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<std::vector<enum std::byte,std::allocator<enum std::byte> > >::`scalar deleting destructor'",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "ucrtbase!free_base",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "ntdll!LdrFindEntryForAddress",
+      "percent": 0.010913999061314192
+    },
+    {
+      "function": "ntdll!RtlSetProcessPreferredUILanguages",
+      "percent": 0.010913999061314192
+    },
+    {
+      "function": "ntdll!NtAllocateVirtualMemory",
+      "percent": 0.010913999061314192
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_work",
+      "percent": 0.010725654100439491
+    },
+    {
+      "function": "httpserver!http::ResponseParser::consume_stream",
+      "percent": 0.010725654100439491
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::ResolveWork>",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "WS2_32!GetAddrInfoW",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "httpserver!net::resolve",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "httpserver!concurrency::ReferenceWorkExecutor::execute",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<11,void,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned __int64,9>,std::",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "ntdll!RtlIpv4StringToAddressW",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "WS2_32!getaddrinfo",
+      "percent": 0.010506373252271361
+    }
+  ],
+  "exclusive": [
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 54.513849400770496
+    },
+    {
+      "function": "ntdll!NtWaitForWorkViaWorkerFactory",
+      "percent": 27.27271428627191
+    },
+    {
+      "function": "ntdll!ZwRemoveIoCompletion",
+      "percent": 9.10076754757
+    },
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 8.538805326457366
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 0.3246657679912725
+    },
+    {
+      "function": "VCRUNTIME140!_NLG_Return2",
+      "percent": 0.04403905532027246
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 0.043470380921496195
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 0.032469943351568005
+    },
+    {
+      "function": "VCRUNTIME140!memmove",
+      "percent": 0.011118721844873648
+    },
+    {
+      "function": "httpserver!std::_Ref_count_obj2<concurrency::Cancellation>::`scalar deleting destructor'",
+      "percent": 0.010965862166482588
+    },
+    {
+      "function": "ucrtbase!memcpy",
+      "percent": 0.010964042408406503
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.010925827488808737
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::run",
+      "percent": 0.010924007730732654
+    },
+    {
+      "function": "ntdll!RtlFreeHeap",
+      "percent": 0.010919458335542444
+    },
+    {
+      "function": "ntdll!NtAllocateVirtualMemory",
+      "percent": 0.010913999061314192
+    },
+    {
+      "function": "httpserver!http::ResponseParser::consume_stream",
+      "percent": 0.010725654100439491
+    },
+    {
+      "function": "ntdll!RtlIpv4StringToAddressW",
+      "percent": 0.010506373252271361
+    },
+    {
+      "function": "httpserver!net::Poller::wake",
+      "percent": 0.010501823857081151
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableSRW",
+      "percent": 0.010447231114798628
+    },
+    {
+      "function": "WS2_32!WSAPoll",
+      "percent": 0.010305289984864071
+    }
+  ]
+}

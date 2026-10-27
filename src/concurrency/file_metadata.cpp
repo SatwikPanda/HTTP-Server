@@ -1,5 +1,7 @@
 #include "detail/file_metadata.hpp"
 
+#include <iterator>
+
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -23,10 +25,19 @@ core::Result<FileInfo> file_metadata(const std::filesystem::path& path, FileFail
     if (error) return fail("file absolute path");
     FileInfo info;
     auto prefix = absolute.root_path();
-    for (const auto& component : absolute.relative_path()) {
-        prefix /= component;
+    const auto components = absolute.relative_path();
 #ifdef _WIN32
-        const auto attributes = ::GetFileAttributesW(prefix.c_str());
+    WIN32_FILE_ATTRIBUTE_DATA final_attributes{};
+#endif
+    for (auto component = components.begin(); component != components.end(); ++component) {
+        prefix /= *component;
+#ifdef _WIN32
+        // The final component query also supplies type and size; do not issue
+        // separate status/file_size calls for data already returned by Windows.
+        const auto attributes = std::next(component) == components.end()
+            ? (::GetFileAttributesExW(prefix.c_str(), GetFileExInfoStandard, &final_attributes)
+                ? final_attributes.dwFileAttributes : INVALID_FILE_ATTRIBUTES)
+            : ::GetFileAttributesW(prefix.c_str());
         if (attributes == INVALID_FILE_ATTRIBUTES) {
             const auto code = ::GetLastError();
             error = std::error_code(static_cast<int>(code), std::system_category());
@@ -39,6 +50,15 @@ core::Result<FileInfo> file_metadata(const std::filesystem::path& path, FileFail
         if (std::filesystem::is_symlink(status)) { info.has_link_component = true; return info; }
 #endif
     }
+#ifdef _WIN32
+    if (components.empty() && !::GetFileAttributesExW(absolute.c_str(), GetFileExInfoStandard, &final_attributes)) {
+        const auto code = ::GetLastError();
+        error = std::error_code(static_cast<int>(code), std::system_category());
+        return fail("file attributes");
+    }
+    info.directory = (final_attributes.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    info.regular = !info.directory; // all reparse components were rejected above
+#else
     const auto status = std::filesystem::status(absolute, error);
     if (error) return fail("file status");
     if (!std::filesystem::exists(status)) {
@@ -46,11 +66,17 @@ core::Result<FileInfo> file_metadata(const std::filesystem::path& path, FileFail
     }
     info.regular = std::filesystem::is_regular_file(status);
     info.directory = std::filesystem::is_directory(status);
+#endif
     info.canonical_path = std::filesystem::canonical(absolute, error);
     if (error) return fail("file canonical path");
     if (info.regular) {
+#ifdef _WIN32
+        info.size = (static_cast<std::uint64_t>(final_attributes.nFileSizeHigh) << 32) |
+                    final_attributes.nFileSizeLow;
+#else
         info.size = std::filesystem::file_size(absolute, error);
         if (error) return fail("file size");
+#endif
     }
     const auto modified = std::filesystem::last_write_time(absolute, error);
     if (error) return fail("file time");

@@ -1,0 +1,14 @@
+{
+  "state": "complete",
+  "expected_trials": 20,
+  "current_source": "aa9f5920bed401b0aa0ea32f484cb3857c7a399d012df99bf227d3d39f4d44c1",
+  "baseline_source": "dd61ed1349d8a31de0d515d4ca66c9fd00b69e49ecbd72650e62f9609006fb79",
+  "before_sha256": "1a8f6b4c67defc7899024f119ebdf2a59b6f66c6917afa1be421880c407954b6",
+  "after_sha256": "99c0ae5e9bf9bd3716235c975afac4fb77df491d48325d5e20baafd7e0fb08dd",
+  "cases": "cache-warm",
+  "duration": 10.0,
+  "warmup": 2.0,
+  "repeats": 5,
+  "script_sha256": "bcddf799d5903c6a104630d76570bb11241573b97c9145e816fe352b430b1a28",
+  "trials": 20
+}

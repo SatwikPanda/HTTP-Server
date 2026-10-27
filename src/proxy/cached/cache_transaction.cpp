@@ -75,7 +75,9 @@ public:
                 selected_.reset(); finished_ = true;
                 return http::ResponseFinished{};
             }
-            const auto count = std::min({drained->body_capacity, services_->config.forwarding.limits.max_read_bytes, bytes.size() - offset_});
+            // A cached body is already resident: the upstream read limit need
+            // not fragment it into extra copies and downstream socket writes.
+            const auto count = std::min({drained->body_capacity, context_.response_window, bytes.size() - offset_});
             const auto segment = bytes.subspan(offset_, count);
             offset_ += count;
             return http::ResponseBody{std::make_shared<const concurrency::Bytes>(segment.begin(), segment.end())};

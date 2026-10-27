@@ -1,0 +1,504 @@
+{
+  "capture": "performance testing\\raw\\optimized-proxy-profile\\proxy-off-thread-pool-c16-r1\\profile.sleepy",
+  "capture_sha256": "f3ebc76cfd38c92df93c388254a3535585d4e84226c589e49847943969fab73f",
+  "stats": "Filename: C:\\Users\\PANDA\\Desktop\\personal-projects\\satwik\\httpserver\\build\\performance-optimized\\Release\\httpserver.exe\nDuration: 10.016\nDate: Tue Oct 27 02:14:16 2026\nSamples: 16875\n",
+  "weighted_thread_microseconds": 270033945,
+  "folded_stacks": 27,
+  "scope": "elapsed thread time, INCLUDING waits; not CPU-event samples",
+  "inclusive": [
+    {
+      "function": "KERNEL32!BaseThreadInitThunk",
+      "percent": 100.0
+    },
+    {
+      "function": "ntdll!RtlUserThreadStart",
+      "percent": 100.0
+    },
+    {
+      "function": "ucrtbase!wcsrchr",
+      "percent": 81.48155040285768
+    },
+    {
+      "function": "mswsock!Tcpip4_WSHStringToAddress",
+      "percent": 62.69294143741817
+    },
+    {
+      "function": "httpserver!net::Poller::wait",
+      "percent": 62.69294143741817
+    },
+    {
+      "function": "WS2_32!WSAPoll",
+      "percent": 62.69294143741817
+    },
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 62.669589928777285
+    },
+    {
+      "function": "mswsock![00007FFCA8C78464]",
+      "percent": 62.669589928777285
+    },
+    {
+      "function": "mswsock![00007FFCA8C7951A]",
+      "percent": 62.669589928777285
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::thread_pool::ThreadPoolDriver::start'::`11'::<lambda_2> >,0>",
+      "percent": 59.259380519734286
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_worker",
+      "percent": 59.259380519734286
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive",
+      "percent": 59.259380519734286
+    },
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 22.21624396147677
+    },
+    {
+      "function": "ntdll!RtlSleepConditionVariableSRW",
+      "percent": 22.21624396147677
+    },
+    {
+      "function": "KERNELBASE!SleepConditionVariableSRW",
+      "percent": 22.21624396147677
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::helpers::HelperPool::start'::`15'::<lambda_1> >,0>",
+      "percent": 14.81480485721897
+    },
+    {
+      "function": "httpserver!concurrency::helpers::HelperPool::run",
+      "percent": 14.81480485721897
+    },
+    {
+      "function": "MSVCP140!Cnd_wait",
+      "percent": 14.808878935572341
+    },
+    {
+      "function": "ntdll!TpCallbackMayRunLong",
+      "percent": 11.111084571237887
+    },
+    {
+      "function": "ntdll!NtWaitForWorkViaWorkerFactory",
+      "percent": 11.111084571237887
+    },
+    {
+      "function": "MSVCP140!Cnd_timedwait",
+      "percent": 7.407365025904428
+    },
+    {
+      "function": "ntdll!ZwRemoveIoCompletion",
+      "percent": 3.7995171310777245
+    },
+    {
+      "function": "mswsock!Tcpip6_WSHGetSockaddrType",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1>::operator()",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1> >,0>",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!__scrt_common_main_seh",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!main",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!observability::StopController::wait_for_stop",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!std::condition_variable::wait_for<__int64,std::ratio<1,1000>,`observability::StopController::wait_for_stop'::`2'::<lambda_1> >",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!std::thread::_Invoke<std::tuple<`concurrency::thread_pool::ThreadPoolDriver::start'::`20'::<lambda_3> >,0>",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::run_acceptor",
+      "percent": 3.703682512952214
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<11,void,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned __int64,9>,std::",
+      "percent": 0.3361151502637937
+    },
+    {
+      "function": "httpserver!concurrency::ReferenceWorkExecutor::execute",
+      "percent": 0.3361151502637937
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::ConnectWork>",
+      "percent": 0.19174959651831922
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_4>::operator()",
+      "percent": 0.13786340824669283
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 0.13222374690707867
+    },
+    {
+      "function": "WS2_32!getsockopt",
+      "percent": 0.09583461812551011
+    },
+    {
+      "function": "mswsock![00007FFCA8C7994C]",
+      "percent": 0.09583461812551011
+    },
+    {
+      "function": "mswsock![00007FFCA8C7A953]",
+      "percent": 0.09583461812551011
+    },
+    {
+      "function": "httpserver!net::Socket::finish_connect",
+      "percent": 0.09583461812551011
+    },
+    {
+      "function": "mswsock!NSPStartup",
+      "percent": 0.0785819723516612
+    },
+    {
+      "function": "WS2_32!connect",
+      "percent": 0.0785819723516612
+    },
+    {
+      "function": "httpserver!net::Socket::begin_connect",
+      "percent": 0.0785819723516612
+    },
+    {
+      "function": "httpserver!http::HttpSession::on_event",
+      "percent": 0.035343334335244406
+    },
+    {
+      "function": "httpserver!std::_Visit_impl<10,concurrency::Action,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned _",
+      "percent": 0.035343334335244406
+    },
+    {
+      "function": "mswsock![00007FFCA8C7C414]",
+      "percent": 0.030108436922624673
+    },
+    {
+      "function": "WS2_32!send",
+      "percent": 0.030108436922624673
+    },
+    {
+      "function": "httpserver!net::Socket::write_some",
+      "percent": 0.030108436922624673
+    },
+    {
+      "function": "httpserver!http::HttpSession::advance_transaction",
+      "percent": 0.017999588903535813
+    },
+    {
+      "function": "mswsock![00007FFCA8C78440]",
+      "percent": 0.017558903566734917
+    },
+    {
+      "function": "mswsock![00007FFCA8C71924]",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "mswsock![00007FFCA8C71301]",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "WS2_32!closesocket",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "httpserver!net::Socket::Impl::close",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "httpserver!net::Socket::close",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WorkEvent>",
+      "percent": 0.0120729266092824
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.012040708437600318
+    },
+    {
+      "function": "ucrtbase!malloc_base",
+      "percent": 0.012040708437600318
+    },
+    {
+      "function": "httpserver!operator new",
+      "percent": 0.012040708437600318
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::pump",
+      "percent": 0.01170112150159492
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_event",
+      "percent": 0.01170112150159492
+    },
+    {
+      "function": "httpserver!http::HttpSession::prepare_response",
+      "percent": 0.011596319862675043
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::ReadDataEvent>",
+      "percent": 0.011596319862675043
+    },
+    {
+      "function": "httpserver!http::make_fixed_response",
+      "percent": 0.011596319862675043
+    },
+    {
+      "function": "httpserver!http::HttpSession::process_parsed_input",
+      "percent": 0.011596319862675043
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::serialize_head",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::_Reallocate_grow_by<`std::basic_string<char,std::char_traits<char>,std::allocator<char> >::append'::`2'::<lambda_1>,char const *,unsigned __int64>",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "httpserver!http::ResponseWriter::begin",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseHead>",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "httpserver!http::`anonymous namespace'::response_head",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "httpserver!http::serialize_response_head",
+      "percent": 0.006298467401940893
+    },
+    {
+      "function": "mswsock![00007FFCA8C7B693]",
+      "percent": 0.00597443406605788
+    },
+    {
+      "function": "httpserver!net::Socket::read_some",
+      "percent": 0.00597443406605788
+    },
+    {
+      "function": "WS2_32!recv",
+      "percent": 0.00597443406605788
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "mswsock![00007FFCA8C74E38]",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "mswsock![00007FFCA8C746AB]",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "httpserver!net::create_tcp_socket",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "WS2_32!WSASocketW",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "WS2_32!socket",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "httpserver!std::vector<enum std::byte,std::allocator<enum std::byte> >::vector<enum std::byte,std::allocator<enum std::byte> ><std::_Span_iterator<enum std::byte const >,0>",
+      "percent": 0.005926662294253413
+    },
+    {
+      "function": "VCRUNTIME140!memchr",
+      "percent": 0.005926662294253413
+    },
+    {
+      "function": "httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WriteCompleteEvent>",
+      "percent": 0.005926662294253413
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::`anonymous namespace'::WakeHandle::wake",
+      "percent": 0.005925921646628538
+    },
+    {
+      "function": "httpserver!net::Poller::wake",
+      "percent": 0.005925921646628538
+    },
+    {
+      "function": "httpserver!concurrency::helpers::CompletionPort::publish",
+      "percent": 0.005925921646628538
+    },
+    {
+      "function": "httpserver!std::chrono::operator<=><__int64,std::ratio<1,1000000000>,__int64,std::ratio<1,1000> >",
+      "percent": 0.005925180999003662
+    },
+    {
+      "function": "httpserver!snprintf",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "ucrtbase!_stdio_common_vsprintf",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "ucrtbase!__lc_locale_name_func",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "ucrtbase!free_base",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "ucrtbase!itoa",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "httpserver!http::format_http_date",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "mswsock![00007FFCA8C78627]",
+      "percent": 0.0057926050741509555
+    },
+    {
+      "function": "ntdll!RtlRestoreLastWin32Error",
+      "percent": 0.0057926050741509555
+    },
+    {
+      "function": "httpserver!http::ResponseParser::consume_stream",
+      "percent": 0.005774459207341507
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::_Reallocate_grow_by<`std::basic_string<char,std::char_traits<char>,std::allocator<char> >::push_back'::`2'::<lambda_1>,char>",
+      "percent": 0.005774459207341507
+    },
+    {
+      "function": "httpserver!http::ResponseParser::accept_byte",
+      "percent": 0.005774459207341507
+    },
+    {
+      "function": "httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_work",
+      "percent": 0.005774459207341507
+    },
+    {
+      "function": "httpserver!http::HttpSession::next_action",
+      "percent": 0.0057474255690335525
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.0057474255690335525
+    },
+    {
+      "function": "MSVCP140!Query_perf_counter",
+      "percent": 0.0057474255690335525
+    },
+    {
+      "function": "httpserver!core::RealSteadyClock::now",
+      "percent": 0.0057474255690335525
+    },
+    {
+      "function": "httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Emplace_reallocate<http::HeaderField>",
+      "percent": 0.0057422410356594246
+    },
+    {
+      "function": "httpserver!http::Response::set_body",
+      "percent": 0.0057422410356594246
+    },
+    {
+      "function": "httpserver!http::HeaderMap::set",
+      "percent": 0.0057422410356594246
+    },
+    {
+      "function": "httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::UpstreamWriteWork>",
+      "percent": 0.005733723587973356
+    }
+  ],
+  "exclusive": [
+    {
+      "function": "ntdll!NtWaitForSingleObject",
+      "percent": 62.669589928777285
+    },
+    {
+      "function": "ntdll!ZwWaitForAlertByThreadId",
+      "percent": 22.21624396147677
+    },
+    {
+      "function": "ntdll!NtWaitForWorkViaWorkerFactory",
+      "percent": 11.111084571237887
+    },
+    {
+      "function": "ntdll!ZwRemoveIoCompletion",
+      "percent": 3.7995171310777245
+    },
+    {
+      "function": "ntdll!NtDeviceIoControlFile",
+      "percent": 0.13222374690707867
+    },
+    {
+      "function": "ntdll!NtClose",
+      "percent": 0.012168470152891334
+    },
+    {
+      "function": "ntdll!RtlAllocateHeap",
+      "percent": 0.012040708437600318
+    },
+    {
+      "function": "httpserver!concurrency::thread_pool::ThreadPoolDriver::State::drive",
+      "percent": 0.006178112162898631
+    },
+    {
+      "function": "ntdll!NtCreateFile",
+      "percent": 0.005932957799064854
+    },
+    {
+      "function": "VCRUNTIME140!memchr",
+      "percent": 0.005926662294253413
+    },
+    {
+      "function": "httpserver!std::chrono::operator<=><__int64,std::ratio<1,1000000000>,__int64,std::ratio<1,1000> >",
+      "percent": 0.005925180999003662
+    },
+    {
+      "function": "ucrtbase!itoa",
+      "percent": 0.005854078827015619
+    },
+    {
+      "function": "ntdll!RtlRestoreLastWin32Error",
+      "percent": 0.0057926050741509555
+    },
+    {
+      "function": "httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::_Reallocate_grow_by<`std::basic_string<char,std::char_traits<char>,std::allocator<char> >::push_back'::`2'::<lambda_1>,char>",
+      "percent": 0.005774459207341507
+    },
+    {
+      "function": "ntdll!RtlQueryPerformanceCounter",
+      "percent": 0.0057474255690335525
+    }
+  ]
+}

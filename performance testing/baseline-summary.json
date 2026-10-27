@@ -1,0 +1,942 @@
+{
+  "groups": [
+    {
+      "label": "baseline",
+      "case": "cache-warm",
+      "driver": "event-loop",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-event-loop-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 20901.43038474896,
+          "p99_ms": 1.6126,
+          "p50_ms": 0.6954,
+          "server_cores": 0.991956393999326,
+          "cpu_us_per_request": 47.45878036764038,
+          "generator_cores_approx": 1.0886707318601367,
+          "max_rss_mib": 7.0234375,
+          "max_handles": 99,
+          "max_threads": 11,
+          "completed_requests": 209063
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-event-loop-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 19188.360824458778,
+          "p99_ms": 1.7832,
+          "p50_ms": 0.7575000000000001,
+          "server_cores": 0.9938240100272219,
+          "cpu_us_per_request": 51.79306451025389,
+          "generator_cores_approx": 1.1003844404315664,
+          "max_rss_mib": 7.02734375,
+          "max_handles": 99,
+          "max_threads": 11,
+          "completed_requests": 192171
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-event-loop-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 16294.64325645733,
+          "p99_ms": 2.0898000000000003,
+          "p50_ms": 0.9659,
+          "server_cores": 0.9947168933657593,
+          "cpu_us_per_request": 61.04563798729178,
+          "generator_cores_approx": 1.043301182473846,
+          "max_rss_mib": 7.0234375,
+          "max_handles": 99,
+          "max_threads": 11,
+          "completed_requests": 163044
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-event-loop-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 20856.50773038536,
+          "p99_ms": 1.4951,
+          "p50_ms": 0.6901,
+          "server_cores": 0.9975864789265573,
+          "cpu_us_per_request": 47.8309452293011,
+          "generator_cores_approx": 1.0562207175351617,
+          "max_rss_mib": 7.046875,
+          "max_handles": 99,
+          "max_threads": 11,
+          "completed_requests": 208743
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-event-loop-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 21199.282607237532,
+          "p99_ms": 1.527,
+          "p50_ms": 0.6972,
+          "server_cores": 0.9958876570590385,
+          "cpu_us_per_request": 46.977422562357745,
+          "generator_cores_approx": 1.0964916906550672,
+          "max_rss_mib": 7.04296875,
+          "max_handles": 99,
+          "max_threads": 11,
+          "completed_requests": 212203
+        }
+      ],
+      "requests_per_second": {
+        "median": 20856.50773038536,
+        "min": 16294.64325645733,
+        "max": 21199.282607237532
+      },
+      "p99_ms": {
+        "median": 1.6126,
+        "min": 1.4951,
+        "max": 2.0898000000000003
+      },
+      "p50_ms": {
+        "median": 0.6972,
+        "min": 0.6901,
+        "max": 0.9659
+      },
+      "server_cores": {
+        "median": 0.9947168933657593,
+        "min": 0.991956393999326,
+        "max": 0.9975864789265573
+      },
+      "cpu_us_per_request": {
+        "median": 47.8309452293011,
+        "min": 46.977422562357745,
+        "max": 61.04563798729178
+      },
+      "generator_cores_approx": {
+        "median": 1.0886707318601367,
+        "min": 1.043301182473846,
+        "max": 1.1003844404315664
+      },
+      "max_rss_mib": {
+        "median": 7.02734375,
+        "min": 7.0234375,
+        "max": 7.046875
+      },
+      "max_handles": {
+        "median": 99,
+        "min": 99,
+        "max": 99
+      },
+      "max_threads": {
+        "median": 11,
+        "min": 11,
+        "max": 11
+      }
+    },
+    {
+      "label": "baseline",
+      "case": "cache-warm",
+      "driver": "thread-pool",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-thread-pool-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 101447.30638700645,
+          "p99_ms": 0.3837,
+          "p50_ms": 0.1304,
+          "server_cores": 7.833590556269342,
+          "cpu_us_per_request": 77.21831988702937,
+          "generator_cores_approx": 3.556798379540095,
+          "max_rss_mib": 8.18359375,
+          "max_handles": 180,
+          "max_threads": 27,
+          "completed_requests": 1014777
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-thread-pool-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 82515.23022066931,
+          "p99_ms": 0.5584,
+          "p50_ms": 0.15990000000000001,
+          "server_cores": 7.10580285187014,
+          "cpu_us_per_request": 86.11504606927947,
+          "generator_cores_approx": 3.231588985633876,
+          "max_rss_mib": 8.1875,
+          "max_handles": 180,
+          "max_threads": 27,
+          "completed_requests": 825930
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-thread-pool-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 83343.44912727005,
+          "p99_ms": 0.5192,
+          "p50_ms": 0.16110000000000002,
+          "server_cores": 7.259250125314425,
+          "cpu_us_per_request": 87.10042842394425,
+          "generator_cores_approx": 3.3874182065296723,
+          "max_rss_mib": 8.140625,
+          "max_handles": 180,
+          "max_threads": 27,
+          "completed_requests": 833987
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-thread-pool-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 86198.73260279025,
+          "p99_ms": 0.49160000000000004,
+          "p50_ms": 0.1545,
+          "server_cores": 7.859233158408822,
+          "cpu_us_per_request": 91.17573914485163,
+          "generator_cores_approx": 3.436390093191898,
+          "max_rss_mib": 8.18359375,
+          "max_handles": 180,
+          "max_threads": 27,
+          "completed_requests": 862517
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\cache-warm-thread-pool-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "cache-warm",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 88650.74075425904,
+          "p99_ms": 0.47909999999999997,
+          "p50_ms": 0.1483,
+          "server_cores": 7.0885652755878725,
+          "cpu_us_per_request": 79.9605870777489,
+          "generator_cores_approx": 3.3691965446802956,
+          "max_rss_mib": 8.1328125,
+          "max_handles": 179,
+          "max_threads": 27,
+          "completed_requests": 886765
+        }
+      ],
+      "requests_per_second": {
+        "median": 86198.73260279025,
+        "min": 82515.23022066931,
+        "max": 101447.30638700645
+      },
+      "p99_ms": {
+        "median": 0.49160000000000004,
+        "min": 0.3837,
+        "max": 0.5584
+      },
+      "p50_ms": {
+        "median": 0.1545,
+        "min": 0.1304,
+        "max": 0.16110000000000002
+      },
+      "server_cores": {
+        "median": 7.259250125314425,
+        "min": 7.0885652755878725,
+        "max": 7.859233158408822
+      },
+      "cpu_us_per_request": {
+        "median": 86.11504606927947,
+        "min": 77.21831988702937,
+        "max": 91.17573914485163
+      },
+      "generator_cores_approx": {
+        "median": 3.3874182065296723,
+        "min": 3.231588985633876,
+        "max": 3.556798379540095
+      },
+      "max_rss_mib": {
+        "median": 8.18359375,
+        "min": 8.1328125,
+        "max": 8.1875
+      },
+      "max_handles": {
+        "median": 180,
+        "min": 179,
+        "max": 180
+      },
+      "max_threads": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    },
+    {
+      "label": "baseline",
+      "case": "static-1k",
+      "driver": "event-loop",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-event-loop-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 7373.475964132861,
+          "p99_ms": 3.507,
+          "p50_ms": 2.0660000000000003,
+          "server_cores": 3.289232585014926,
+          "cpu_us_per_request": 446.08982263112966,
+          "generator_cores_approx": 0.3165242511543409,
+          "max_rss_mib": 8.1484375,
+          "max_handles": 122,
+          "max_threads": 11,
+          "completed_requests": 73801
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-event-loop-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 5850.601187839098,
+          "p99_ms": 4.2783999999999995,
+          "p50_ms": 2.6243999999999996,
+          "server_cores": 3.2456643719040015,
+          "cpu_us_per_request": 554.75741170845,
+          "generator_cores_approx": 0.3198008002087009,
+          "max_rss_mib": 8.12109375,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 58556
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-event-loop-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 5778.0068264434585,
+          "p99_ms": 4.4521999999999995,
+          "p50_ms": 2.6535,
+          "server_cores": 3.2817951197460027,
+          "cpu_us_per_request": 567.9804850223843,
+          "generator_cores_approx": 0.2725403656519942,
+          "max_rss_mib": 8.1875,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 57853
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-event-loop-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 7238.9609613811335,
+          "p99_ms": 3.5465,
+          "p50_ms": 2.1139,
+          "server_cores": 3.2319018289280037,
+          "cpu_us_per_request": 446.45935323726127,
+          "generator_cores_approx": 0.32998220873744016,
+          "max_rss_mib": 8.265625,
+          "max_handles": 127,
+          "max_threads": 11,
+          "completed_requests": 72515
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-event-loop-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 7308.36817100768,
+          "p99_ms": 3.5511000000000004,
+          "p50_ms": 2.085,
+          "server_cores": 3.2576224317079654,
+          "cpu_us_per_request": 445.73868687006825,
+          "generator_cores_approx": 0.29193554607521416,
+          "max_rss_mib": 8.20703125,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 73123
+        }
+      ],
+      "requests_per_second": {
+        "median": 7238.9609613811335,
+        "min": 5778.0068264434585,
+        "max": 7373.475964132861
+      },
+      "p99_ms": {
+        "median": 3.5511000000000004,
+        "min": 3.507,
+        "max": 4.4521999999999995
+      },
+      "p50_ms": {
+        "median": 2.1139,
+        "min": 2.0660000000000003,
+        "max": 2.6535
+      },
+      "server_cores": {
+        "median": 3.2576224317079654,
+        "min": 3.2319018289280037,
+        "max": 3.289232585014926
+      },
+      "cpu_us_per_request": {
+        "median": 446.45935323726127,
+        "min": 445.73868687006825,
+        "max": 567.9804850223843
+      },
+      "generator_cores_approx": {
+        "median": 0.3165242511543409,
+        "min": 0.2725403656519942,
+        "max": 0.32998220873744016
+      },
+      "max_rss_mib": {
+        "median": 8.1875,
+        "min": 8.12109375,
+        "max": 8.265625
+      },
+      "max_handles": {
+        "median": 123,
+        "min": 122,
+        "max": 127
+      },
+      "max_threads": {
+        "median": 11,
+        "min": 11,
+        "max": 11
+      }
+    },
+    {
+      "label": "baseline",
+      "case": "static-1k",
+      "driver": "thread-pool",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-thread-pool-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 6703.283252302923,
+          "p99_ms": 3.7995,
+          "p50_ms": 2.3157,
+          "server_cores": 3.39560012193422,
+          "cpu_us_per_request": 506.5577559724418,
+          "generator_cores_approx": 0.2801426941371803,
+          "max_rss_mib": 9.83984375,
+          "max_handles": 206,
+          "max_threads": 27,
+          "completed_requests": 67058
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-thread-pool-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 5963.53967322525,
+          "p99_ms": 4.1297,
+          "p50_ms": 2.5952,
+          "server_cores": 3.338799644846166,
+          "cpu_us_per_request": 559.8687738821479,
+          "generator_cores_approx": 0.2510870686714297,
+          "max_rss_mib": 9.83984375,
+          "max_handles": 203,
+          "max_threads": 27,
+          "completed_requests": 59668
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-thread-pool-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 5792.410591288982,
+          "p99_ms": 4.2813,
+          "p50_ms": 2.6543,
+          "server_cores": 3.3783399992748246,
+          "cpu_us_per_request": 583.2355883671991,
+          "generator_cores_approx": 0.2356157072464614,
+          "max_rss_mib": 9.91015625,
+          "max_handles": 203,
+          "max_threads": 27,
+          "completed_requests": 57974
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-thread-pool-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 7195.766324431161,
+          "p99_ms": 3.5335,
+          "p50_ms": 2.1375,
+          "server_cores": 3.224262214608232,
+          "cpu_us_per_request": 448.07767084669973,
+          "generator_cores_approx": 0.24726637762944514,
+          "max_rss_mib": 9.80859375,
+          "max_handles": 202,
+          "max_threads": 27,
+          "completed_requests": 72009
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-1k-thread-pool-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "static-1k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 7200.850194729088,
+          "p99_ms": 3.4547,
+          "p50_ms": 2.1449,
+          "server_cores": 3.4411788870972413,
+          "cpu_us_per_request": 477.88508218323045,
+          "generator_cores_approx": 0.29268651628968667,
+          "max_rss_mib": 9.609375,
+          "max_handles": 204,
+          "max_threads": 27,
+          "completed_requests": 72095
+        }
+      ],
+      "requests_per_second": {
+        "median": 6703.283252302923,
+        "min": 5792.410591288982,
+        "max": 7200.850194729088
+      },
+      "p99_ms": {
+        "median": 3.7995,
+        "min": 3.4547,
+        "max": 4.2813
+      },
+      "p50_ms": {
+        "median": 2.3157,
+        "min": 2.1375,
+        "max": 2.6543
+      },
+      "server_cores": {
+        "median": 3.3783399992748246,
+        "min": 3.224262214608232,
+        "max": 3.4411788870972413
+      },
+      "cpu_us_per_request": {
+        "median": 506.5577559724418,
+        "min": 448.07767084669973,
+        "max": 583.2355883671991
+      },
+      "generator_cores_approx": {
+        "median": 0.2510870686714297,
+        "min": 0.2356157072464614,
+        "max": 0.29268651628968667
+      },
+      "max_rss_mib": {
+        "median": 9.83984375,
+        "min": 9.609375,
+        "max": 9.91015625
+      },
+      "max_handles": {
+        "median": 203,
+        "min": 202,
+        "max": 206
+      },
+      "max_threads": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    },
+    {
+      "label": "baseline",
+      "case": "static-64k",
+      "driver": "event-loop",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-event-loop-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 5448.410784564856,
+          "p99_ms": 4.527,
+          "p50_ms": 2.8383000000000003,
+          "server_cores": 3.5046488310885406,
+          "cpu_us_per_request": 643.2424003375589,
+          "generator_cores_approx": 0.3365960166072431,
+          "max_rss_mib": 9.1328125,
+          "max_handles": 124,
+          "max_threads": 11,
+          "completed_requests": 54509
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-event-loop-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 5657.915171417636,
+          "p99_ms": 4.1428,
+          "p50_ms": 2.7428,
+          "server_cores": 3.419052647480456,
+          "cpu_us_per_request": 604.2954946996466,
+          "generator_cores_approx": 0.3077745025223826,
+          "max_rss_mib": 9.01953125,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 56600
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-event-loop-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 5618.699166638015,
+          "p99_ms": 4.1412,
+          "p50_ms": 2.7691999999999997,
+          "server_cores": 3.4202514255283396,
+          "cpu_us_per_request": 608.7265618057407,
+          "generator_cores_approx": 0.3239644639325138,
+          "max_rss_mib": 9.01953125,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 56265
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-event-loop-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 6909.863667707136,
+          "p99_ms": 3.6463,
+          "p50_ms": 2.2199,
+          "server_cores": 3.3516522169828136,
+          "cpu_us_per_request": 485.05330613780035,
+          "generator_cores_approx": 0.30728627222676225,
+          "max_rss_mib": 9.125,
+          "max_handles": 123,
+          "max_threads": 11,
+          "completed_requests": 69129
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-event-loop-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "event-loop",
+          "profile": null,
+          "clients": 16,
+          "workers": 1,
+          "offered_rate": 0,
+          "requests_per_second": 6741.027163089575,
+          "p99_ms": 3.6719999999999997,
+          "p50_ms": 2.2877,
+          "server_cores": 3.3899884483934115,
+          "cpu_us_per_request": 502.8890058410176,
+          "generator_cores_approx": 0.34201824571474915,
+          "max_rss_mib": 9.15234375,
+          "max_handles": 122,
+          "max_threads": 11,
+          "completed_requests": 67454
+        }
+      ],
+      "requests_per_second": {
+        "median": 5657.915171417636,
+        "min": 5448.410784564856,
+        "max": 6909.863667707136
+      },
+      "p99_ms": {
+        "median": 4.1412,
+        "min": 3.6463,
+        "max": 4.527
+      },
+      "p50_ms": {
+        "median": 2.7428,
+        "min": 2.2199,
+        "max": 2.8383000000000003
+      },
+      "server_cores": {
+        "median": 3.419052647480456,
+        "min": 3.3516522169828136,
+        "max": 3.5046488310885406
+      },
+      "cpu_us_per_request": {
+        "median": 604.2954946996466,
+        "min": 485.05330613780035,
+        "max": 643.2424003375589
+      },
+      "generator_cores_approx": {
+        "median": 0.3239644639325138,
+        "min": 0.30728627222676225,
+        "max": 0.34201824571474915
+      },
+      "max_rss_mib": {
+        "median": 9.125,
+        "min": 9.01953125,
+        "max": 9.15234375
+      },
+      "max_handles": {
+        "median": 123,
+        "min": 122,
+        "max": 124
+      },
+      "max_threads": {
+        "median": 11,
+        "min": 11,
+        "max": 11
+      }
+    },
+    {
+      "label": "baseline",
+      "case": "static-64k",
+      "driver": "thread-pool",
+      "profile": null,
+      "clients": 16,
+      "offered_rate": 0,
+      "n": 5,
+      "trials": [
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-thread-pool-c16-r1\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 5794.1629311784545,
+          "p99_ms": 4.2829,
+          "p50_ms": 2.6821,
+          "server_cores": 3.5581785565612707,
+          "cpu_us_per_request": 614.097083362063,
+          "generator_cores_approx": 0.33457361769098387,
+          "max_rss_mib": 10.21875,
+          "max_handles": 204,
+          "max_threads": 27,
+          "completed_requests": 58012
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-thread-pool-c16-r2\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 5413.0171682696255,
+          "p99_ms": 4.4951,
+          "p50_ms": 2.8504,
+          "server_cores": 3.5438179656493465,
+          "cpu_us_per_request": 654.6844126825845,
+          "generator_cores_approx": 0.3262702156269812,
+          "max_rss_mib": 10.109375,
+          "max_handles": 205,
+          "max_threads": 27,
+          "completed_requests": 54153
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-thread-pool-c16-r3\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 5640.26856115982,
+          "p99_ms": 4.1455,
+          "p50_ms": 2.7502999999999997,
+          "server_cores": 3.701700905722939,
+          "cpu_us_per_request": 656.2986966992491,
+          "generator_cores_approx": 0.3326364376078822,
+          "max_rss_mib": 10.2734375,
+          "max_handles": 203,
+          "max_threads": 27,
+          "completed_requests": 56472
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-thread-pool-c16-r4\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 6822.570063192201,
+          "p99_ms": 3.6962,
+          "p50_ms": 2.2547,
+          "server_cores": 3.5666955120511488,
+          "cpu_us_per_request": 522.778876437413,
+          "generator_cores_approx": 0.32044846756077405,
+          "max_rss_mib": 10.421875,
+          "max_handles": 205,
+          "max_threads": 27,
+          "completed_requests": 68265
+        },
+        {
+          "path": "performance testing\\raw\\baseline\\static-64k-thread-pool-c16-r5\\record.json",
+          "label": "baseline",
+          "case": "static-64k",
+          "driver": "thread-pool",
+          "profile": null,
+          "clients": 16,
+          "workers": 16,
+          "offered_rate": 0,
+          "requests_per_second": 6429.664196606087,
+          "p99_ms": 3.9274,
+          "p50_ms": 2.401,
+          "server_cores": 3.5687385078810987,
+          "cpu_us_per_request": 555.0427516517684,
+          "generator_cores_approx": 0.3710232759032632,
+          "max_rss_mib": 10.4921875,
+          "max_handles": 203,
+          "max_threads": 27,
+          "completed_requests": 64325
+        }
+      ],
+      "requests_per_second": {
+        "median": 5794.1629311784545,
+        "min": 5413.0171682696255,
+        "max": 6822.570063192201
+      },
+      "p99_ms": {
+        "median": 4.1455,
+        "min": 3.6962,
+        "max": 4.4951
+      },
+      "p50_ms": {
+        "median": 2.6821,
+        "min": 2.2547,
+        "max": 2.8504
+      },
+      "server_cores": {
+        "median": 3.5666955120511488,
+        "min": 3.5438179656493465,
+        "max": 3.701700905722939
+      },
+      "cpu_us_per_request": {
+        "median": 614.097083362063,
+        "min": 522.778876437413,
+        "max": 656.2986966992491
+      },
+      "generator_cores_approx": {
+        "median": 0.3326364376078822,
+        "min": 0.32044846756077405,
+        "max": 0.3710232759032632
+      },
+      "max_rss_mib": {
+        "median": 10.2734375,
+        "min": 10.109375,
+        "max": 10.4921875
+      },
+      "max_handles": {
+        "median": 204,
+        "min": 203,
+        "max": 205
+      },
+      "max_threads": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    }
+  ],
+  "failures": [],
+  "note": "Latency summaries are medians of per-trial percentiles, not a pooled percentile; generator CPU stops at last live sample."
+}

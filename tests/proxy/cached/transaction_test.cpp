@@ -1,5 +1,7 @@
 #include "fixtures.hpp"
 
+#include "concurrency/single_session_driver.hpp"
+
 namespace {
 using namespace cached_test;
 
@@ -59,6 +61,60 @@ void request_and_response_bypass() {
     auto request = invalid.request; request.target = "/origin-form";
     auto rejected = test::take(env.factory->create(request, {{{2, 1}, 1}, 256, env.steady, env.wall}));
     CHECK(std::get<http::TransactionFailure>(rejected->on_event(http::StartTransaction{})).status == http::StatusCode::BadRequest);
+}
+
+void cached_output_uses_downstream_window() {
+    constexpr std::size_t window = 64 * 1024;
+    Environment env;
+    env.steady.set(core::real_steady_clock().now());
+    // Include binary bytes and a final short segment to detect lost, repeated,
+    // or reordered bytes across both application segments and socket writes.
+    std::string body(2 * window + 13, '\0');
+    for (std::size_t i = 0; i < body.size(); ++i) body[i] = static_cast<char>(i % 251);
+    Exchange miss(env, {response(body)});
+    miss.read_window = 16384; miss.body_window = 16384; miss.finish();
+    CHECK(!miss.failure && miss.output == body && env.entry());
+
+    for (const std::size_t output_window : {std::size_t{8192}, window}) {
+        for (const bool slow : {false, true}) {
+            auto config = session(env); config.max_output_bytes = output_window;
+            http::HttpSession connection(config, {2, 1}, core::real_steady_clock(), env.wall);
+            proxy_test::Channel client(proxy_test::get("http://127.0.0.1:8080/item", "GET", true,
+                "HTTP/1.1", "Cache-Control: only-if-cached\r\n"), slow ? 997 : output_window, slow ? 3 : 0);
+            concurrency::SingleSessionDriver driver;
+            const auto result = driver.drive_channel(client, connection);
+            CHECK(result.completed_cleanly && connection.stats().requests_served == 1);
+            CHECK(connection.peak_output_bytes() == output_window);
+            const auto parsed = proxy_test::parse_all(client.output, {http::Method::GET});
+            CHECK(parsed[0].complete && parsed[0].response.status_code == 200 && parsed[0].response.body == body);
+            CHECK(parsed[0].consumed == client.output.size());
+            if (slow) {
+                CHECK(result.short_write_count > 0 && result.would_block_write_count > 0);
+            } else {
+                // One head, then full output windows and a final short body.
+                // This fails if upstream read sizing fragments cache hits.
+                CHECK(client.writes == 1 + (body.size() + output_window - 1) / output_window);
+            }
+            CHECK(env.storage->statistics().readers == 0);
+        }
+    }
+    CHECK(env.forwarding->snapshot().origin_connections == 1);
+    CHECK(env.stats->count(CacheEvent::hit) == 4);
+
+    auto request = miss.request;
+    auto hit = test::take(env.factory->create(request, {{{3, 1}, 1}, window, env.steady, env.wall}));
+    CHECK(std::holds_alternative<http::ResponseHead>(hit->on_event(http::StartTransaction{})));
+    std::string output;
+    for (const std::size_t capacity : {2 * window, std::size_t{1}, std::size_t{8192}, window}) {
+        auto step = hit->on_event(http::OutputDrained{capacity});
+        const auto* part = std::get_if<http::ResponseBody>(&step);
+        CHECK(part && part->bytes && !part->bytes->empty());
+        CHECK(part->bytes->size() <= capacity && part->bytes->size() <= window);
+        output += text(*part->bytes);
+    }
+    CHECK(output == body);
+    CHECK(std::holds_alternative<http::ResponseFinished>(hit->on_event(http::OutputDrained{window})));
+    CHECK(env.storage->statistics().readers == 0);
 }
 
 void limits_and_incomplete_capture() {
@@ -198,6 +254,7 @@ void real_origin_streaming_and_commitment() {
 
 int main() {
     miss_hit_age_and_cache_only(); request_and_response_bypass(); limits_and_incomplete_capture();
+    cached_output_uses_downstream_window();
     validators_and_changes(); unusable_validation_and_failure(); real_origin_streaming_and_commitment();
     std::cout << "cache proxy transaction acceptance passed\n";
 }

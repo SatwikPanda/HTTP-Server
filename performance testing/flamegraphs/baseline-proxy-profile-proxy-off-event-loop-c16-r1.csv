@@ -1,0 +1,128 @@
+function,inclusive_thread_wall_percent,exclusive_thread_wall_percent
+ntdll!RtlUserThreadStart,100.0,0.0
+KERNEL32!BaseThreadInitThunk,100.0,0.0
+ucrtbase!wcsrchr,54.54546405782631,0.0
+ntdll!RtlSleepConditionVariableSRW,54.5242966318853,0.010447231114798628
+ntdll!ZwWaitForAlertByThreadId,54.513849400770496,54.513849400770496
+KERNELBASE!SleepConditionVariableSRW,54.481627854396315,0.0
+httpserver!concurrency::helpers::HelperPool::run,36.36363967228741,0.010924007730732654
+"httpserver!std::thread::_Invoke<std::tuple<`concurrency::helpers::HelperPool::start'::`15'::<lambda_1> >,0>",36.36363967228741,0.0
+MSVCP140!Cnd_wait,36.29980619849454,0.0
+ntdll!NtWaitForWorkViaWorkerFactory,27.27271428627191,27.27271428627191
+ntdll!TpCallbackMayRunLong,27.27271428627191,0.0
+MSVCP140!Cnd_timedwait,18.181821655901782,0.0
+ntdll!ZwRemoveIoCompletion,9.10076754757,9.10076754757
+"httpserver!std::thread::_Invoke<std::tuple<`concurrency::event_loop::EventLoopDriver::Impl::start'::`8'::<lambda_1> >,0>",9.090913557588005,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_iteration,9.090913557588005,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::run_loop,9.090913557588005,0.0
+mswsock!Tcpip6_WSHGetSockaddrType,9.090910827950891,0.0
+"httpserver!std::thread::_Invoke<std::tuple<`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1> >,0>",9.090910827950891,0.0
+httpserver!`observability::ScopedStopHooks::ScopedStopHooks'::`2'::<lambda_1>::operator(),9.090910827950891,0.0
+"httpserver!std::condition_variable::wait_for<__int64,std::ratio<1,1000>,`observability::StopController::wait_for_stop'::`2'::<lambda_1> >",9.090910827950891,0.0
+httpserver!main,9.090910827950891,0.0
+httpserver!__scrt_common_main_seh,9.090910827950891,0.0
+httpserver!observability::StopController::wait_for_stop,9.090910827950891,0.0
+httpserver!net::Poller::wait,8.570507331900826,0.0
+mswsock!Tcpip4_WSHStringToAddress,8.560711574177265,0.0
+WS2_32!WSAPoll,8.560060100786027,0.010305289984864071
+mswsock![00007FFCA8C78464],8.538805326457366,0.0
+ntdll!NtWaitForSingleObject,8.538805326457366,8.538805326457366
+mswsock![00007FFCA8C7951A],8.538805326457366,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::process_runnable_sessions,0.49910868704372924,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::advance_session_turn,0.49910868704372924,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::execute_work_action,0.3591419946217232,0.0
+ntdll!NtDeviceIoControlFile,0.3246657679912725,0.3246657679912725
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::try_next_connect_candidate,0.19449938268801725,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::start_connect_work,0.19449938268801725,0.0
+httpserver!net::Socket::begin_connect,0.1511099810009068,0.0
+mswsock!NSPStartup,0.14015321762480462,0.0
+WS2_32!connect,0.14015321762480462,0.0
+httpserver!net::Socket::write_some,0.11939705700898975,0.0
+WS2_32!send,0.11939705700898975,0.0
+mswsock![00007FFCA8C7C414],0.11939705700898975,0.0
+httpserver!`concurrency::event_loop::EventLoopDriver::Impl::execute_work_action'::`2'::<lambda_2>::operator()<concurrency::UpstreamReadWork>,0.08807902051958297,0.0
+"httpserver!std::_Visit_impl<10,concurrency::Action,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned _",0.08757585741154572,0.0
+httpserver!http::HttpSession::on_event,0.08757585741154572,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::deliver_event,0.08757585741154572,0.0
+httpserver!http::HttpSession::advance_transaction,0.0656841677562544,0.0
+httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WorkEvent>,0.04420374342615807,0.0
+httpserver!`http::HttpSession::advance_transaction'::`2'::<lambda_1>::operator()<http::ResponseBody>,0.04403905532027246,0.0
+httpserver!http::ResponseWriter::body,0.04403905532027246,0.0
+"httpserver!std::basic_string<char,std::char_traits<char>,std::allocator<char> >::assign",0.04403905532027246,0.0
+VCRUNTIME140!_NLG_Return2,0.04403905532027246,0.04403905532027246
+ntdll!NtClose,0.043470380921496195,0.043470380921496195
+WS2_32!closesocket,0.043470380921496195,0.0
+mswsock![00007FFCA8C71924],0.043470380921496195,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::close_upstream_on_owner,0.043470380921496195,0.0
+mswsock![00007FFCA8C71301],0.043470380921496195,0.0
+httpserver!net::Socket::Impl::close,0.043470380921496195,0.0
+httpserver!net::Socket::close,0.043470380921496195,0.0
+WS2_32!WSASocketW,0.04338940168711045,0.0
+WS2_32!socket,0.04338940168711045,0.0
+httpserver!net::create_tcp_socket,0.04338940168711045,0.0
+MSVCP140!Mtx_lock,0.04266877748898116,0.0
+ntdll!RtlAcquireSRWLockExclusive,0.04266877748898116,0.0
+mswsock![00007FFCA8C746AB],0.032469943351568005,0.0
+ntdll!NtCreateFile,0.032469943351568005,0.032469943351568005
+mswsock![00007FFCA8C74E38],0.032469943351568005,0.0
+WS2_32!recv,0.03228978730203568,0.0
+mswsock![00007FFCA8C7B693],0.03228978730203568,0.0
+httpserver!net::Socket::read_some,0.03228978730203568,0.0
+httpserver!net::Poller::wake,0.03195586169507426,0.010501823857081151
+httpserver!concurrency::helpers::CompletionPort::publish,0.03195586169507426,0.0
+"httpserver!std::_Func_impl_no_alloc<`concurrency::event_loop::EventLoopDriver::Impl::bind_listener_locked'::`35'::<lambda_1>,void>::_Do_call",0.03195586169507426,0.0
+httpserver!`concurrency::event_loop::EventLoopDriver::Impl::execute_work_action'::`2'::<lambda_2>::operator()<concurrency::UpstreamWriteWork>,0.022169202761894147,0.0
+"httpserver!std::vector<enum std::byte,std::allocator<enum std::byte> >::vector<enum std::byte,std::allocator<enum std::byte> >",0.022032720906187842,0.0
+httpserver!http::HttpSession::process_parsed_input,0.021891689655291327,0.0
+httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::ReadDataEvent>,0.021891689655291327,0.0
+httpserver!http::HttpSession::prepare_response,0.021891689655291327,0.0
+httpserver!operator new,0.02183982655012293,0.0
+ucrtbase!malloc_base,0.02183982655012293,0.0
+ntdll!RtlAllocateHeap,0.02183982655012293,0.010925827488808737
+httpserver!proxy::`anonymous namespace'::ForwardTransaction::pump,0.021645112435981936,0.0
+httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_event,0.021645112435981936,0.0
+httpserver!`http::HttpSession::on_event'::`2'::<lambda_1>::operator()<concurrency::WriteCompleteEvent>,0.021480424330096327,0.0
+httpserver!concurrency::helpers::CompletionPort::drain,0.021297538643449878,0.0
+httpserver!net::Socket::finish_connect,0.020820762027515854,0.0
+mswsock![00007FFCA8C7994C],0.020820762027515854,0.0
+WS2_32!getsockopt,0.020820762027515854,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::step_connect_readiness,0.020820762027515854,0.0
+mswsock![00007FFCA8C7A953],0.020820762027515854,0.0
+VCRUNTIME140!memmove,0.011118721844873648,0.011118721844873648
+httpserver!std::_Ref_count_obj2<concurrency::Cancellation>::`scalar deleting destructor',0.010965862166482588,0.010965862166482588
+httpserver!std::shared_ptr<concurrency::helpers::HelperPool>::operator=,0.010965862166482588,0.0
+mswsock![00007FFCA8C742BC],0.010964042408406503,0.0
+mswsock!Tcpip6_WSHSetSocketInformation,0.010964042408406503,0.0
+ucrtbase!memcpy,0.010964042408406503,0.010964042408406503
+httpserver!net::Socket::set_nonblocking,0.010956763376102166,0.0
+mswsock![00007FFCA8C71205],0.010956763376102166,0.0
+WS2_32!ioctlsocket,0.010956763376102166,0.0
+mswsock![00007FFCA8C78440],0.010949484343797831,0.0
+httpserver!proxy::`anonymous namespace'::ForwardFactory::create,0.010925827488808737,0.0
+httpserver!proxy::`anonymous namespace'::ForwardTransaction::ForwardTransaction,0.010925827488808737,0.0
+"httpserver!std::vector<http::HeaderField,std::allocator<http::HeaderField> >::_Emplace_reallocate<http::HeaderField>",0.010925827488808737,0.0
+httpserver!http::HeaderMap::add,0.010925827488808737,0.0
+httpserver!proxy::end_to_end_fields,0.010925827488808737,0.0
+httpserver!proxy::prepare_outbound,0.010925827488808737,0.0
+httpserver!concurrency::helpers::HelperExecutor::submit,0.010924007730732654,0.0
+httpserver!concurrency::event_loop::EventLoopDriver::Impl::submit_helper_work,0.010924007730732654,0.0
+httpserver!concurrency::helpers::HelperPool::submit,0.010924007730732654,0.0
+mswsock![00007FFCA8C743E7],0.010919458335542444,0.0
+mswsock![00007FFCA8C746CD],0.010919458335542444,0.0
+httpserver!proxy::`anonymous namespace'::ForwardTransaction::read,0.010919458335542444,0.0
+"httpserver!std::_Ref_count_obj2<std::vector<enum std::byte,std::allocator<enum std::byte> > >::`scalar deleting destructor'",0.010919458335542444,0.0
+ntdll!RtlFreeHeap,0.010919458335542444,0.010919458335542444
+ucrtbase!free_base,0.010919458335542444,0.0
+ntdll!LdrFindEntryForAddress,0.010913999061314192,0.0
+ntdll!RtlSetProcessPreferredUILanguages,0.010913999061314192,0.0
+ntdll!NtAllocateVirtualMemory,0.010913999061314192,0.010913999061314192
+httpserver!proxy::`anonymous namespace'::ForwardTransaction::on_work,0.010725654100439491,0.0
+httpserver!http::ResponseParser::consume_stream,0.010725654100439491,0.010725654100439491
+httpserver!`concurrency::ReferenceWorkExecutor::execute'::`2'::<lambda_5>::operator()<concurrency::ResolveWork>,0.010506373252271361,0.0
+WS2_32!GetAddrInfoW,0.010506373252271361,0.0
+httpserver!net::resolve,0.010506373252271361,0.0
+httpserver!concurrency::ReferenceWorkExecutor::execute,0.010506373252271361,0.0
+"httpserver!std::_Visit_impl<11,void,std::_Meta_list<std::integer_sequence<unsigned __int64,0>,std::integer_sequence<unsigned __int64,1>,std::integer_sequence<unsigned __int64,2>,std::integer_sequence<unsigned __int64,3>,std::integer_sequence<unsigned __int64,4>,std::integer_sequence<unsigned __int64,5>,std::integer_sequence<unsigned __int64,6>,std::integer_sequence<unsigned __int64,7>,std::integer_sequence<unsigned __int64,8>,std::integer_sequence<unsigned __int64,9>,std::",0.010506373252271361,0.0
+httpserver!concurrency::helpers::`anonymous namespace'::ReferenceAdapter::execute,0.010506373252271361,0.0
+ntdll!RtlIpv4StringToAddressW,0.010506373252271361,0.010506373252271361
+WS2_32!getaddrinfo,0.010506373252271361,0.0

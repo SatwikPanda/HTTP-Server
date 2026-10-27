@@ -6,3 +6,11 @@ benchmarks/reports/**/*.svg -text -whitespace linguist-generated=true
 benchmarks/reports/**/*.png linguist-generated=true
 benchmarks/reports/**/*.csv -text -whitespace linguist-generated=true
 benchmarks/reports/**/*.json -text -whitespace linguist-generated=true
+# The investigation includes an exact-byte digest inventory of its artifacts.
+"performance testing/**" -text
+"performance testing/raw/**" -text -whitespace linguist-generated=true
+"performance testing/validation/**" -text -whitespace linguist-generated=true
+"performance testing/flamegraphs/**" -text -whitespace linguist-generated=true
+"performance testing/*.json" -text -whitespace linguist-generated=true
+"performance testing/*.svg" -text -whitespace linguist-generated=true
+"performance testing/*.png" linguist-generated=true

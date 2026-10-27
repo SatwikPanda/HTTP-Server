@@ -1,0 +1,673 @@
+{
+  "comparisons": [
+    {
+      "case": "cache-warm",
+      "driver": "event-loop",
+      "before": {
+        "label": "before",
+        "case": "cache-warm",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-1-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 19109.40581581726,
+            "p99_ms": 1.7784,
+            "p50_ms": 0.7845000000000001,
+            "server_cores": 0.9988869103491905,
+            "cpu_us_per_request": 52.27200259269133,
+            "generator_cores_approx": 1.019932153801622,
+            "max_rss_mib": 7.05859375,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 191307
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-2-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 16793.79167773768,
+            "p99_ms": 2.0703,
+            "p50_ms": 0.9758,
+            "server_cores": 0.9995650092992532,
+            "cpu_us_per_request": 59.519912386688965,
+            "generator_cores_approx": 1.00483467869661,
+            "max_rss_mib": 7.00390625,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 168011
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-3-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 16618.014835606053,
+            "p99_ms": 2.0712,
+            "p50_ms": 1.0093999999999999,
+            "server_cores": 0.9965972831167249,
+            "cpu_us_per_request": 59.97089862872176,
+            "generator_cores_approx": 0.9874170641148934,
+            "max_rss_mib": 7.03125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 166487
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-4-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 15003.73631547407,
+            "p99_ms": 2.7131999999999996,
+            "p50_ms": 1.0084,
+            "server_cores": 0.9714500197598557,
+            "cpu_us_per_request": 64.74720691791636,
+            "generator_cores_approx": 1.035458514117663,
+            "max_rss_mib": 7.015625,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 150103
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-5-cache-warm-event-loop-before\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 18085.299068715638,
+            "p99_ms": 2.095,
+            "p50_ms": 0.8065,
+            "server_cores": 0.9782540350148716,
+            "cpu_us_per_request": 54.09111739308075,
+            "generator_cores_approx": 1.0857604231596198,
+            "max_rss_mib": 7.0546875,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 181118
+          }
+        ],
+        "requests_per_second": {
+          "median": 16793.79167773768,
+          "min": 15003.73631547407,
+          "max": 19109.40581581726
+        },
+        "p99_ms": {
+          "median": 2.0712,
+          "min": 1.7784,
+          "max": 2.7131999999999996
+        },
+        "p50_ms": {
+          "median": 0.9758,
+          "min": 0.7845000000000001,
+          "max": 1.0093999999999999
+        },
+        "server_cores": {
+          "median": 0.9965972831167249,
+          "min": 0.9714500197598557,
+          "max": 0.9995650092992532
+        },
+        "cpu_us_per_request": {
+          "median": 59.519912386688965,
+          "min": 52.27200259269133,
+          "max": 64.74720691791636
+        },
+        "generator_cores_approx": {
+          "median": 1.019932153801622,
+          "min": 0.9874170641148934,
+          "max": 1.0857604231596198
+        },
+        "max_rss_mib": {
+          "median": 7.03125,
+          "min": 7.00390625,
+          "max": 7.05859375
+        },
+        "max_handles": {
+          "median": 99,
+          "min": 99,
+          "max": 99
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "cache-warm",
+        "driver": "event-loop",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-1-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 21424.566898673365,
+            "p99_ms": 1.8159999999999998,
+            "p50_ms": 0.6438,
+            "server_cores": 0.9978398039358405,
+            "cpu_us_per_request": 46.57456128075233,
+            "generator_cores_approx": 1.0793764613212842,
+            "max_rss_mib": 7.85546875,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 214374
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-2-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 20894.517826429077,
+            "p99_ms": 1.8825,
+            "p50_ms": 0.6681,
+            "server_cores": 0.9981947091009054,
+            "cpu_us_per_request": 47.77304350322494,
+            "generator_cores_approx": 0.958396337807281,
+            "max_rss_mib": 7.90234375,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 208996
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-3-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 22716.279583116724,
+            "p99_ms": 1.7817,
+            "p50_ms": 0.6275000000000001,
+            "server_cores": 0.9974442649498482,
+            "cpu_us_per_request": 43.908786264946855,
+            "generator_cores_approx": 1.044823184781832,
+            "max_rss_mib": 7.90234375,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 227389
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-4-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 25214.67241556028,
+            "p99_ms": 1.5095,
+            "p50_ms": 0.5102,
+            "server_cores": 0.9945974540523581,
+            "cpu_us_per_request": 39.44518642401953,
+            "generator_cores_approx": 1.062083419026122,
+            "max_rss_mib": 7.8984375,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 252328
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-5-cache-warm-event-loop-after\\cache-warm-event-loop-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "event-loop",
+            "profile": null,
+            "clients": 16,
+            "workers": 1,
+            "offered_rate": 0,
+            "requests_per_second": 21633.484912931406,
+            "p99_ms": 2.2115,
+            "p50_ms": 0.626,
+            "server_cores": 0.9609801330411847,
+            "cpu_us_per_request": 44.42095838506164,
+            "generator_cores_approx": 1.159241779709732,
+            "max_rss_mib": 7.828125,
+            "max_handles": 99,
+            "max_threads": 11,
+            "completed_requests": 216677
+          }
+        ],
+        "requests_per_second": {
+          "median": 21633.484912931406,
+          "min": 20894.517826429077,
+          "max": 25214.67241556028
+        },
+        "p99_ms": {
+          "median": 1.8159999999999998,
+          "min": 1.5095,
+          "max": 2.2115
+        },
+        "p50_ms": {
+          "median": 0.6275000000000001,
+          "min": 0.5102,
+          "max": 0.6681
+        },
+        "server_cores": {
+          "median": 0.9974442649498482,
+          "min": 0.9609801330411847,
+          "max": 0.9981947091009054
+        },
+        "cpu_us_per_request": {
+          "median": 44.42095838506164,
+          "min": 39.44518642401953,
+          "max": 47.77304350322494
+        },
+        "generator_cores_approx": {
+          "median": 1.062083419026122,
+          "min": 0.958396337807281,
+          "max": 1.159241779709732
+        },
+        "max_rss_mib": {
+          "median": 7.8984375,
+          "min": 7.828125,
+          "max": 7.90234375
+        },
+        "max_handles": {
+          "median": 99,
+          "min": 99,
+          "max": 99
+        },
+        "max_threads": {
+          "median": 11,
+          "min": 11,
+          "max": 11
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 24.418107758996644,
+          "min": 12.115296023175137,
+          "max": 68.05595543261569
+        },
+        "p99_ms": {
+          "median_percent_change": -9.071149108824805,
+          "min": -44.36458794043933,
+          "max": 5.560859188544143
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -19.736031879796744,
+          "min": -39.07816521873075,
+          "max": -10.899604050631151
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    },
+    {
+      "case": "cache-warm",
+      "driver": "thread-pool",
+      "before": {
+        "label": "before",
+        "case": "cache-warm",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-1-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 93402.05293573934,
+            "p99_ms": 0.4142,
+            "p50_ms": 0.1452,
+            "server_cores": 7.413440919726205,
+            "cpu_us_per_request": 79.37128453511248,
+            "generator_cores_approx": 3.374457010888416,
+            "max_rss_mib": 8.1875,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 935280
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-2-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 94235.25985197301,
+            "p99_ms": 0.4008,
+            "p50_ms": 0.14459999999999998,
+            "server_cores": 7.623890538716985,
+            "cpu_us_per_request": 80.90273800584595,
+            "generator_cores_approx": 3.543564140900215,
+            "max_rss_mib": 8.16796875,
+            "max_handles": 179,
+            "max_threads": 27,
+            "completed_requests": 942876
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-3-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 91682.773225891,
+            "p99_ms": 0.4077,
+            "p50_ms": 0.1493,
+            "server_cores": 7.64625021366388,
+            "cpu_us_per_request": 83.39898483245919,
+            "generator_cores_approx": 3.40828707961853,
+            "max_rss_mib": 8.16796875,
+            "max_handles": 179,
+            "max_threads": 27,
+            "completed_requests": 917090
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-4-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 70771.92083330065,
+            "p99_ms": 0.9695,
+            "p50_ms": 0.16990000000000002,
+            "server_cores": 6.070284299641823,
+            "cpu_us_per_request": 85.77249604317004,
+            "generator_cores_approx": 2.7975261705220906,
+            "max_rss_mib": 8.08203125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 708269
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-5-cache-warm-thread-pool-before\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "before",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 89401.74441272339,
+            "p99_ms": 0.4442,
+            "p50_ms": 0.1518,
+            "server_cores": 7.407365307718363,
+            "cpu_us_per_request": 82.8548185091584,
+            "generator_cores_approx": 3.5740182101999527,
+            "max_rss_mib": 8.25,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 894260
+          }
+        ],
+        "requests_per_second": {
+          "median": 91682.773225891,
+          "min": 70771.92083330065,
+          "max": 94235.25985197301
+        },
+        "p99_ms": {
+          "median": 0.4142,
+          "min": 0.4008,
+          "max": 0.9695
+        },
+        "p50_ms": {
+          "median": 0.1493,
+          "min": 0.14459999999999998,
+          "max": 0.16990000000000002
+        },
+        "server_cores": {
+          "median": 7.413440919726205,
+          "min": 6.070284299641823,
+          "max": 7.64625021366388
+        },
+        "cpu_us_per_request": {
+          "median": 82.8548185091584,
+          "min": 79.37128453511248,
+          "max": 85.77249604317004
+        },
+        "generator_cores_approx": {
+          "median": 3.40828707961853,
+          "min": 2.7975261705220906,
+          "max": 3.5740182101999527
+        },
+        "max_rss_mib": {
+          "median": 8.16796875,
+          "min": 8.08203125,
+          "max": 8.25
+        },
+        "max_handles": {
+          "median": 180,
+          "min": 179,
+          "max": 180
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "after": {
+        "label": "after",
+        "case": "cache-warm",
+        "driver": "thread-pool",
+        "profile": null,
+        "clients": 16,
+        "offered_rate": 0,
+        "n": 5,
+        "trials": [
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-1-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 120611.98887071716,
+            "p99_ms": 0.37389999999999995,
+            "p50_ms": 0.1013,
+            "server_cores": 7.216669635049555,
+            "cpu_us_per_request": 59.83376696312531,
+            "generator_cores_approx": 3.369291462020777,
+            "max_rss_mib": 9.50390625,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 1207251
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-2-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 102049.0014045955,
+            "p99_ms": 0.4323,
+            "p50_ms": 0.1137,
+            "server_cores": 7.221737724417749,
+            "cpu_us_per_request": 70.76735318345347,
+            "generator_cores_approx": 3.138381236071962,
+            "max_rss_mib": 9.3203125,
+            "max_handles": 179,
+            "max_threads": 27,
+            "completed_requests": 1020951
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-3-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 108492.81938875713,
+            "p99_ms": 0.3791,
+            "p50_ms": 0.10900000000000001,
+            "server_cores": 6.956283815690142,
+            "cpu_us_per_request": 64.11745823254923,
+            "generator_cores_approx": 3.1080488658874885,
+            "max_rss_mib": 9.5,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 1085654
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-4-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 100080.90027766264,
+            "p99_ms": 0.4452,
+            "p50_ms": 0.1166,
+            "server_cores": 6.908510128145692,
+            "cpu_us_per_request": 69.02925642134359,
+            "generator_cores_approx": 3.0604257316532055,
+            "max_rss_mib": 9.08203125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 1001387
+          },
+          {
+            "path": "performance testing\\raw\\cached-output-paired\\pair-5-cache-warm-thread-pool-after\\cache-warm-thread-pool-c16-r1\\record.json",
+            "label": "after",
+            "case": "cache-warm",
+            "driver": "thread-pool",
+            "profile": null,
+            "clients": 16,
+            "workers": 16,
+            "offered_rate": 0,
+            "requests_per_second": 99637.42684275893,
+            "p99_ms": 0.4375,
+            "p50_ms": 0.116,
+            "server_cores": 6.901155378885977,
+            "cpu_us_per_request": 69.26268168061902,
+            "generator_cores_approx": 3.1495424449872518,
+            "max_rss_mib": 9.4453125,
+            "max_handles": 180,
+            "max_threads": 27,
+            "completed_requests": 997561
+          }
+        ],
+        "requests_per_second": {
+          "median": 102049.0014045955,
+          "min": 99637.42684275893,
+          "max": 120611.98887071716
+        },
+        "p99_ms": {
+          "median": 0.4323,
+          "min": 0.37389999999999995,
+          "max": 0.4452
+        },
+        "p50_ms": {
+          "median": 0.1137,
+          "min": 0.1013,
+          "max": 0.1166
+        },
+        "server_cores": {
+          "median": 6.956283815690142,
+          "min": 6.901155378885977,
+          "max": 7.221737724417749
+        },
+        "cpu_us_per_request": {
+          "median": 69.02925642134359,
+          "min": 59.83376696312531,
+          "max": 70.76735318345347
+        },
+        "generator_cores_approx": {
+          "median": 3.138381236071962,
+          "min": 3.0604257316532055,
+          "max": 3.369291462020777
+        },
+        "max_rss_mib": {
+          "median": 9.4453125,
+          "min": 9.08203125,
+          "max": 9.50390625
+        },
+        "max_handles": {
+          "median": 180,
+          "min": 179,
+          "max": 180
+        },
+        "max_threads": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      "paired": {
+        "requests_per_second": {
+          "median_percent_change": 18.335010571123323,
+          "min": 8.291738745026557,
+          "max": 41.41328806575375
+        },
+        "p99_ms": {
+          "median_percent_change": -7.0149619818494,
+          "min": -54.07942238267148,
+          "max": 7.8592814371257536
+        },
+        "cpu_us_per_request": {
+          "median_percent_change": -19.520522771541394,
+          "min": -24.61534758624715,
+          "max": -12.527863793262606
+        }
+      },
+      "host_ipv4_active_opens_per_response": {}
+    }
+  ],
+  "note": "Latency summaries are medians of per-trial percentiles, not a pooled percentile; generator CPU stops at last live sample."
+}
