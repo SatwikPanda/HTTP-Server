@@ -59,6 +59,15 @@ jobs:
           ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: python tools/qualify.py --build-dir build/asan --binary build/asan/httpserver --output build/asan/qualification.json --jobs 2
+      - name: Repeat concurrent cache revalidation
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: >-
+          python benchmarks/benchmark.py run --binary build/asan/httpserver
+          --build-dir build/asan --scenario proxy-revalidation --driver thread-pool
+          --workers 2 --concurrency 2 --object-bytes 1024 --timeout 3
+          --smoke --repeats 20 --request-limit 100 --output build/asan/benchmark-smoke
       - name: Retain diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4

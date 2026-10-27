@@ -2,7 +2,7 @@ import asyncio
 import sys
 import unittest
 import copy
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +45,52 @@ class Contracts(unittest.TestCase):
         selected = profile(ROOT / 'profiles/demo.json')
         with self.assertRaises(SpecError):
             command(Path('server'), selected, dict(application='proxy', driver='event-loop'), ROOT)
+
+
+class ClientCompletion(unittest.IsolatedAsyncioTestCase):
+    async def test_closing_response_rejects_extra_bytes(self):
+        client = Client(("127.0.0.1", 1), None, 1729, 1, reuse=False)
+        reader = asyncio.StreamReader()
+        reader.feed_data(b"HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\n" + payload(1729, 0, 0, 1) + b"extra")
+        reader.feed_eof()
+        writer = Mock(drain=AsyncMock(), wait_closed=AsyncMock())
+        client.reader, client.writer = reader, writer
+        with self.assertRaisesRegex(ResponseError, "unexpected bytes after response"):
+            await client.request(0)
+        writer.close.assert_called_once()
+        self.assertIsNone(client.writer)
+
+    async def test_close_probe_waits_for_server_completion(self):
+        # The final fixed-length byte can reach the client before the proxy's
+        # upstream-close callback publishes the cache entry. EOF on a requested
+        # close is the synchronization point; no sleep or retry proves that.
+        eof_requested = asyncio.Event()
+
+        class Reader(asyncio.StreamReader):
+            async def read(self, count=-1):
+                eof_requested.set()
+                return await super().read(count)
+
+        client = Client(("127.0.0.1", 1), None, 1729, 1, reuse=False)
+        reader = Reader()
+        reader.feed_data(b"HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\n" + payload(1729, 0, 0, 1))
+        writer = Mock(drain=AsyncMock(), wait_closed=AsyncMock())
+        client.reader, client.writer = reader, writer
+        request = asyncio.create_task(client.request(0))
+        waiting = asyncio.create_task(eof_requested.wait())
+        try:
+            await asyncio.wait_for(asyncio.wait({request, waiting}, return_when=asyncio.FIRST_COMPLETED), 1)
+            self.assertFalse(request.done(), "probe returned before server completed the close")
+            writer.close.assert_not_called()
+            reader.feed_eof()
+            self.assertEqual(await asyncio.wait_for(request, 1), 1)
+            writer.close.assert_called_once()
+        finally:
+            reader.feed_eof()
+            request.cancel()
+            waiting.cancel()
+            await asyncio.gather(request, waiting, return_exceptions=True)
+            await client.close()
 
 
 class Network(unittest.IsolatedAsyncioTestCase):

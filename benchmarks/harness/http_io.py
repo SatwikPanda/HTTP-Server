@@ -167,6 +167,13 @@ class Client:
             if expected is not None and offset != expected:
                 raise ResponseError("incomplete representation")
             if close or b"close" in b",".join(headers.get(b"connection", [])).lower().split(b","):
+                # Receiving the body does not prove that the server finished
+                # its transaction (including publishing a proxy cache fill).
+                # The caller's request deadline also bounds this EOF barrier.
+                extra = await self.reader.read(1)
+                self.response_wire += len(extra)
+                if extra:
+                    raise ResponseError("unexpected bytes after response")
                 await self.close()
             return offset if status == 200 else 0
         except BaseException:

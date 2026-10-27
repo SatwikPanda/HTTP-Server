@@ -44,6 +44,14 @@ Each repeat owns a unique temporary directory, local origin (if needed) and serv
 
 Cache runs restart the server after warmup. Cold means empty at measurement start; it naturally warms during the interval. A cache-only absence probe verifies that state. Warm runs prefill every selected object and verify cache-only hits without origin traffic. Revalidation runs verify conditional 304 traffic before measurement. Concurrent 304/version conflicts may cause K's one unconditional retry; the check enforces at most one retry per completed request and records actual 200/304 origin counts. Mixed runs prefill only the hottest object.
 
+Setup probes request connection closure and await the server's EOF within the
+request deadline. Receiving the final body byte alone does not guarantee that
+the proxy has completed its upstream-close callback and published the cache
+entry. This completion barrier keeps successive probes ordered without sleeps
+or retries. Extra bytes after a complete closing response fail validation.
+Failed repeats print their full retained record to stderr, and CI archives the
+raw smoke results alongside CTest logs and qualification records.
+
 The OS filesystem cache is separate. Files are written immediately before warmup and the harness never flushes the OS cache. `--filesystem-cache` records the operator's label; `cold-external` is only an external preparation claim and is not established by this harness. Prefer the truthful default `uncontrolled`.
 
 Windows hidden children are terminated via their owned handles and the record marks forced shutdown. POSIX uses termination signals with a bounded kill fallback. Graceful driver/helper teardown is tested separately by I's in-process lifecycle suite. Cancellation closes clients, stops the owned server/origin, and saves an interrupted record. Uninterruptible OS DNS can still extend a graceful server join; controlled benchmark origins use numeric loopback addresses.
