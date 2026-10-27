@@ -1,0 +1,161 @@
+Test project C:/Users/PANDA/Desktop/personal-projects/satwik/httpserver/build/performance-next
+      Start  1: socket_ownership_test
+ 1/56 Test  #1: socket_ownership_test ............   Passed    0.01 sec
+      Start  2: echo_test_double_test
+ 2/56 Test  #2: echo_test_double_test ............   Passed    0.01 sec
+      Start  3: echo_integration_test
+ 3/56 Test  #3: echo_integration_test ............   Passed    0.26 sec
+      Start  4: milestone01_test
+ 4/56 Test  #4: milestone01_test .................   Passed    0.01 sec
+      Start  5: milestone02_test
+ 5/56 Test  #5: milestone02_test .................   Passed    0.06 sec
+      Start  6: milestone03_test
+ 6/56 Test  #6: milestone03_test .................   Passed    6.42 sec
+      Start  7: milestone04_test
+ 7/56 Test  #7: milestone04_test .................   Passed    0.01 sec
+      Start  8: milestone05_test
+ 8/56 Test  #8: milestone05_test .................   Passed    0.01 sec
+      Start  9: milestone06_test
+ 9/56 Test  #9: milestone06_test .................   Passed    0.01 sec
+      Start 10: http_serialization_test
+10/56 Test #10: http_serialization_test ..........   Passed    0.01 sec
+      Start 11: http_session_test
+11/56 Test #11: http_session_test ................   Passed    0.02 sec
+      Start 12: http_integration_test
+12/56 Test #12: http_integration_test ............   Passed    0.21 sec
+      Start 13: http_parser_test
+13/56 Test #13: http_parser_test .................   Passed    0.01 sec
+      Start 14: milestone07_test
+14/56 Test #14: milestone07_test .................   Passed    0.01 sec
+      Start 15: milestone08_test
+15/56 Test #15: milestone08_test .................   Passed    0.01 sec
+      Start 16: http_response_test
+16/56 Test #16: http_response_test ...............   Passed    0.01 sec
+      Start 17: milestone09_test
+17/56 Test #17: milestone09_test .................   Passed    0.02 sec
+      Start 18: cli_validation_test
+18/56 Test #18: cli_validation_test ..............   Passed    0.13 sec
+      Start 19: parallel_foundation_test
+19/56 Test #19: parallel_foundation_test .........   Passed    0.01 sec
+      Start 20: parallel_work_test
+20/56 Test #20: parallel_work_test ...............   Passed    2.09 sec
+      Start 21: fixture_harness_test
+21/56 Test #21: fixture_harness_test .............   Passed    0.12 sec
+      Start 22: path_policy_test
+22/56 Test #22: path_policy_test .................   Passed    0.01 sec
+      Start 23: mime_test
+23/56 Test #23: mime_test ........................   Passed    0.01 sec
+      Start 24: conditional_test
+24/56 Test #24: conditional_test .................   Passed    0.01 sec
+      Start 25: static_target_test
+25/56 Test #25: static_target_test ...............   Passed    0.16 sec
+      Start 26: static_response_test
+26/56 Test #26: static_response_test .............   Passed    0.15 sec
+      Start 27: milestone13_test
+27/56 Test #27: milestone13_test .................   Passed    0.01 sec
+      Start 28: milestone14_test
+28/56 Test #28: milestone14_test .................   Passed    0.07 sec
+      Start 29: milestone15_test
+29/56 Test #29: milestone15_test .................   Passed    0.09 sec
+      Start 30: milestone16_test
+30/56 Test #30: milestone16_test .................   Passed    4.30 sec
+      Start 31: cache_proxy_test
+31/56 Test #31: cache_proxy_test .................   Passed    0.48 sec
+      Start 32: cache_proxy_concurrency_test
+32/56 Test #32: cache_proxy_concurrency_test .....   Passed    0.02 sec
+      Start 33: cache_storage_test
+33/56 Test #33: cache_storage_test ...............   Passed    0.01 sec
+      Start 34: cache_storage_concurrency_test
+34/56 Test #34: cache_storage_concurrency_test ...   Passed    0.02 sec
+      Start 35: cache_policy_storage_test
+35/56 Test #35: cache_policy_storage_test ........   Passed    0.01 sec
+      Start 36: cache_policy_test
+36/56 Test #36: cache_policy_test ................   Passed    0.01 sec
+      Start 37: cache_freshness_test
+37/56 Test #37: cache_freshness_test .............   Passed    0.01 sec
+      Start 38: cache_revalidation_test
+38/56 Test #38: cache_revalidation_test ..........   Passed    0.01 sec
+      Start 39: helper_pool_test
+39/56 Test #39: helper_pool_test .................   Passed    0.20 sec
+      Start 40: thread_pool_test
+40/56 Test #40: thread_pool_test .................   Passed    3.39 sec
+      Start 41: milestone25_test
+41/56 Test #41: milestone25_test .................   Passed    0.26 sec
+      Start 42: milestone26_test
+42/56 Test #42: milestone26_test .................   Passed    6.21 sec
+      Start 43: milestone27_test
+43/56 Test #43: milestone27_test .................   Passed    0.22 sec
+      Start 44: milestone28_test
+44/56 Test #44: milestone28_test .................   Passed    0.12 sec
+      Start 45: config_parser_test
+45/56 Test #45: config_parser_test ...............   Passed    0.01 sec
+      Start 46: metrics_and_logging_test
+46/56 Test #46: metrics_and_logging_test .........   Passed    0.01 sec
+      Start 47: stop_hooks_test
+47/56 Test #47: stop_hooks_test ..................   Passed    0.03 sec
+      Start 48: system_matrix_test
+48/56 Test #48: system_matrix_test ...............   Passed    0.24 sec
+      Start 49: application_lifecycle_test
+49/56 Test #49: application_lifecycle_test .......   Passed    0.30 sec
+      Start 50: resource_soak_test
+50/56 Test #50: resource_soak_test ...............   Passed    1.74 sec
+      Start 51: router_test
+51/56 Test #51: router_test ......................   Passed    0.07 sec
+      Start 52: application_server_test
+52/56 Test #52: application_server_test ..........   Passed    0.05 sec
+      Start 53: results_tool_test
+53/56 Test #53: results_tool_test ................   Passed    0.28 sec
+      Start 54: benchmark_harness_test
+54/56 Test #54: benchmark_harness_test ...........   Passed    1.06 sec
+      Start 55: benchmark_smoke_thread-pool
+55/56 Test #55: benchmark_smoke_thread-pool ......   Passed    5.14 sec
+      Start 56: benchmark_smoke_event-loop
+56/56 Test #56: benchmark_smoke_event-loop .......   Passed    5.00 sec
+
+100% tests passed out of 56
+
+Label Time Summary:
+benchmark_harness      =  11.21 sec*proc (3 tests)
+cache_policy           =   0.04 sec*proc (4 tests)
+cache_proxy            =   0.50 sec*proc (2 tests)
+cache_storage          =   0.04 sec*proc (3 tests)
+correctness_gate       =   2.02 sec*proc (2 tests)
+event_loop             =   6.81 sec*proc (4 tests)
+executable_matrix      =  10.15 sec*proc (2 tests)
+milestone01            =   0.02 sec*proc (2 tests)
+milestone02            =   0.33 sec*proc (3 tests)
+milestone03            =   6.56 sec*proc (2 tests)
+milestone04            =   0.01 sec*proc (1 test)
+milestone05            =   0.24 sec*proc (4 tests)
+milestone06            =   0.02 sec*proc (2 tests)
+milestone07            =   0.01 sec*proc (1 test)
+milestone08            =   0.02 sec*proc (2 tests)
+milestone09            =   0.02 sec*proc (1 test)
+milestone10            =   0.17 sec*proc (2 tests)
+milestone11            =   0.16 sec*proc (2 tests)
+milestone12            =   0.01 sec*proc (1 test)
+milestone13            =   0.01 sec*proc (1 test)
+milestone14            =   0.07 sec*proc (1 test)
+milestone15            =   0.09 sec*proc (1 test)
+milestone16            =   4.30 sec*proc (1 test)
+milestone17            =   0.01 sec*proc (1 test)
+milestone18            =   0.01 sec*proc (1 test)
+milestone19            =   0.01 sec*proc (1 test)
+milestone20            =   0.48 sec*proc (1 test)
+milestone21            =   0.50 sec*proc (3 tests)
+milestone22            =   0.20 sec*proc (1 test)
+milestone23            =   3.39 sec*proc (1 test)
+milestone24            =   1.79 sec*proc (4 tests)
+milestone25            =   0.26 sec*proc (1 test)
+milestone26            =   6.21 sec*proc (1 test)
+milestone27            =   0.22 sec*proc (1 test)
+milestone28            =   2.20 sec*proc (4 tests)
+milestone29            =   0.06 sec*proc (3 tests)
+milestone30            =   2.74 sec*proc (6 tests)
+milestone31            =  11.21 sec*proc (3 tests)
+milestone32            =   0.28 sec*proc (1 test)
+parallel_foundation    =   2.22 sec*proc (3 tests)
+routing                =   0.12 sec*proc (2 tests)
+system_matrix          =   0.55 sec*proc (2 tests)
+
+Total Test time (real) =  39.23 sec

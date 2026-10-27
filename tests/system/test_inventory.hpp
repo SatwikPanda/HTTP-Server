@@ -16,7 +16,7 @@ struct SuiteInventoryEntry {
 };
 
 // Explicit runtime test inventory mapping milestones/tracks to CTest targets.
-inline constexpr std::array<SuiteInventoryEntry, 50> kRuntimeSuiteInventory{{
+inline constexpr std::array<SuiteInventoryEntry, 52> kRuntimeSuiteInventory{{
     {"socket_ownership_test", "Base", "milestone01", true},
     {"milestone01_test", "Base", "milestone01", true},
     {"echo_test_double_test", "Base", "milestone02", true},
@@ -66,7 +66,9 @@ inline constexpr std::array<SuiteInventoryEntry, 50> kRuntimeSuiteInventory{{
     {"fixture_harness_test", "I", "parallel_foundation;milestone30", true},
     {"system_matrix_test", "I", "milestone30", true},
     {"application_lifecycle_test", "I/L", "milestone28;milestone30", true},
-    {"resource_soak_test", "M", "milestone24;milestone28;milestone30", true}
+    {"resource_soak_test", "M", "milestone24;milestone28;milestone30", true},
+    {"router_test", "Application API", "routing", true},
+    {"application_server_test", "Application API", "routing;milestone30", true}
 }};
 
 struct ProductMatrixEntry {

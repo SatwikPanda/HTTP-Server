@@ -1,0 +1,7 @@
+{
+  "dynamic_tcp_range_start": 49152,
+  "dynamic_tcp_range_count": 16384,
+  "completed_benchmark_endpoints_client_time_wait": 7601,
+  "scope": "read-only aggregate observation after GCC soak, during MSVC soak; no network settings changed",
+  "recorded_utc": "2026-10-27T16:08:58.929383+00:00"
+}

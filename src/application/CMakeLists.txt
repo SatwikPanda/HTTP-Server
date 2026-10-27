@@ -1,4 +1,4 @@
-add_library(application STATIC runtime.cpp)
+add_library(application STATIC runtime.cpp server.cpp)
 target_include_directories(application PUBLIC "${PROJECT_SOURCE_DIR}/include")
 target_compile_features(application PUBLIC cxx_std_20)
 set_target_properties(application PROPERTIES CXX_EXTENSIONS OFF)

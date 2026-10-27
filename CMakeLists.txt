@@ -68,6 +68,7 @@ add_library(http STATIC
     src/http/validators.cpp
     src/http/response_writer.cpp
     src/http/application.cpp
+    src/http/router.cpp
     src/http/reference_application.cpp
     src/http/serializer.cpp
     src/http/limits.cpp
@@ -177,3 +178,4 @@ if(BUILD_TESTING)
 endif()
 
 include(cmake/ParallelModules.cmake)
+add_subdirectory(app)

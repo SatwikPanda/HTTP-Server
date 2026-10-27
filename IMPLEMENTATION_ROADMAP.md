@@ -18,6 +18,23 @@ The first useful result is a TCP server that accepts a connection. Build a TCP e
 - Run local checks continuously. Run available Windows, Linux, and macOS checks at phase boundaries; final portability acceptance requires all three platforms. Record any platform not yet tested.
 - Treat the command-line examples in the architecture as future functionality. Add options as their features become available and consolidate them in milestone 29.
 
+## Application route API — 2026-10-27
+
+An explicit scope extension adds bounded GET route handlers using the existing
+HTTP transaction interface and drivers. `application::Server` owns network and
+runtime lifetimes; `http::Router` publishes immutable route tables. `app/` contains
+the runnable Hello World application with a configurable listen port. See the
+[API guide](docs/application-api.md) for behavior and limits. The strict inventory
+now includes `router_test` and `application_server_test` (56 suites with benchmarks
+enabled). This extends application composition without changing the original
+static-file/proxy milestone status.
+
+The full strict Release gate passed all 56 suites locally on Windows GCC 16.2
+and MSVC 19.29. Records and logs are retained as
+`build/lmn/application-api-qualification.*` and
+`build/performance-next/application-api-qualification.*`. Linux/macOS verification
+of this extension is pending; earlier baseline records do not cover it.
+
 ## LMN candidate — 2026-10-27
 
 `codex/lmn-completion` starts from integrated main `e24077f`, preserving the A–K

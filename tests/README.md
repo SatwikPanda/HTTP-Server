@@ -1,5 +1,32 @@
 # Milestone acceptance tests
 
+## Application route API — 2026-10-27
+
+The complete inventory now contains 56 suites with benchmarks enabled.
+`ctest --test-dir build/lmn -C Release -L routing --no-tests=error --output-on-failure`
+selects the new router and application-server suites. They cover bounded route
+registration, exact/query/escaped matching, GET/HEAD, response validation,
+exceptions, partial I/O, pipelining and real concurrent loopback requests through
+all three drivers. The application-server suite compiles and calls `app/routes.cpp`.
+See [the API guide](../docs/application-api.md) for usage and contracts.
+
+The complete strict Release gate passed 56/56 locally on Windows GCC 16.2 and
+MSVC 19.29. Source/binary fingerprints, build/CTest logs and JUnit output are in
+`build/lmn/application-api-qualification.*` and
+`build/performance-next/application-api-qualification.*`. The GCC `http_app`
+executable also passed manual loopback checks on port 0 and a fixed available
+port (GET, HEAD, 404 and 405), plus help/invalid-port CLI checks. The MSVC executable
+also returned `200 Hello, World!` in a direct port-0 smoke check. Linux/macOS
+verification of the new route API is pending.
+
+The [app measurement record](../docs/validation/app-2026-10-27/README.md) retains
+fresh full-suite gates, executable hashes, 23 actual-app checks per compiler,
+and repeated CPU/RAM/latency/binary-size measurements. The root README embeds
+the graphs. Failed unrestricted stress trials are retained separately from the
+controlled-load results; benchmark client port exhaustion is not treated as a
+passing measurement. `results_tool_test` also checks app report units, percentile
+summaries, rejected bad accounting, and preservation of failed stress records.
+
 ## LMN candidate gate — 2026-10-27
 
 Commit `22e5592` passes all 54 suites on native Windows, Linux and macOS, and

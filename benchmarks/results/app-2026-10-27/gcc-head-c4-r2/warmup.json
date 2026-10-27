@@ -1,0 +1,103 @@
+{
+  "summary": {
+    "successRate": 0.999489125675084,
+    "total": 1.0098817,
+    "slowest": 0.0216378,
+    "fastest": 0.0000166,
+    "average": 0.00005667163636363596,
+    "requestsPerSec": 67839.6291367593,
+    "totalData": 0,
+    "sizePerRequest": 0,
+    "sizePerSec": 0.0
+  },
+  "metrics": {
+    "success_rate": 0.999489125675084,
+    "requests_per_sec": 67839.6291367593,
+    "latency_ms": {
+      "min": 0.017,
+      "mean": 0.057,
+      "p50": 0.027,
+      "p95": 0.046,
+      "p99": 1.37,
+      "max": 21.638
+    }
+  },
+  "responseTimeHistogram": {
+    "0.0000166": 1,
+    "0.00217872": 68092,
+    "0.00434084": 348,
+    "0.00650296": 32,
+    "0.00866508": 0,
+    "0.0108272": 0,
+    "0.01298932": 1,
+    "0.01515144": 0,
+    "0.01731356": 0,
+    "0.01947568": 0,
+    "0.0216378": 1
+  },
+  "latencyPercentiles": {
+    "p10": 0.0000216,
+    "p25": 0.0000231,
+    "p50": 0.0000266,
+    "p75": 0.0000306,
+    "p90": 0.000038,
+    "p95": 0.0000462,
+    "p99": 0.0013698,
+    "p99.9": 0.0035286,
+    "p99.99": 0.0057967
+  },
+  "firstByteHistogram": {
+    "NaN": 0
+  },
+  "firstBytePercentiles": {
+    "p10": null,
+    "p25": null,
+    "p50": null,
+    "p75": null,
+    "p90": null,
+    "p95": null,
+    "p99": null,
+    "p99.9": null,
+    "p99.99": null
+  },
+  "rps": {
+    "mean": 67530.7999678986,
+    "stddev": 18783.410335125187,
+    "max": 125433.65351835857,
+    "min": 35751.84016824402,
+    "percentiles": {
+      "p10": 50070.09813739237,
+      "p25": 55116.295383258606,
+      "p50": 64438.01843087454,
+      "p75": 72059.08845253111,
+      "p90": 97733.2292979613,
+      "p95": 111135.56338028169,
+      "p99": 120614.58385466177,
+      "p99.9": 125433.65351835857,
+      "p99.99": 125433.65351835857
+    }
+  },
+  "details": {
+    "DNSDialup": {
+      "average": 0.0014665626822157423,
+      "fastest": 0.0001128,
+      "slowest": 0.021553
+    },
+    "DNSLookup": {
+      "average": 2.6265306122448982e-6,
+      "fastest": 1.4e-6,
+      "slowest": 0.000023
+    },
+    "firstByte": {
+      "average": null,
+      "fastest": null,
+      "slowest": null
+    }
+  },
+  "statusCodeDistribution": {
+    "200": 68475
+  },
+  "errorDistribution": {
+    "Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)": 35
+  }
+}

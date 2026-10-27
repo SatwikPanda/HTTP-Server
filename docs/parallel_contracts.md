@@ -46,6 +46,13 @@ before close, and keep `NetworkRuntime` alive until all drivers have joined.
 
 ## HTTP application boundary
 
+The authorized GET-route extension exposes `http::Router` and
+`application::Server` over this boundary; see [the API guide](application-api.md).
+Router factories own immutable route tables and execute bounded synchronous
+handlers on session threads. They return `BufferedResponse`, catch handler
+exceptions, and retain the common session's framing and output limits. Callbacks
+on the event loop must remain nonblocking.
+
 [`http/application.hpp`](../include/http/application.hpp) defines:
 
 ```cpp

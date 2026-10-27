@@ -45,7 +45,7 @@ def source_identity(repo=ROOT):
         path = Path(name)
         if path.suffix.lower() not in {".cpp", ".hpp", ".h", ".cmake", ".txt", ".py", ".json", ".yml", ".yaml"}:
             continue
-        if path.parts[0] in {"src", "include", "cmake", "tests", "tools", ".github"} or name == "CMakeLists.txt" or (
+        if path.parts[0] in {"src", "include", "app", "cmake", "tests", "tools", ".github"} or name == "CMakeLists.txt" or (
                 path.parts[0] == "benchmarks" and path.suffix in {".py", ".json", ".txt"} and
                 len(path.parts) > 1 and path.parts[1] not in {"results", "reports"}):
             # Git checkouts use CRLF on some Windows hosts. These inputs are text;
@@ -142,6 +142,9 @@ def qualify(build, binary, output, jobs=4):
         execute(["cmake", "--build", str(build), "--config", "Release", "--parallel", str(jobs)], "build")
         require(binary.is_file(), "built executable is absent")
         record["binary"] = dict(path=str(binary), sha256=sha256(binary))
+        app_binary = build / "app" / ("Release" if cache.get("CMAKE_CONFIGURATION_TYPES") else "") / ("http_app.exe" if os.name == "nt" else "http_app")
+        require(app_binary.is_file(), "built application executable is absent")
+        record["additional_binaries"] = {"http_app": dict(path=str(app_binary), sha256=sha256(app_binary), bytes=app_binary.stat().st_size)}
         inventory = execute(["ctest", "--test-dir", str(build), "-C", "Release", "--show-only=json-v1"], "inventory", True)
         record["expected"] = check_inventory(inventory)
         junit = output.with_suffix(".junit.xml")
@@ -150,6 +153,7 @@ def qualify(build, binary, output, jobs=4):
         record["tests"] = check_junit(junit, record["expected"])
         require(source_identity()["sha256"] == record["source"]["sha256"], "source changed during validation")
         require(sha256(binary) == record["binary"]["sha256"], "binary changed during validation")
+        require(sha256(app_binary) == record["additional_binaries"]["http_app"]["sha256"], "application binary changed during validation")
         record["state"] = "passed"
     except (ValueError, OSError, KeyError, subprocess.TimeoutExpired) as error:
         record["error"] = str(error)

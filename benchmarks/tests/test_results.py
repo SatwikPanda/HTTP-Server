@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "benchmarks"), str(ROOT / "tools")]
@@ -11,6 +12,8 @@ sys.dont_write_bytecode = True
 from harness.report import merged_latency, summarize, write_report
 from harness.spec import SpecError
 from qualify import check_junit, check_inventory
+from app_report import summarize as summarize_app
+from app_report import read_stress
 
 
 def fixture(index=1):
@@ -76,6 +79,57 @@ class Results(unittest.TestCase):
                 with self.assertRaises(ValueError): check_junit(path, ["real"])
             path.write_text('<testsuite><testcase name="real" status="run" time="1.2"/></testsuite>')
             self.assertTrue(check_junit(path, ["real"])[0]["passed"])
+
+
+class AppResults(unittest.TestCase):
+    def app_record(self, repeat=1):
+        return dict(state="passed", variant="gcc", case=dict(id="get-c4", status=200), repeat=repeat,
+                    server_cpu_percent=75, sampled_peak_rss_bytes=2 * 1048576, peak_threads=9, peak_handles=100,
+                    requests=20, oha=dict(statusCodeDistribution={"200": 20}, errorDistribution={},
+                    summary=dict(total=2, totalData=260), latencyPercentiles=dict(p50=.001, p95=.002, p99=.003)))
+
+    def test_app_units_and_per_run_statistics(self):
+        first, second = self.app_record(), self.app_record(2)
+        second["oha"]["summary"]["total"] = 1
+        second["oha"]["latencyPercentiles"]["p99"] = .009
+        row = summarize_app([first, second])[0]
+        self.assertEqual(row["rps"], dict(median=15, min=10, max=20))
+        self.assertEqual(row["p99_ms"], dict(median=6, min=3, max=9))
+        self.assertEqual(row["rss_mib"]["median"], 2)
+        self.assertEqual(row["cpu_percent"]["median"], 75)
+        self.assertEqual(row["requests"], 40)
+
+    def test_app_failures_duplicates_and_bad_accounting_are_rejected(self):
+        for mutate in [lambda r: r.update(state="failed"),
+                       lambda r: r.update(requests=21),
+                       lambda r: r["oha"].update(statusCodeDistribution={"500": 20}),
+                       lambda r: r["oha"].update(errorDistribution={"timeout": 1})]:
+            record = self.app_record()
+            mutate(record)
+            with self.assertRaises(ValueError): summarize_app([record])
+        with self.assertRaises(ValueError): summarize_app([self.app_record(), self.app_record()])
+        with self.assertRaises(ValueError): summarize_app([])
+
+    def test_unrestricted_failures_remain_in_stress_report(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            variants = [dict(label="gcc", binary_sha256="same-binary")]
+            names = [str(i) for i in range(8)]
+            manifest = dict(state="failed", variants=variants, trials=names, source={}, settings=dict(repeats=1))
+            (root / "campaign.json").write_text(json.dumps(manifest))
+            for i, name in enumerate(names):
+                trial = root / name; trial.mkdir()
+                record = dict(variant="gcc", case=dict(id="get-c4"), repeat=i + 1,
+                              state="failed" if i == 0 else "passed", diagnostics=["port pressure"] if i == 0 else [])
+                (trial / "record.json").write_text(json.dumps(record))
+                result = dict(statusCodeDistribution={"200": 10}, errorDistribution={"10048": 12} if i == 0 else {}, summary=dict(total=5))
+                (trial / "oha.json").write_text(json.dumps(result))
+            with patch("app_report.ROOT", root):
+                result = read_stress(root, variants)
+            self.assertEqual(result["passed"], 7)
+            self.assertEqual(result["failed"], 1)
+            self.assertEqual(result["errors"], {"10048": 12})
+            self.assertEqual(result["trials"][0]["phases"]["oha"]["errors"], 12)
 
 
 if __name__ == "__main__": unittest.main()

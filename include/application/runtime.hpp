@@ -1,5 +1,6 @@
 #pragma once
 #include "core/config.hpp"
+#include "http/application.hpp"
 #include "net/endpoint.hpp"
 #include <memory>
 #include <string>
@@ -8,7 +9,10 @@ namespace application {
 // NetworkRuntime must outlive this owner. Destruction joins drivers before helpers.
 class Runtime {
 public:
-    [[nodiscard]] static core::Result<std::unique_ptr<Runtime>> start(core::RuntimeConfig config);
+    // A custom factory replaces the demo application; static/proxy modes reject
+    // overrides so their configuration cannot be silently ignored.
+    [[nodiscard]] static core::Result<std::unique_ptr<Runtime>> start(core::RuntimeConfig config,
+        std::shared_ptr<const http::TransactionFactory> custom_application = {});
     ~Runtime();
     Runtime(const Runtime&) = delete;
     Runtime& operator=(const Runtime&) = delete;

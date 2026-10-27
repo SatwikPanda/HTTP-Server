@@ -6,6 +6,10 @@ benchmarks/reports/**/*.svg -text -whitespace linguist-generated=true
 benchmarks/reports/**/*.png linguist-generated=true
 benchmarks/reports/**/*.csv -text -whitespace linguist-generated=true
 benchmarks/reports/**/*.json -text -whitespace linguist-generated=true
+# App campaigns and report checksums must survive checkout without CRLF conversion.
+benchmarks/results/app-2026-10-27/** -text -whitespace linguist-generated=true
+benchmarks/results/app-controlled-2026-10-27/** -text -whitespace linguist-generated=true
+benchmarks/reports/app-2026-10-27/** -text -whitespace linguist-generated=true
 # The investigation includes an exact-byte digest inventory of its artifacts.
 "performance testing/**" -text
 "performance testing/raw/**" -text -whitespace linguist-generated=true

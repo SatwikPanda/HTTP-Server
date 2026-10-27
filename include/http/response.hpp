@@ -57,6 +57,12 @@ struct Response {
         headers.set("Content-Length", std::to_string(body.size()));
     }
 
+    [[nodiscard]] static Response text(std::string body, StatusCode code = StatusCode::OK) {
+        Response response(code);
+        response.set_body(std::move(body));
+        return response;
+    }
+
     [[nodiscard]] std::optional<std::string_view> header(
         std::string_view name
     ) const noexcept {

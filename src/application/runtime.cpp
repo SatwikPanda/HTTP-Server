@@ -48,7 +48,11 @@ void Runtime::request_stop() noexcept { state_->stop(); }
 void Runtime::join() noexcept { state_->join(); }
 net::Endpoint Runtime::local_endpoint() const { return state_->endpoint; }
 
-core::Result<std::unique_ptr<Runtime>> Runtime::start(core::RuntimeConfig config) {
+core::Result<std::unique_ptr<Runtime>> Runtime::start(core::RuntimeConfig config,
+    std::shared_ptr<const http::TransactionFactory> custom_application) {
+    if (custom_application && config.application != core::ApplicationMode::demo) {
+        return core::make_error(core::ErrorCategory::invalid_argument, "custom application mode");
+    }
     auto valid = core::validate_config(config);
     if (!valid) return valid.error();
     if (config.workers > 1024 || config.helpers > 256 || config.job_queue > 65536 ||
@@ -72,6 +76,7 @@ core::Result<std::unique_ptr<Runtime>> Runtime::start(core::RuntimeConfig config
     session.idle_timeout = config.idle_timeout;
     session.request_progress_timeout = config.progress_timeout;
     session.output_progress_timeout = config.progress_timeout;
+    session.application = std::move(custom_application);
     if (config.application == core::ApplicationMode::static_files) {
         server::StaticConfig sc{config.document_root};
         sc.max_chunk_bytes = std::min<std::size_t>(65536, config.buffers.output);

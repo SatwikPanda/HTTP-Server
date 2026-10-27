@@ -27,6 +27,14 @@ The project has three learning goals:
 
 The first version will support cleartext HTTP/1.1 and GET/HEAD. HTTPS, TLS, CONNECT tunnels, protocol upgrades, HTTP/2, HTTP/3, dynamic application handlers, cache persistence, and generated compression are outside the initial scope. External clients and load generators may be used to test the implementation.
 
+**Authorized scope extension (2026-10-27):** bounded synchronous GET route handlers
+and automatic HEAD responses are now supported through `http::Router` and
+`application::Server`. The runnable `app/` example defines `GET /` returning
+`Hello, World!` and accepts a chosen port. It uses the existing transaction,
+session and driver layers. The original design above is preserved; the current
+[application API guide](docs/application-api.md) defines this extension's
+contracts and limits. Other exclusions remain in effect.
+
 ## 2. Overall architecture
 
 Application behavior and concurrency are separate choices. Both execution models must use the same HTTP parser, server handler, proxy handler, and cache policy.

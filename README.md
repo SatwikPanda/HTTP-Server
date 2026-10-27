@@ -4,6 +4,12 @@ A C++20 learning project that implements HTTP/1.1 directly on TCP sockets. It ca
 
 The applications share one HTTP state machine and run with a thread pool or an event loop. A sequential reference driver and the original fixed-response demo remain available.
 
+To build your own application, define GET handlers in [`app/routes.cpp`](app/routes.cpp)
+and start it from [`app/main.cpp`](app/main.cpp). The new `application::Server`
+owns networking and shutdown while reusing the existing drivers. See the
+[application API guide](docs/application-api.md) for route registration, responses,
+ports and concurrency options.
+
 The [performance investigation](performance%20testing/README.md) contains native
 flame graphs, retained baseline measurements, targeted optimizations, and their
 validation. Its Windows measurements have a narrower scope than the complete
@@ -23,6 +29,11 @@ ctest --test-dir build/release -C Release --no-tests=error --output-on-failure
 
 With Ninja, the Windows executable is `build/release/httpserver.exe`; on Linux/macOS it is `build/release/httpserver`. For MSVC, use a Developer PowerShell or select the Visual Studio generator, build with `--config Release`, and use `build/release/Release/httpserver.exe`. Use a separate directory for each generator/compiler.
 
+The application example is also built: run `./build/release/app/http_app.exe 8080`
+and visit `http://127.0.0.1:8080/` for `Hello, World!`. With MSVC it is under
+`build/release/app/Release/`; on POSIX omit `.exe`. Pass any available port, or 0
+for automatic selection. Ctrl+C stops the app.
+
 ```powershell
 # Serve the included www/index.html.
 ./build/release/httpserver.exe --mode server --root www --concurrency thread-pool --workers 4 --port 8080
@@ -40,6 +51,108 @@ With Ninja, the Windows executable is `build/release/httpserver.exe`; on Linux/m
 ```
 
 The default bind address is `127.0.0.1`. `--port 0` asks the OS for an available port; startup prints the actual endpoint. Ctrl+C requests shutdown. For a local proxy exercise, run a static server on 8080 and use `curl --noproxy "" --proxy http://127.0.0.1:8081 http://127.0.0.1:8080/`. A response is cached only if its origin metadata and the request satisfy the cache policy.
+
+## App test and benchmark results
+
+The Hello World `http_app` is measured directly, using its default four-worker
+pool and 100-request keep-alive limit. The results below are local Windows
+Release measurements from **2026-10-27**, with GCC 16.2 and MSVC 19.29.
+Linux/macOS verification of this application extension is still pending.
+
+**Controlled campaign: 72/72 trials passed, with 1,861,410 expected responses
+and no unexpected statuses, byte-count mismatches or transport errors.**
+
+| Build | Regression suites | App checks | EXE size | Unrestricted GET/s¹ | CPU at 5k/s² | Peak RAM at 5k/s² |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| GCC | 56/56 | 23/23 | 1.690 MiB | 110,441 | 9.8% | 7.30 MiB |
+| MSVC | 56/56 | 23/23 | 0.561 MiB | 107,932 | 15.7% | 6.57 MiB |
+
+¹ Four-client GET only: all five unrestricted trials passed for this point.
+Other unrestricted workloads did fail, as shown below. These medians are not a
+claim that the entire unrestricted campaign passed.
+
+² Four-client GET, 5,000 requests/s cap; median CPU and median sampled peak RAM
+across five runs. Host: Windows 11 build 26200, 16 logical CPUs, 31.10 GiB RAM.
+
+| Build | P99: 4 clients at 5k/s | P99: 16 clients at 5k/s |
+| --- | ---: | ---: |
+| GCC | 0.220 ms | 124.322 ms |
+| MSVC | 0.225 ms | 117.663 ms |
+
+At 16 clients, latency increases while throughput stays near the offered rate.
+This is consistent with clients waiting for the default four session workers.
+
+![App throughput, latency, CPU, RAM, binary size and passing checks](benchmarks/reports/app-2026-10-27/overview.png)
+
+Each workload has five fresh-process trials: one second of warmup followed by
+five seconds of load; idle trials last three seconds. Compiler order alternates
+between rounds. Each build also runs one 60-second GET soak. Bars show medians
+and min/max error bars. These resource graphs use **5,000 requests/s** for reused
+connections and **250 requests/s** for new TCP connections; they show delivery
+at a defined load, not maximum throughput. Latency summaries are medians of each run's percentile,
+not percentiles pooled across requests. The load generator and server share
+this host, so these results do not establish production capacity or a universal
+compiler ranking.
+
+CPU measures the app's user + kernel process time: **100% means one logical
+core**, not the entire machine. RAM is the maximum sampled working set/RSS at
+100 ms intervals. Binary size counts the as-built EXE only; runtime DLLs and
+debug-symbol files are excluded. GCC uses `-O3 -DNDEBUG`; MSVC uses
+`/O2 /Ob2 /DNDEBUG /Zi` with optimized linking and a separate PDB.
+
+**Unrestricted stress found a host limit:** 56/72 trials passed and 16 failed
+during warmup or measurement. The native client reported Windows socket-address
+errors (`10048`) and timeouts under heavy connection churn. The app's default
+100-request limit was kept unchanged. Those failed trials are retained below;
+the rate-controlled graphs do not replace them or claim unrestricted stability.
+
+![All unrestricted stress trials, including the 16 failures](benchmarks/reports/app-2026-10-27/stress.png)
+
+<details>
+<summary>Every regression suite: pass status and duration</summary>
+
+All 56 suites run on both builds, including parsing/framing, socket ownership,
+static files, proxy/cache behavior, all three concurrency drivers, routing,
+lifecycle/resource cleanup and the benchmark/report tooling. Test durations
+show how long checks took, not server throughput.
+
+![All 56 regression suites on GCC and MSVC](benchmarks/reports/app-2026-10-27/test-suites.png)
+
+</details>
+
+<details>
+<summary>Actual executable: all 23 functional checks</summary>
+
+These exercise the compiled app, including exact Hello World bytes, HEAD,
+query routing, 404/405, malformed requests, pipeline ordering, port selection,
+startup errors and the 100-request limit.
+
+![Application executable functional checks](benchmarks/reports/app-2026-10-27/functional.png)
+
+</details>
+
+<details>
+<summary>60-second sustained load: CPU, RAM, handles and threads</summary>
+
+![CPU, RAM, handles and threads during sustained load](benchmarks/reports/app-2026-10-27/soak.png)
+
+A short working-set trace is not proof of leak freedom. The regression suites
+separately check resource ownership and graceful cleanup. Windows benchmark
+children are stopped using their owned process handles; benchmark cleanup is
+not a graceful-shutdown test.
+
+</details>
+
+The [full report](benchmarks/reports/app-2026-10-27/report.md) includes every
+workload, response latency, throughput, CPU/RAM, thread/handle counts, and the
+measurement limits. [Controlled raw trials](benchmarks/results/app-controlled-2026-10-27),
+[unrestricted raw trials, including failures](benchmarks/results/app-2026-10-27),
+[CSV data](benchmarks/reports/app-2026-10-27/trials.csv),
+[JSON summary](benchmarks/reports/app-2026-10-27/summary.json), and
+[qualification logs and reproduction commands](docs/validation/app-2026-10-27/README.md)
+retain the evidence behind the graphs. Every timed run checks statuses and
+aggregate body bytes; separate probes verify exact response contents before and
+after load.
 
 ## Architecture
 
@@ -98,7 +211,7 @@ The main control thread emits a bounded `METRICS` JSON line each second and at g
 
 ## Tests and benchmarks
 
-The integrated inventory contains 50 native/script acceptance suites and four optional Python CTests (54 total with `BUILD_BENCHMARKS=ON`). Release builds retain assertions. Strict mode treats pending exit code 77 as failure. The inventory is checked at CMake configuration, and CI is configured to run every registered suite on Windows, Linux and macOS.
+The integrated inventory contains 52 native/script acceptance suites and four optional Python CTests (56 total with `BUILD_BENCHMARKS=ON`). Release builds retain assertions. Strict mode treats pending exit code 77 as failure. The inventory is checked at CMake configuration, and CI is configured to run every registered suite on Windows, Linux and macOS.
 
 Track I exercises real static, uncached-proxy and cached-proxy applications through both drivers, plus the static reference path. It checks independent wire output, pipeline ordering, framing, forwarding, cache hits/revalidation, concurrent readers, blocked-origin cancellation, overload recovery and startup rollback. Feature suites provide additional detailed policy, memory-accounting, deadline and driver checks.
 
@@ -116,12 +229,13 @@ python tools/qualify.py --build-dir build/release --binary build/release/httpser
 python benchmarks/benchmark.py run --binary build/release/httpserver.exe --build-dir build/release --scenario proxy-warm --driver event-loop --warmup 1 --measurement 5 --repeats 5 --candidate-record build/release/qualification.json
 ```
 
-See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for commands. The [LMN CI record](docs/validation/lmn-ci/README.md) verifies all 54 suites on Windows, Linux and macOS, plus Linux ASan/UBSan with leak detection. Race diagnostics and final performance comparisons remain unverified.
+See [benchmark instructions](benchmarks/README.md), [test documentation](tests/README.md) and the [integration record](docs/branches/application-assembly.md) for commands. The [LMN CI record](docs/validation/lmn-ci/README.md) verifies the earlier 54-suite baseline on Windows, Linux and macOS, plus Linux ASan/UBSan with leak detection. The application route extension passes the expanded 56-suite gate locally on Windows GCC and MSVC; its Linux/macOS verification is pending. Race diagnostics and final performance comparisons remain unverified.
 
 ## Repository guide
 
 | Location | Responsibility |
 | --- | --- |
+| `app` | Your application's routes, handlers and executable entry point |
 | `include/core`, `src/core` | Results/errors, clocks, identities, budgets and configuration |
 | `include/net`, `src/net` | Portable sockets/readiness and selected OS backend |
 | `include/http`, `src/http` | Messages, parsing/framing, streaming responses and shared sessions |
@@ -134,4 +248,4 @@ See [benchmark instructions](benchmarks/README.md), [test documentation](tests/R
 | `tests`, `benchmarks` | Acceptance fixtures and reproducible workload tooling |
 | `roadmap`, `docs/branches` | Planned work and implementation/verification handoffs |
 
-Start with [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md) and the [parallel track index](roadmap/README.md). Scope is cleartext HTTP/1.1 GET/HEAD. TLS, CONNECT tunnels, upgrades, HTTP/2/3, dynamic handlers, persistent caches and generated compression are outside the current implementation.
+Start with [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md) and the [parallel track index](roadmap/README.md). Scope is cleartext HTTP/1.1 GET/HEAD, including application route handlers. TLS, CONNECT tunnels, upgrades, HTTP/2/3, additional request methods, persistent caches and generated compression are outside the current implementation.

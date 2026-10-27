@@ -13,6 +13,12 @@ add_project_test(resource_soak_test SOURCES resource_soak_test.cpp resource_prob
     LABELS milestone24 milestone28 milestone30 correctness_gate TIMEOUT 120)
 require_project_tests(resource_soak_test)
 
+add_project_test(router_test SOURCES router_test.cpp LINKS http LABELS routing TIMEOUT 30)
+add_project_test(application_server_test SOURCES application_server_test.cpp ../../app/routes.cpp
+    LINKS application LABELS routing milestone30 TIMEOUT 45)
+target_include_directories(application_server_test PRIVATE "${PROJECT_SOURCE_DIR}/app")
+require_project_tests(router_test application_server_test)
+
 # The C++ inventory is also the configure-time source of truth. A compiled
 # executable without a registered CTest does not satisfy this contract.
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/test_inventory.hpp" inventory_rows

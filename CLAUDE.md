@@ -14,8 +14,9 @@ Read any applicable directory-specific instructions before editing those files.
   HTTP parsing, framing, proxying, and caching here rather than introducing a
   library that replaces the functionality being learned.
 - Target Windows/Winsock and Linux/macOS/POSIX with the same public contracts.
-- Initial application scope is cleartext HTTP/1.1 with GET/HEAD. TLS, CONNECT
-  tunnels, protocol upgrades, HTTP/2, HTTP/3, dynamic handlers, persistent caches,
+- Application scope is cleartext HTTP/1.1 with GET/HEAD, including bounded
+  application route handlers. TLS, CONNECT tunnels, protocol upgrades, HTTP/2,
+  HTTP/3, additional request methods, persistent caches,
   and generated compression require an explicit scope change.
 - Read `IMPLEMENTATION_ROADMAP.md`, `tests/README.md`, `CMakeLists.txt`, and the
   relevant implementation and tests before making a change. Read
